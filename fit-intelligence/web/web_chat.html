@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT Intelligence Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 900px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.user {
+            text-align: right;
+        }
+        
+        .message.bot {
+            text-align: left;
+        }
+        
+        .message-content {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        
+        .user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .bot .message-content {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .confidence-high {
+            border-left: 4px solid #10b981;
+        }
+        
+        .confidence-medium {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .confidence-low {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .confidence-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .badge-high {
+            background: #10b981;
+            color: white;
+        }
+        
+        .badge-medium {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .badge-low {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-container input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .input-container input:focus {
+            border-color: #667eea;
+        }
+        
+        .input-container button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .input-container button:hover {
+            transform: scale(1.05);
+        }
+        
+        .input-container button:active {
+            transform: scale(0.95);
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-btn {
+            padding: 8px 15px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f4f6;
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 FIT Intelligence Chat</h1>
+            <p>Ask about FIT installations and get instant matching analysis</p>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>Connected</span>
+            </div>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="message bot">
+                <div class="message-content">
+                    👋 Welcome! I can help you match FIT installations. Try asking:
+                    <ul style="margin-top: 10px; text-align: left;">
+                        <li>"Match a 330kW turbine in Ryedale"</li>
+                        <li>"Check postcode YO17 with MPAN 23"</li>
+                        <li>"Test with sample data"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="sendQuickQuery('test ryedale330')">Test Ryedale 330kW</button>
+                <button class="quick-btn" onclick="sendQuickQuery('test selby225')">Test Selby 225kW</button>
+                <button class="quick-btn" onclick="sendQuickQuery('test hull500')">Test Hull 500kW</button>
+                <button class="quick-btn" onclick="sendQuickQuery('match 330 Ryedale YO17')">Match Custom</button>
+            </div>
+            <div class="input-container">
+                <input type="text" id="userInput" placeholder="Ask about a FIT installation..." 
+                       onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:8002';
+        const chatArea = document.getElementById('chatArea');
+        const userInput = document.getElementById('userInput');
+        
+        // Sample records for testing
+        const sampleRecords = {
+            'ryedale330': {
+                fit_id: 'TEST_001',
+                technology: 'Wind',
+                capacity_kw: 330,
+                local_authority: 'Ryedale',
+                postcode_district: 'YO17',
+                mpan_prefix: '23',
+                commissioning_date: '2013-04-07'
+            },
+            'selby225': {
+                fit_id: 'TEST_002',
+                technology: 'Wind',
+                capacity_kw: 225,
+                local_authority: 'Selby',
+                postcode_district: 'DN6',
+                mpan_prefix: '23',
+                commissioning_date: '2012-11-15'
+            },
+            'hull500': {
+                fit_id: 'TEST_003',
+                technology: 'Wind',
+                capacity_kw: 500,
+                local_authority: 'East Riding',
+                postcode_district: 'HU15',
+                mpan_prefix: '23',
+                commissioning_date: '2015-06-20'
+            }
+        };
+        
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content;
+            
+            messageDiv.appendChild(contentDiv);
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function parseQuery(query) {
+            const queryLower = query.toLowerCase();
+            
+            // Check for test commands
+            if (queryLower.includes('test ')) {
+                const parts = queryLower.split('test ');
+                if (parts[1]) {
+                    const testName = parts[1].trim();
+                    if (sampleRecords[testName]) {
+                        return { type: 'test', record: sampleRecords[testName] };
+                    }
+                }
+            }
+            
+            // Parse for FIT data
+            const record = {
+                technology: 'Wind',
+                fit_id: 'QUERY_' + Date.now()
+            };
+            
+            // Extract capacity
+            const capacityMatch = query.match(/(\d+)\s*kw/i);
+            if (capacityMatch) {
+                record.capacity_kw = parseInt(capacityMatch[1]);
+            }
+            
+            // Extract location
+            const locations = ['ryedale', 'selby', 'york', 'scarborough', 'hull', 'east riding', 'doncaster'];
+            for (const loc of locations) {
+                if (queryLower.includes(loc)) {
+                    record.local_authority = loc.charAt(0).toUpperCase() + loc.slice(1);
+                    if (record.local_authority === 'East riding') {
+                        record.local_authority = 'East Riding';
+                    }
+                    break;
+                }
+            }
+            
+            // Extract postcode
+            const postcodeMatch = query.match(/\b([A-Z]{1,2}\d{1,2})\b/i);
+            if (postcodeMatch) {
+                record.postcode_district = postcodeMatch[1].toUpperCase();
+            }
+            
+            // Extract MPAN
+            const mpanMatch = query.match(/mpan\s*(\d{2})/i);
+            if (mpanMatch) {
+                record.mpan_prefix = mpanMatch[1];
+            } else {
+                record.mpan_prefix = '23'; // Default
+            }
+            
+            // Check if we have enough data
+            if (record.capacity_kw || record.postcode_district) {
+                return { type: 'match', record: record };
+            }
+            
+            return { type: 'unknown', query: query };
+        }
+        
+        async function matchRecord(record) {
+            try {
+                const response = await fetch(`${API_URL}/match`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ fit_record: record })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                return { error: error.message };
+            }
+        }
+        
+        function formatResult(result) {
+            if (result.error) {
+                return `<div class="result-card confidence-low">
+                    <span class="confidence-badge badge-low">ERROR</span>
+                    <p>Failed to process request: ${result.error}</p>
+                </div>`;
+            }
+            
+            const confidenceBand = result.confidence_band || 'LOW';
+            const confidenceScore = result.confidence_score || 0;
+            const confidenceClass = confidenceBand.toLowerCase();
+            
+            let html = `<div class="result-card confidence-${confidenceClass}">
+                <span class="confidence-badge badge-${confidenceClass}">${confidenceBand} CONFIDENCE (${confidenceScore.toFixed(2)})</span>`;
+            
+            if (result.reasoning) {
+                html += `<p><strong>Analysis:</strong> ${result.reasoning}</p>`;
+            }
+            
+            if (result.recommended_action) {
+                html += `<p><strong>Action:</strong> ${result.recommended_action}</p>`;
+            }
+            
+            if (result.match_found && (result.planning_ref || result.site_name)) {
+                html += `<p><strong>Match Details:</strong>`;
+                if (result.planning_ref) html += ` Planning Ref: ${result.planning_ref}`;
+                if (result.site_name) html += ` | Site: ${result.site_name}`;
+                if (result.developer) html += ` | Developer: ${result.developer}`;
+                html += `</p>`;
+            }
+            
+            html += `</div>`;
+            return html;
+        }
+        
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, true);
+            userInput.value = '';
+            
+            // Show loading
+            addMessage('<div class="loading"></div> Analyzing...');
+            
+            // Parse the query
+            const parsed = parseQuery(message);
+            
+            // Remove loading message
+            chatArea.lastElementChild.remove();
+            
+            if (parsed.type === 'match' || parsed.type === 'test') {
+                // Show what we understood
+                const record = parsed.record;
+                let understanding = `I'll check: ${record.capacity_kw || '?'}kW turbine`;
+                if (record.local_authority) understanding += ` in ${record.local_authority}`;
+                if (record.postcode_district) understanding += ` (${record.postcode_district})`;
+                addMessage(understanding);
+                
+                // Match the record
+                const result = await matchRecord(record);
+                addMessage(formatResult(result));
+            } else {
+                addMessage(`I understand you're asking about: "${message}"<br><br>
+                    Please include details like:<br>
+                    • Capacity (e.g., "330kW")<br>
+                    • Location (e.g., "Ryedale")<br>
+                    • Postcode (e.g., "YO17")<br><br>
+                    Example: "Check a 330kW turbine in Ryedale YO17"`);
+            }
+        }
+        
+        function sendQuickQuery(query) {
+            userInput.value = query;
+            sendMessage();
+        }
+        
+        // Check API status on load
+        fetch(`${API_URL}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('API Status:', data);
+            })
+            .catch(error => {
+                addMessage('⚠️ Warning: API server not responding. Make sure simple_server.py is running.');
+            });
+    </script>
+</body>
+</html>

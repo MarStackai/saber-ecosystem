@@ -1,0 +1,44 @@
+{
+  "test_queries": [
+    "wind sites over 250kw in yorkshire",
+    "solar installations above 500kw",
+    "large renewable sites in east anglia",
+    "wind site fit ids for sites over 250kw around beverly",
+    "hydro installations in scotland"
+  ],
+  "results": [
+    {
+      "query": "wind sites over 250kw in yorkshire",
+      "original_embedding_norm": 0.9999999403953552,
+      "trained_embedding_norm": 1.0,
+      "embedding_difference": 1.0690975189208984
+    },
+    {
+      "query": "solar installations above 500kw",
+      "original_embedding_norm": 1.0,
+      "trained_embedding_norm": 1.0,
+      "embedding_difference": 0.8274103403091431
+    },
+    {
+      "query": "large renewable sites in east anglia",
+      "original_embedding_norm": 1.0,
+      "trained_embedding_norm": 1.0,
+      "embedding_difference": 0.5737991333007812
+    },
+    {
+      "query": "wind site fit ids for sites over 250kw around beverly",
+      "original_embedding_norm": 1.0,
+      "trained_embedding_norm": 1.0,
+      "embedding_difference": 0.845984697341919
+    },
+    {
+      "query": "hydro installations in scotland",
+      "original_embedding_norm": 1.0,
+      "trained_embedding_norm": 1.0,
+      "embedding_difference": 0.5080324411392212
+    }
+  ],
+  "summary": {
+    "avg_embedding_difference": 0.7648648262023926
+  }
+}

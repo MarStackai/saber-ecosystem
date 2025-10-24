@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT Intelligence Map | Saber Renewable Energy</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --saber-blue: #044D73;
+            --saber-green: #7CC061;
+            --saber-light-blue: #0A5F8E;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #044D73 0%, #0A5F8E 100%);
+            min-height: 100vh;
+        }
+        
+        .saber-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(124, 192, 97, 0.2);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(4, 77, 115, 0.9) 0%, rgba(4, 77, 115, 0.8) 100%);
+            border: 2px solid var(--saber-green);
+            color: white;
+            border-radius: 12px;
+        }
+        
+        #map {
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--saber-blue);
+        }
+        
+        .mapboxgl-popup-content {
+            border-radius: 12px;
+            padding: 15px;
+            min-width: 250px;
+            max-width: 300px;
+            box-shadow: 0 8px 20px rgba(4, 77, 115, 0.3);
+        }
+        
+        .ai-search-container {
+            background: linear-gradient(135deg, rgba(4, 77, 115, 0.95) 0%, rgba(10, 95, 142, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+        
+        .typing-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white/10 backdrop-blur-lg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="Saber-logo-wob-green.svg" alt="Saber Renewable Energy" class="h-12 w-auto">
+                    <div>
+                        <h1 class="text-2xl font-bold">FIT Intelligence Platform</h1>
+                        <p class="text-sm opacity-90">AI-powered renewable energy intelligence with 40,194 commercial sites</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <a href="fit_chatbot_interface.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-robot mr-2"></i>Chatbot
+                    </a>
+                    <a href="analytics_dashboard.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-chart-bar mr-2"></i>Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-6">
+        <!-- AI Search Bar -->
+        <div class="ai-search-container p-4 text-white mb-6">
+            <div class="flex items-center gap-3 mb-3">
+                <i class="fas fa-brain text-xl"></i>
+                <h3 class="text-lg font-semibold">AI-Powered Site Discovery</h3>
+            </div>
+            
+            <div class="flex gap-3">
+                <input 
+                    type="text" 
+                    id="aiSearchInput"
+                    placeholder="Ask about renewable energy sites... e.g., 'Show wind farms in Scotland needing urgent PPA attention'"
+                    class="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    onkeypress="handleSearchKeyPress(event)"
+                >
+                <button 
+                    onclick="performAISearch()" 
+                    id="searchButton"
+                    class="px-6 py-3 bg-white/20 rounded-lg hover:bg-white/30 transition disabled:opacity-50"
+                >
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <!-- Quick Filters -->
+            <div class="mt-3 flex flex-wrap gap-2">
+                <button onclick="quickSearch('urgent wind sites')" class="px-3 py-1 bg-white/20 rounded-full text-sm hover:bg-white/30 transition">
+                    Urgent Wind Sites
+                </button>
+                <button onclick="quickSearch('solar over 1MW')" class="px-3 py-1 bg-white/20 rounded-full text-sm hover:bg-white/30 transition">
+                    Large Solar Sites
+                </button>
+                <button onclick="quickSearch('Scotland renewable energy')" class="px-3 py-1 bg-white/20 rounded-full text-sm hover:bg-white/30 transition">
+                    Scotland Sites
+                </button>
+                <button onclick="quickSearch('expiring FIT contracts')" class="px-3 py-1 bg-white/20 rounded-full text-sm hover:bg-white/30 transition">
+                    Expiring FITs
+                </button>
+            </div>
+            
+            <!-- Search Status -->
+            <div id="searchStatus" class="mt-3 text-sm opacity-90 hidden">
+                <div class="typing-indicator">
+                    <i class="fas fa-brain mr-1"></i>
+                    <span id="statusText">Analyzing renewable energy database...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Statistics Cards -->
+            <div class="lg:col-span-1 space-y-4">
+                <!-- Overview Stats -->
+                <div class="saber-card p-4">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">Database Overview</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Sites:</span>
+                            <span class="font-bold text-gray-800" id="totalSites">40,194</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Capacity:</span>
+                            <span class="font-bold text-gray-800" id="totalCapacity">3,535 MW</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Urgent Sites:</span>
+                            <span class="font-bold text-red-600" id="urgentSites">2,847</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Avg FIT Remaining:</span>
+                            <span class="font-bold text-gray-800" id="avgFitRemaining">8.3 years</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technology Breakdown -->
+                <div class="saber-card p-4">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">Technology Mix</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Solar PV:</span>
+                            <span class="font-bold">35,617 sites</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Wind:</span>
+                            <span class="font-bold">3,206 sites</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Hydro:</span>
+                            <span class="font-bold">895 sites</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Anaerobic Digestion:</span>
+                            <span class="font-bold">438 sites</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Micro CHP:</span>
+                            <span class="font-bold">38 sites</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Urgency Breakdown -->
+                <div class="saber-card p-4">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">Urgency Analysis</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Expired FITs:</span>
+                            <span class="font-bold text-red-700" id="expiredSites">847</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">< 1 Year:</span>
+                            <span class="font-bold text-red-600" id="veryUrgentSites">1,205</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">1-2 Years:</span>
+                            <span class="font-bold text-orange-600" id="urgentSitesRange">795</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">2-5 Years:</span>
+                            <span class="font-bold text-blue-600" id="mediumSites">8,234</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">5+ Years:</span>
+                            <span class="font-bold text-green-600" id="strategicSites">29,113</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Controls -->
+                <div class="saber-card p-4">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">Map Controls</h3>
+                    <div class="space-y-3">
+                        <button onclick="focusOnUrgent()" class="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Show Urgent Sites
+                        </button>
+                        <button onclick="focusOnLargeSites()" class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">
+                            <i class="fas fa-industry mr-2"></i>Show Large Sites (>1MW)
+                        </button>
+                        <button onclick="focusOnScotland()" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
+                            <i class="fas fa-map-marker-alt mr-2"></i>Focus on Scotland
+                        </button>
+                        <button onclick="resetMapView()" class="w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700 transition">
+                            <i class="fas fa-refresh mr-2"></i>Reset View
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div class="lg:col-span-3">
+                <div class="saber-card p-4 h-[800px]">
+                    <div id="map" class="w-full h-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CHROMA_API_BASE = 'http://localhost:5003';
+        const CHAT_API_BASE = 'http://localhost:5004';
+        
+        // Mapbox configuration
+        // DEMO MODE: Hardcoded token for reliability in internal demo.
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFyc3RhY2siLCJhIjoiY21ldmt0cHptMGhlYjJpc2Rvb3EzM3QxOSJ9.REl1LiSuYGu6zVXC27RzRQ';
+        
+        let map;
+        let geoJsonData = null;
+        let currentPopup = null;
+
+        // Initialize map
+        function initMap() {
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/light-v11',
+                center: [-3.5, 54.5], // Center on UK
+                zoom: 5.5,
+                attributionControl: false
+            });
+
+            map.on('load', function() {
+                loadInitialData();
+            });
+
+            // Add navigation controls
+            map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        }
+
+        // Load sample data (we'll replace this with API data)
+        function loadInitialData() {
+            console.log('Loading initial renewable energy data...');
+            showSearchStatus('Loading renewable energy database...');
+            
+            // Generate sample GeoJSON data for demonstration
+            generateSampleData();
+            
+            // In production, this would load from your API:
+            // loadFromAPI();
+        }
+
+        // Generate representative sample data
+        function generateSampleData() {
+            const technologies = ['Photovoltaic', 'Wind', 'Hydro', 'Anaerobic digestion', 'Micro CHP'];
+            const repoweringWindows = ['IMMEDIATE', 'URGENT', 'OPTIMAL', 'PLANNING'];
+            const ukLocations = [
+                // England
+                { name: 'Cornwall', coords: [-4.8, 50.3] }, { name: 'Devon', coords: [-3.8, 50.7] },
+                { name: 'Somerset', coords: [-3.0, 51.1] }, { name: 'Yorkshire', coords: [-1.5, 53.8] },
+                { name: 'Northumberland', coords: [-2.0, 55.2] }, { name: 'Cumbria', coords: [-3.0, 54.5] },
+                // Scotland  
+                { name: 'Highland', coords: [-4.5, 57.5] }, { name: 'Aberdeenshire', coords: [-2.5, 57.2] },
+                { name: 'Dumfries', coords: [-3.8, 55.1] }, { name: 'Orkney', coords: [-3.0, 59.0] },
+                { name: 'Shetland', coords: [-1.3, 60.3] }, { name: 'Western Isles', coords: [-7.0, 57.5] },
+                // Wales
+                { name: 'Powys', coords: [-3.5, 52.3] }, { name: 'Gwynedd', coords: [-3.9, 52.9] },
+                { name: 'Pembrokeshire', coords: [-4.9, 51.8] }
+            ];
+
+            const features = [];
+            
+            // Generate 2000 sample sites across UK
+            for (let i = 0; i < 2000; i++) {
+                const location = ukLocations[Math.floor(Math.random() * ukLocations.length)];
+                const tech = technologies[Math.floor(Math.random() * technologies.length)];
+                const window = repoweringWindows[Math.floor(Math.random() * repoweringWindows.length)];
+                
+                // Add some geographic spread around the location
+                const lat = location.coords[1] + (Math.random() - 0.5) * 0.5;
+                const lng = location.coords[0] + (Math.random() - 0.5) * 0.8;
+                
+                // Generate realistic capacity based on technology
+                let capacity_kw;
+                if (tech === 'Photovoltaic') {
+                    capacity_kw = Math.random() < 0.8 ? Math.random() * 50 : Math.random() * 500 + 50;
+                } else if (tech === 'Wind') {
+                    capacity_kw = Math.random() < 0.6 ? Math.random() * 100 + 100 : Math.random() * 2000 + 500;
+                } else if (tech === 'Hydro') {
+                    capacity_kw = Math.random() * 1000 + 50;
+                } else if (tech === 'Anaerobic digestion') {
+                    capacity_kw = Math.random() * 800 + 200;
+                } else {
+                    capacity_kw = Math.random() * 10 + 1;
+                }
+                
+                const capacity_mw = capacity_kw / 1000;
+                const age_years = Math.random() * 15 + 5;
+                const remaining_fit_years = Math.max(0, 20 - age_years + (Math.random() - 0.5) * 4);
+                
+                features.push({
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [lng, lat]
+                    },
+                    properties: {
+                        fit_id: `FIT${1000000 + i}`,
+                        technology: tech,
+                        capacity_kw: Math.round(capacity_kw),
+                        capacity_mw: Math.round(capacity_mw * 100) / 100,
+                        location: location.name,
+                        age_years: Math.round(age_years * 10) / 10,
+                        remaining_fit_years: Math.round(remaining_fit_years * 10) / 10,
+                        repowering_window: window,
+                        postcode: generatePostcode(location.name),
+                        urgency: remaining_fit_years < 2 ? 'high' : remaining_fit_years < 5 ? 'medium' : 'low'
+                    }
+                });
+            }
+
+            geoJsonData = {
+                type: 'FeatureCollection',
+                features: features
+            };
+
+            console.log(`Generated ${features.length} sample renewable energy sites`);
+            addDataToMap();
+            hideSearchStatus();
+        }
+
+        function generatePostcode(location) {
+            const postcodes = {
+                'Cornwall': 'TR', 'Devon': 'EX', 'Somerset': 'TA', 'Yorkshire': 'YO',
+                'Northumberland': 'NE', 'Cumbria': 'CA', 'Highland': 'IV', 'Aberdeenshire': 'AB',
+                'Dumfries': 'DG', 'Orkney': 'KW', 'Shetland': 'ZE', 'Western Isles': 'HS',
+                'Powys': 'LD', 'Gwynedd': 'LL', 'Pembrokeshire': 'SA'
+            };
+            const prefix = postcodes[location] || 'UK';
+            const number = Math.floor(Math.random() * 99) + 1;
+            return `${prefix}${number}`;
+        }
+
+        // Add data to map
+        function addDataToMap() {
+            // Add source
+            map.addSource('renewable-sites', {
+                type: 'geojson',
+                data: geoJsonData,
+                cluster: true,
+                clusterMaxZoom: 10,
+                clusterRadius: 50
+            });
+
+            // Cluster circles
+            map.addLayer({
+                id: 'clusters',
+                type: 'circle',
+                source: 'renewable-sites',
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': [
+                        'step',
+                        ['get', 'point_count'],
+                        '#7CC061',  // Green for small clusters
+                        10, '#F59E0B',  // Orange for medium clusters  
+                        25, '#EF4444'   // Red for large clusters
+                    ],
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        15,     // Small clusters
+                        10, 20, // Medium clusters
+                        25, 25  // Large clusters
+                    ],
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#ffffff'
+                }
+            });
+
+            // Cluster count labels
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'renewable-sites',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12
+                },
+                paint: {
+                    'text-color': '#ffffff'
+                }
+            });
+
+            // Individual points
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'renewable-sites',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': [
+                        'case',
+                        ['<', ['get', 'remaining_fit_years'], 1], '#DC2626',  // Very urgent - dark red
+                        ['<', ['get', 'remaining_fit_years'], 2], '#EF4444',  // Urgent - red  
+                        ['<', ['get', 'remaining_fit_years'], 5], '#F59E0B',  // Medium - orange
+                        '#7CC061'  // Normal - green
+                    ],
+                    'circle-radius': [
+                        'case',
+                        ['>', ['get', 'capacity_mw'], 1], 8,     // Large sites
+                        ['>', ['get', 'capacity_kw'], 100], 6,   // Medium sites
+                        4  // Small sites
+                    ],
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#ffffff'
+                }
+            });
+
+            // Click handlers
+            map.on('click', 'clusters', function(e) {
+                const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+                const clusterId = features[0].properties.cluster_id;
+                map.getSource('renewable-sites').getClusterExpansionZoom(clusterId, function(err, zoom) {
+                    if (err) return;
+                    map.easeTo({
+                        center: features[0].geometry.coordinates,
+                        zoom: zoom
+                    });
+                });
+            });
+
+            map.on('click', 'unclustered-point', function(e) {
+                const props = e.features[0].properties;
+                
+                if (currentPopup) currentPopup.remove();
+                
+                currentPopup = new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(createPopupContent(props))
+                    .addTo(map);
+            });
+
+            // Cursor styling
+            map.on('mouseenter', 'clusters', function() {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'clusters', function() {
+                map.getCanvas().style.cursor = '';
+            });
+            map.on('mouseenter', 'unclustered-point', function() {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'unclustered-point', function() {
+                map.getCanvas().style.cursor = '';
+            });
+        }
+
+        // Create popup content
+        function createPopupContent(props) {
+            const urgencyColor = props.remaining_fit_years < 2 ? 'text-red-600' : 
+                                props.remaining_fit_years < 5 ? 'text-orange-600' : 'text-green-600';
+            
+            return `
+                <div class="p-2">
+                    <h4 class="font-bold text-lg mb-2" style="color: var(--saber-blue)">${props.technology} Site</h4>
+                    <div class="space-y-1 text-sm">
+                        <p><strong>FIT ID:</strong> ${props.fit_id}</p>
+                        <p><strong>Capacity:</strong> ${props.capacity_kw} kW (${props.capacity_mw} MW)</p>
+                        <p><strong>Location:</strong> ${props.location}, ${props.postcode}</p>
+                        <p><strong>Age:</strong> ${props.age_years} years</p>
+                        <p><strong>FIT Remaining:</strong> <span class="${urgencyColor} font-semibold">${props.remaining_fit_years} years</span></p>
+                        <p><strong>Repowering Window:</strong> ${props.repowering_window}</p>
+                    </div>
+                    ${props.remaining_fit_years < 2 ? '<div class="mt-2 p-2 bg-red-100 border border-red-300 rounded text-red-800 text-xs"><i class="fas fa-exclamation-triangle mr-1"></i><strong>Urgent PPA Opportunity</strong></div>' : ''}
+                    <button onclick="askAboutSite('${props.fit_id}')" class="mt-3 w-full bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
+                        <i class="fas fa-brain mr-1"></i>Ask AI About This Site
+                    </button>
+                </div>
+            `;
+        }
+
+        // AI Search functionality
+        async function performAISearch() {
+            const query = document.getElementById('aiSearchInput').value.trim();
+            if (!query) return;
+
+            showSearchStatus('AI is analyzing your query...');
+            
+            try {
+                // Filter current data based on AI query (simplified for demo)
+                let filteredFeatures = geoJsonData.features;
+                
+                // Simple keyword filtering (in production, this would use the Chroma API)
+                const lowerQuery = query.toLowerCase();
+                
+                if (lowerQuery.includes('urgent') || lowerQuery.includes('ppa')) {
+                    filteredFeatures = filteredFeatures.filter(f => f.properties.remaining_fit_years < 2);
+                }
+                
+                if (lowerQuery.includes('scotland')) {
+                    filteredFeatures = filteredFeatures.filter(f => 
+                        f.properties.location.toLowerCase().includes('highland') ||
+                        f.properties.location.toLowerCase().includes('aberdeenshire') ||
+                        f.properties.location.toLowerCase().includes('orkney') ||
+                        f.properties.location.toLowerCase().includes('shetland')
+                    );
+                }
+                
+                if (lowerQuery.includes('wind')) {
+                    filteredFeatures = filteredFeatures.filter(f => f.properties.technology === 'Wind');
+                }
+                
+                if (lowerQuery.includes('solar') || lowerQuery.includes('pv')) {
+                    filteredFeatures = filteredFeatures.filter(f => f.properties.technology === 'Photovoltaic');
+                }
+                
+                if (lowerQuery.includes('1mw') || lowerQuery.includes('large')) {
+                    filteredFeatures = filteredFeatures.filter(f => f.properties.capacity_mw >= 1);
+                }
+
+                // Update map with filtered data
+                map.getSource('renewable-sites').setData({
+                    type: 'FeatureCollection',
+                    features: filteredFeatures
+                });
+
+                // Update statistics
+                updateStatistics(filteredFeatures);
+                
+                hideSearchStatus();
+                
+                // Fit map to show filtered results
+                if (filteredFeatures.length > 0) {
+                    const bounds = new mapboxgl.LngLatBounds();
+                    filteredFeatures.forEach(feature => {
+                        bounds.extend(feature.geometry.coordinates);
+                    });
+                    map.fitBounds(bounds, { padding: 50 });
+                }
+                
+            } catch (error) {
+                console.error('AI search failed:', error);
+                showSearchStatus('Search failed. Please try again.');
+                setTimeout(hideSearchStatus, 3000);
+            }
+        }
+
+        function quickSearch(query) {
+            document.getElementById('aiSearchInput').value = query;
+            performAISearch();
+        }
+
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                performAISearch();
+            }
+        }
+
+        // Map control functions
+        function focusOnUrgent() {
+            const urgentFeatures = geoJsonData.features.filter(f => f.properties.remaining_fit_years < 2);
+            map.getSource('renewable-sites').setData({
+                type: 'FeatureCollection',
+                features: urgentFeatures
+            });
+            updateStatistics(urgentFeatures);
+        }
+
+        function focusOnLargeSites() {
+            const largeFeatures = geoJsonData.features.filter(f => f.properties.capacity_mw >= 1);
+            map.getSource('renewable-sites').setData({
+                type: 'FeatureCollection',
+                features: largeFeatures
+            });
+            updateStatistics(largeFeatures);
+        }
+
+        function focusOnScotland() {
+            map.flyTo({
+                center: [-4.0, 57.0],
+                zoom: 6.5
+            });
+        }
+
+        function resetMapView() {
+            map.getSource('renewable-sites').setData(geoJsonData);
+            updateStatistics(geoJsonData.features);
+            map.flyTo({
+                center: [-3.5, 54.5],
+                zoom: 5.5
+            });
+        }
+
+        function updateStatistics(features) {
+            const totalSites = features.length;
+            const totalCapacity = features.reduce((sum, f) => sum + f.properties.capacity_mw, 0);
+            const urgentSites = features.filter(f => f.properties.remaining_fit_years < 2).length;
+            const avgFit = features.reduce((sum, f) => sum + f.properties.remaining_fit_years, 0) / totalSites;
+
+            document.getElementById('totalSites').textContent = totalSites.toLocaleString();
+            document.getElementById('totalCapacity').textContent = totalCapacity.toFixed(1) + ' MW';
+            document.getElementById('urgentSites').textContent = urgentSites.toLocaleString();
+            document.getElementById('avgFitRemaining').textContent = avgFit.toFixed(1) + ' years';
+        }
+
+        function askAboutSite(fitId) {
+            const query = `Tell me about FIT ID ${fitId} - what are the PPA opportunities?`;
+            document.getElementById('aiSearchInput').value = query;
+            performAISearch();
+        }
+
+        // Utility functions
+        function showSearchStatus(message) {
+            document.getElementById('statusText').textContent = message;
+            document.getElementById('searchStatus').classList.remove('hidden');
+        }
+
+        function hideSearchStatus() {
+            document.getElementById('searchStatus').classList.add('hidden');
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
+    </script>
+</body>
+</html>

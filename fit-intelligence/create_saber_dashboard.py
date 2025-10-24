@@ -1,0 +1,805 @@
+#!/usr/bin/env python3
+"""
+Create a beautiful Saber-branded dashboard with interactive mapping
+"""
+
+import pandas as pd
+import json
+import logging
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+def prepare_geojson_data():
+    """Convert turbine data to GeoJSON format for Mapbox"""
+    
+    # Load the data
+    df = pd.read_csv('data/turbine_coordinates.csv')
+    
+    # Parse turbine details
+    df['capacity_mw'] = df['turbine_details'].apply(lambda x: eval(x)['capacity_mw'] if isinstance(x, str) else 0)
+    df['location'] = df['turbine_details'].apply(lambda x: eval(x)['location'] if isinstance(x, str) else 'Unknown')
+    df['age_years'] = df['turbine_details'].apply(lambda x: eval(x)['age_years'] if isinstance(x, str) else 0)
+    
+    # Filter UK bounds
+    uk_bounds = {
+        'min_lat': 49.5,
+        'max_lat': 61.0,
+        'min_lon': -11.0,
+        'max_lon': 2.5
+    }
+    
+    df = df[
+        (df['latitude'] >= uk_bounds['min_lat']) & 
+        (df['latitude'] <= uk_bounds['max_lat']) &
+        (df['longitude'] >= uk_bounds['min_lon']) & 
+        (df['longitude'] <= uk_bounds['max_lon'])
+    ]
+    
+    # Create GeoJSON features
+    features = []
+    for _, row in df.iterrows():
+        feature = {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [row['longitude'], row['latitude']]
+            },
+            "properties": {
+                "id": str(row['turbine_id']),
+                "score": row['overall_score'],
+                "priority": row['priority'],
+                "remaining_fit_years": round(row['remaining_fit_years'], 1),
+                "repowering_window": row['repowering_window'],
+                "capacity_mw": round(row['capacity_mw'], 3),
+                "location": row['location'],
+                "postcode": row['postcode'],
+                "age_years": round(row['age_years'], 1)
+            }
+        }
+        features.append(feature)
+    
+    geojson = {
+        "type": "FeatureCollection",
+        "features": features
+    }
+    
+    # Save GeoJSON
+    with open('visualizations/turbines.geojson', 'w') as f:
+        json.dump(geojson, f)
+    
+    logger.info(f"Created GeoJSON with {len(features)} turbines")
+    return len(features)
+
+
+def create_saber_dashboard():
+    """Create a beautiful Saber-branded dashboard"""
+    
+    html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saber Renewable Energy - Wind Repowering Intelligence Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Mapbox GL JS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+    
+    <!-- Mapbox GL Geocoder for search -->
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css' type='text/css' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js'></script>
+    
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Saber brand colors */
+        :root {
+            --saber-primary: #1B4F72;    /* Deep Blue */
+            --saber-secondary: #2E86AB;  /* Sky Blue */
+            --saber-accent: #A0C4E1;     /* Light Blue */
+            --saber-success: #27AE60;    /* Green */
+            --saber-warning: #F39C12;    /* Orange */
+            --saber-danger: #E74C3C;     /* Red */
+            --saber-dark: #1A1A2E;       /* Dark Navy */
+            --saber-light: #F8F9FA;      /* Light Gray */
+        }
+        
+        /* Custom Tailwind config */
+        .saber-gradient {
+            background: linear-gradient(135deg, var(--saber-primary) 0%, var(--saber-secondary) 100%);
+        }
+        
+        .saber-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        
+        .saber-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
+        }
+        
+        /* Map styles */
+        #map {
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mapboxgl-popup-content {
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 250px;
+        }
+        
+        /* Priority badges */
+        .priority-critical { background-color: var(--saber-danger); }
+        .priority-high { background-color: var(--saber-warning); }
+        .priority-medium { background-color: var(--saber-secondary); }
+        .priority-low { background-color: var(--saber-success); }
+        .priority-monitor { background-color: var(--saber-accent); }
+        
+        /* Window badges */
+        .window-urgent { background-color: var(--saber-danger); }
+        .window-optimal { background-color: var(--saber-warning); }
+        .window-early { background-color: var(--saber-success); }
+        .window-late { background-color: #6B7280; }
+        
+        /* Loading animation */
+        .loader {
+            border: 3px solid var(--saber-accent);
+            border-top: 3px solid var(--saber-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--saber-light);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--saber-secondary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--saber-primary);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="saber-gradient text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-wind text-3xl mr-3"></i>
+                        <div>
+                            <h1 class="text-2xl font-bold">Saber Renewable Energy</h1>
+                            <p class="text-sm opacity-90">Wind Repowering Intelligence Platform</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm opacity-90">Last Updated: <span id="lastUpdate"></span></span>
+                    <button onclick="location.reload()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Dashboard -->
+    <div class="container mx-auto px-4 py-6">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Active FIT Sites</p>
+                        <p class="text-2xl font-bold text-gray-800">7,172</p>
+                    </div>
+                    <i class="fas fa-chart-line text-3xl" style="color: var(--saber-secondary)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Capacity</p>
+                        <p class="text-2xl font-bold text-gray-800">770 MW</p>
+                    </div>
+                    <i class="fas fa-bolt text-3xl" style="color: var(--saber-success)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Urgent (2-5yr)</p>
+                        <p class="text-2xl font-bold" style="color: var(--saber-danger)">801</p>
+                    </div>
+                    <i class="fas fa-exclamation-triangle text-3xl" style="color: var(--saber-danger)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Optimal (5-10yr)</p>
+                        <p class="text-2xl font-bold" style="color: var(--saber-warning)">5,582</p>
+                    </div>
+                    <i class="fas fa-bullseye text-3xl" style="color: var(--saber-warning)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Avg FIT Left</p>
+                        <p class="text-2xl font-bold text-gray-800">7.0 yr</p>
+                    </div>
+                    <i class="fas fa-clock text-3xl" style="color: var(--saber-secondary)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Potential MW</p>
+                        <p class="text-2xl font-bold" style="color: var(--saber-success)">492</p>
+                    </div>
+                    <i class="fas fa-seedling text-3xl" style="color: var(--saber-success)"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Map Section (2/3 width) -->
+            <div class="lg:col-span-2">
+                <div class="saber-card p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-map-marked-alt mr-2" style="color: var(--saber-primary)"></i>
+                            UK Wind Turbine Map
+                        </h2>
+                        <div class="flex space-x-2">
+                            <button onclick="resetMap()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition">
+                                <i class="fas fa-home mr-1"></i>Reset View
+                            </button>
+                            <button onclick="toggleClustering()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition">
+                                <i class="fas fa-layer-group mr-1"></i>Clustering
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Buttons -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="text-sm text-gray-600 self-center">Filter by window:</span>
+                        <button onclick="filterByWindow('all')" class="filter-btn px-3 py-1 bg-gray-700 text-white rounded-lg text-sm transition">All</button>
+                        <button onclick="filterByWindow('URGENT')" class="filter-btn px-3 py-1 window-urgent text-white rounded-lg text-sm transition opacity-50">Urgent</button>
+                        <button onclick="filterByWindow('OPTIMAL')" class="filter-btn px-3 py-1 window-optimal text-white rounded-lg text-sm transition opacity-50">Optimal</button>
+                        <button onclick="filterByWindow('TOO_EARLY')" class="filter-btn px-3 py-1 window-early text-white rounded-lg text-sm transition opacity-50">Too Early</button>
+                        <button onclick="filterByWindow('TOO_LATE')" class="filter-btn px-3 py-1 window-late text-white rounded-lg text-sm transition opacity-50">Too Late</button>
+                    </div>
+                    
+                    <!-- Map Container -->
+                    <div id="map" class="h-96 lg:h-[600px] relative">
+                        <div id="mapLoader" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Map Legend -->
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Legend:</p>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2" style="background-color: var(--saber-danger)"></span>
+                                <span>Urgent (2-5 yr)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2" style="background-color: var(--saber-warning)"></span>
+                                <span>Optimal (5-10 yr)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2" style="background-color: var(--saber-success)"></span>
+                                <span>Too Early (>15 yr)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2 bg-gray-500"></span>
+                                <span>Too Late (<2 yr)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Side Panel (1/3 width) -->
+            <div class="space-y-6">
+                <!-- Search Panel -->
+                <div class="saber-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-search mr-2" style="color: var(--saber-primary)"></i>
+                        Search & Filter
+                    </h3>
+                    <div id="geocoder" class="mb-3"></div>
+                    <div class="space-y-2">
+                        <label class="text-sm text-gray-600">Capacity Range (MW)</label>
+                        <input type="range" id="capacitySlider" min="0" max="5" step="0.1" value="5" class="w-full" 
+                               oninput="updateCapacityFilter(this.value)">
+                        <span id="capacityValue" class="text-sm text-gray-600">Max: 5.0 MW</span>
+                    </div>
+                </div>
+                
+                <!-- Regional Summary -->
+                <div class="saber-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-chart-bar mr-2" style="color: var(--saber-primary)"></i>
+                        Top Regions
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Orkney Islands</span>
+                            <span class="text-sm font-bold">770 sites</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 100%; background-color: var(--saber-secondary)"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Aberdeenshire</span>
+                            <span class="text-sm font-bold">524 sites</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 68%; background-color: var(--saber-secondary)"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Cornwall</span>
+                            <span class="text-sm font-bold">409 sites</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 53%; background-color: var(--saber-secondary)"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Highland</span>
+                            <span class="text-sm font-bold">208 sites</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 27%; background-color: var(--saber-secondary)"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Chart -->
+                <div class="saber-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-chart-pie mr-2" style="color: var(--saber-primary)"></i>
+                        Priority Distribution
+                    </h3>
+                    <canvas id="priorityChart" width="400" height="200"></canvas>
+                </div>
+                
+                <!-- Selected Site Info -->
+                <div id="siteInfo" class="saber-card p-4 hidden">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-info-circle mr-2" style="color: var(--saber-primary)"></i>
+                        Site Information
+                    </h3>
+                    <div id="siteDetails" class="space-y-2 text-sm">
+                        <!-- Site details will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="saber-gradient text-white mt-12 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm opacity-90">© 2024 Saber Renewable Energy. Wind Repowering Intelligence Platform.</p>
+            <p class="text-xs opacity-75 mt-2">Powered by advanced analytics and machine learning</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Initialize Mapbox
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'; // Public token
+        
+        let map;
+        let markers = [];
+        let turbineData;
+        let clusteringEnabled = true;
+        
+        // Color mapping
+        const windowColors = {
+            'URGENT': '#E74C3C',
+            'OPTIMAL': '#F39C12',
+            'TOO_EARLY': '#27AE60',
+            'TOO_LATE': '#6B7280'
+        };
+        
+        // Initialize map
+        function initMap() {
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/light-v11',
+                center: [-3.5, 54.5],
+                zoom: 5.5,
+                pitch: 0,
+                bearing: 0
+            });
+            
+            // Add navigation controls
+            map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+            
+            // Add geocoder search
+            const geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl,
+                placeholder: 'Search location...',
+                countries: 'gb',
+                bbox: [-11, 49.5, 2.5, 61]
+            });
+            
+            document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+            
+            // Load turbine data
+            map.on('load', () => {
+                loadTurbineData();
+                document.getElementById('mapLoader').style.display = 'none';
+            });
+        }
+        
+        // Load turbine data
+        async function loadTurbineData() {
+            try {
+                const response = await fetch('turbines.geojson');
+                turbineData = await response.json();
+                
+                // Add source
+                map.addSource('turbines', {
+                    type: 'geojson',
+                    data: turbineData,
+                    cluster: true,
+                    clusterMaxZoom: 14,
+                    clusterRadius: 50,
+                    clusterProperties: {
+                        'urgent_count': ['+', ['case', ['==', ['get', 'repowering_window'], 'URGENT'], 1, 0]],
+                        'optimal_count': ['+', ['case', ['==', ['get', 'repowering_window'], 'OPTIMAL'], 1, 0]],
+                        'total_capacity': ['+', ['get', 'capacity_mw']]
+                    }
+                });
+                
+                // Add cluster layer
+                map.addLayer({
+                    id: 'clusters',
+                    type: 'circle',
+                    source: 'turbines',
+                    filter: ['has', 'point_count'],
+                    paint: {
+                        'circle-color': [
+                            'step',
+                            ['get', 'point_count'],
+                            '#A0C4E1',
+                            10, '#2E86AB',
+                            50, '#1B4F72',
+                            100, '#1A1A2E'
+                        ],
+                        'circle-radius': [
+                            'step',
+                            ['get', 'point_count'],
+                            15,
+                            10, 20,
+                            50, 25,
+                            100, 30
+                        ],
+                        'circle-stroke-width': 2,
+                        'circle-stroke-color': '#ffffff'
+                    }
+                });
+                
+                // Add cluster count layer
+                map.addLayer({
+                    id: 'cluster-count',
+                    type: 'symbol',
+                    source: 'turbines',
+                    filter: ['has', 'point_count'],
+                    layout: {
+                        'text-field': '{point_count_abbreviated}',
+                        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                        'text-size': 12
+                    },
+                    paint: {
+                        'text-color': '#ffffff'
+                    }
+                });
+                
+                // Add individual turbine layer
+                map.addLayer({
+                    id: 'unclustered-point',
+                    type: 'circle',
+                    source: 'turbines',
+                    filter: ['!', ['has', 'point_count']],
+                    paint: {
+                        'circle-color': [
+                            'match',
+                            ['get', 'repowering_window'],
+                            'URGENT', '#E74C3C',
+                            'OPTIMAL', '#F39C12',
+                            'TOO_EARLY', '#27AE60',
+                            'TOO_LATE', '#6B7280',
+                            '#999999'
+                        ],
+                        'circle-radius': [
+                            'interpolate',
+                            ['linear'],
+                            ['get', 'capacity_mw'],
+                            0, 4,
+                            1, 8,
+                            5, 12
+                        ],
+                        'circle-stroke-width': 2,
+                        'circle-stroke-color': '#ffffff',
+                        'circle-opacity': 0.8
+                    }
+                });
+                
+                // Click handler for clusters
+                map.on('click', 'clusters', (e) => {
+                    const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+                    const clusterId = features[0].properties.cluster_id;
+                    map.getSource('turbines').getClusterExpansionZoom(clusterId, (err, zoom) => {
+                        if (err) return;
+                        map.easeTo({
+                            center: features[0].geometry.coordinates,
+                            zoom: zoom
+                        });
+                    });
+                });
+                
+                // Click handler for individual points
+                map.on('click', 'unclustered-point', (e) => {
+                    const properties = e.features[0].properties;
+                    showSiteInfo(properties);
+                    
+                    new mapboxgl.Popup()
+                        .setLngLat(e.features[0].geometry.coordinates)
+                        .setHTML(createPopupContent(properties))
+                        .addTo(map);
+                });
+                
+                // Change cursor on hover
+                map.on('mouseenter', 'clusters', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'clusters', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+                map.on('mouseenter', 'unclustered-point', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'unclustered-point', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+                
+            } catch (error) {
+                console.error('Error loading turbine data:', error);
+            }
+        }
+        
+        // Create popup content
+        function createPopupContent(properties) {
+            const windowClass = `window-${properties.repowering_window.toLowerCase().replace('_', '-')}`;
+            const priorityClass = `priority-${properties.priority.toLowerCase()}`;
+            
+            return `
+                <div class="space-y-2">
+                    <div class="font-bold text-lg" style="color: var(--saber-primary)">
+                        FIT ID: ${properties.id}
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <div><strong>Location:</strong> ${properties.location}</div>
+                        <div><strong>Postcode:</strong> ${properties.postcode}</div>
+                        <div><strong>Capacity:</strong> ${properties.capacity_mw} MW</div>
+                        <div><strong>Age:</strong> ${properties.age_years} years</div>
+                        <div><strong>FIT Remaining:</strong> ${properties.remaining_fit_years} years</div>
+                        <div><strong>Score:</strong> ${properties.score.toFixed(3)}</div>
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <span class="px-2 py-1 text-xs text-white rounded ${windowClass}">
+                            ${properties.repowering_window}
+                        </span>
+                        <span class="px-2 py-1 text-xs text-white rounded ${priorityClass}">
+                            ${properties.priority}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Show site info panel
+        function showSiteInfo(properties) {
+            const siteInfo = document.getElementById('siteInfo');
+            const siteDetails = document.getElementById('siteDetails');
+            
+            siteInfo.classList.remove('hidden');
+            siteDetails.innerHTML = `
+                <div class="space-y-2">
+                    <div class="border-b pb-2">
+                        <strong>FIT ID:</strong> ${properties.id}
+                    </div>
+                    <div><strong>Location:</strong> ${properties.location}</div>
+                    <div><strong>Postcode:</strong> ${properties.postcode}</div>
+                    <div><strong>Capacity:</strong> ${properties.capacity_mw} MW</div>
+                    <div><strong>Age:</strong> ${properties.age_years} years</div>
+                    <div><strong>FIT Remaining:</strong> ${properties.remaining_fit_years} years</div>
+                    <div><strong>Repowering Score:</strong> ${properties.score.toFixed(3)}</div>
+                    <div><strong>Priority:</strong> <span class="priority-${properties.priority.toLowerCase()} text-white px-2 py-1 rounded text-xs">${properties.priority}</span></div>
+                    <div><strong>Window:</strong> <span class="window-${properties.repowering_window.toLowerCase().replace('_', '-')} text-white px-2 py-1 rounded text-xs">${properties.repowering_window}</span></div>
+                </div>
+            `;
+        }
+        
+        // Filter by window
+        function filterByWindow(window) {
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.add('opacity-50');
+            });
+            event.target.classList.remove('opacity-50');
+            
+            // Apply filter
+            if (window === 'all') {
+                map.setFilter('unclustered-point', null);
+            } else {
+                map.setFilter('unclustered-point', ['==', ['get', 'repowering_window'], window]);
+            }
+        }
+        
+        // Update capacity filter
+        function updateCapacityFilter(value) {
+            document.getElementById('capacityValue').textContent = `Max: ${value} MW`;
+            map.setFilter('unclustered-point', ['<=', ['get', 'capacity_mw'], parseFloat(value)]);
+        }
+        
+        // Toggle clustering
+        function toggleClustering() {
+            clusteringEnabled = !clusteringEnabled;
+            map.setLayoutProperty('clusters', 'visibility', clusteringEnabled ? 'visible' : 'none');
+            map.setLayoutProperty('cluster-count', 'visibility', clusteringEnabled ? 'visible' : 'none');
+        }
+        
+        // Reset map view
+        function resetMap() {
+            map.flyTo({
+                center: [-3.5, 54.5],
+                zoom: 5.5,
+                pitch: 0,
+                bearing: 0
+            });
+        }
+        
+        // Initialize priority chart
+        function initPriorityChart() {
+            const ctx = document.getElementById('priorityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Urgent', 'Optimal', 'Too Early', 'Too Late'],
+                    datasets: [{
+                        data: [801, 5582, 1, 276],
+                        backgroundColor: [
+                            '#E74C3C',
+                            '#F39C12',
+                            '#27AE60',
+                            '#6B7280'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update last update time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleString();
+        }
+        
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTime();
+            initMap();
+            initPriorityChart();
+        });
+    </script>
+</body>
+</html>"""
+    
+    return html_content
+
+
+def main():
+    logger.info("Creating Saber-branded dashboard...")
+    
+    # Prepare GeoJSON data
+    num_turbines = prepare_geojson_data()
+    
+    # Create dashboard HTML
+    dashboard_html = create_saber_dashboard()
+    
+    # Save dashboard
+    with open('visualizations/saber_dashboard.html', 'w') as f:
+        f.write(dashboard_html)
+    
+    print("\n" + "="*60)
+    print("SABER BRANDED DASHBOARD CREATED")
+    print("="*60)
+    print("\n🎨 Features:")
+    print("   ✓ Saber brand colors and styling")
+    print("   ✓ Tailwind CSS for beautiful UI")
+    print("   ✓ Mapbox GL JS for smooth zooming and panning")
+    print("   ✓ Clustering for better performance")
+    print("   ✓ Interactive filters and search")
+    print("   ✓ Site information panels")
+    print("   ✓ Regional analytics")
+    print("   ✓ Priority distribution chart")
+    print(f"\n📍 {num_turbines} turbines mapped with accurate UK coordinates")
+    print("\n📁 Dashboard location: visualizations/saber_dashboard.html")
+    print("\nTo view: open visualizations/saber_dashboard.html")
+    
+    # Try to open automatically
+    import webbrowser
+    import os
+    full_path = os.path.abspath('visualizations/saber_dashboard.html')
+    webbrowser.open(f"file://{full_path}")
+
+
+if __name__ == "__main__":
+    main()

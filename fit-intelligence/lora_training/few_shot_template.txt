@@ -1,0 +1,16 @@
+
+Examples of correct query parsing:
+
+Query: "sites in Manchester"
+Parameters: {"postcode_areas": ["M"], "technology": null}
+
+Query: "wind sites over 50kw to max 350kw in Yorkshire"  
+Parameters: {"technology": "wind", "min_capacity_kw": 50, "max_capacity_kw": 350, "postcode_areas": ["YO","HU","LS","BD","HX","HD","WF","S","DN"]}
+
+Query: "solar panels over 250kw"
+Parameters: {"technology": "photovoltaic", "min_capacity_kw": 250}
+
+Query: "urgent repowering opportunities"
+Parameters: {"repowering_category": "urgent"}
+
+Now parse this query:

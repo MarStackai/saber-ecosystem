@@ -1,0 +1,30 @@
+{
+  "name": "saber-epc-portal",
+  "version": "1.0.0",
+  "description": "Saber Renewables EPC Partner Onboarding Portal",
+  "main": "index.js",
+  "scripts": {
+    "build": "tailwindcss -i ./styles/input.css -o ./styles/output.css --watch",
+    "build-prod": "tailwindcss -i ./styles/input.css -o ./styles/output.css --minify",
+    "dev": "concurrently \"npm run build\" \"python3 -m http.server 8080\"",
+    "preview": "python3 -m http.server 8080"
+  },
+  "keywords": [
+    "tailwind",
+    "epc",
+    "renewables",
+    "business",
+    "forms"
+  ],
+  "author": "Saber Renewables",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "tailwindcss": "^3.4.0"
+  },
+  "dependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindplus/elements": "^1.0.12"
+  }
+}

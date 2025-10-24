@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT Intelligence Map | Saber Renewable Energy</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --saber-blue: #044D73;
+            --saber-green: #7CC061;
+            --saber-light-blue: #0A5F8E;
+        }
+        
+        .saber-gradient {
+            background: linear-gradient(135deg, var(--saber-blue) 0%, var(--saber-light-blue) 100%);
+        }
+        
+        .ai-search-container {
+            background: linear-gradient(135deg, rgba(4, 77, 115, 0.95) 0%, rgba(10, 95, 142, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .search-suggestions {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(4, 77, 115, 0.1);
+        }
+        
+        .map-overlay {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .typing-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .search-result-marker {
+            background: var(--saber-green);
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            animation: markerPulse 2s infinite;
+        }
+        
+        @keyframes markerPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .cluster-marker {
+            background: var(--saber-blue);
+            color: white;
+            border: 3px solid white;
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* Dual slider styling */
+        .slider-container {
+            position: relative;
+            height: 24px;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: transparent;
+            outline: none;
+            position: absolute;
+            top: 8px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--saber-blue);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            pointer-events: all;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--saber-blue);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            pointer-events: all;
+        }
+        
+        .range-track {
+            position: absolute;
+            top: 12px;
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+        }
+        
+        #capacityRangeBar {
+            position: absolute;
+            top: 12px;
+            height: 8px;
+            background: var(--saber-blue);
+            border-radius: 4px;
+            left: 0%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="saber-gradient text-white shadow-lg relative z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="Saber-logo-wob-green.svg" alt="Saber Renewable Energy" class="h-12 w-auto">
+                    <div>
+                        <h1 class="text-2xl font-bold">FIT Intelligence Map</h1>
+                        <p class="text-sm opacity-90">AI-powered renewable energy site discovery and analysis</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <a href="fit_chatbot_interface.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-robot mr-2"></i>Chatbot
+                    </a>
+                    <a href="analytics_dashboard.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-chart-bar mr-2"></i>Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-screen">
+        <!-- Map Container -->
+        <div class="flex-1 relative">
+            <div id="map" class="w-full h-full"></div>
+            
+            <!-- AI Search Overlay -->
+            <div class="absolute top-4 left-4 right-4 z-40">
+                <div class="ai-search-container rounded-lg p-4 text-white max-w-2xl mx-auto">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i class="fas fa-brain text-xl"></i>
+                        <h3 class="text-lg font-semibold">AI-Powered Site Discovery</h3>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <input 
+                            type="text" 
+                            id="aiSearchInput"
+                            placeholder="Ask about renewable energy sites... e.g., 'Show wind farms in Scotland needing PPA attention'"
+                            class="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white/50"
+                            onkeypress="handleSearchKeyPress(event)"
+                        >
+                        <button 
+                            onclick="performAISearch()" 
+                            id="searchButton"
+                            class="px-6 py-3 bg-white/20 rounded-lg hover:bg-white/30 transition disabled:opacity-50"
+                        >
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Filters -->
+                    <div class="mt-3 flex flex-wrap gap-2" id="quickFilters">
+                        <button onclick="quickSearch('urgent wind sites')" class="px-3 py-1 bg-white/20 rounded-full text-sm hover:bg-white/30 transition">
+                            Urgent Wind Sites
+                        </button>
+                        <button onclick="quickSearch('solar over 1MW')" class="px-3 py-1 bg-white/20 rounded-full text-sm hover:bg-white/30 transition">
+                            Large Solar Sites
+                        </button>
+                        <button onclick="quickSearch('Scotland renewable energy')" class="px-3 py-1 bg-white/20 rounded-full text-sm hover:bg-white/30 transition">
+                            Scotland Sites
+                        </button>
+                        <button onclick="quickSearch('expiring FIT contracts')" class="px-3 py-1 bg-white/20 rounded-full text-sm hover:bg-white/30 transition">
+                            Expiring FITs
+                        </button>
+                    </div>
+                    
+                    <!-- Search Status -->
+                    <div id="searchStatus" class="mt-3 text-sm opacity-90 hidden">
+                        <div class="typing-indicator">
+                            <i class="fas fa-brain mr-1"></i>
+                            <span id="statusText">Analyzing renewable energy database...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Search Results Panel -->
+            <div id="searchResultsPanel" class="absolute top-4 right-4 w-80 max-h-96 overflow-y-auto search-suggestions rounded-lg p-4 hidden z-30">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-gray-800">Search Results</h4>
+                    <button onclick="closeSearchResults()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="searchResultsList" class="space-y-3">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="w-96 bg-white shadow-lg overflow-y-auto">
+            <!-- Site Details -->
+            <div id="siteDetailsPanel" class="p-6 border-b">
+                <h3 class="text-lg font-semibold mb-4">Site Details</h3>
+                <div id="siteDetailsContent" class="text-gray-600 text-center py-8">
+                    <i class="fas fa-map-marker-alt text-4xl mb-3"></i>
+                    <p>Click on a site to view details</p>
+                </div>
+            </div>
+            
+            <!-- Map Controls -->
+            <div class="p-6 border-b">
+                <h3 class="text-lg font-semibold mb-4">Map Controls</h3>
+                
+                <!-- Technology Filter -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Technology</label>
+                    <select id="technologyFilter" onchange="updateMapFilters()" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        <option value="all">All Technologies</option>
+                        <option value="Photovoltaic">Solar (PV)</option>
+                        <option value="Wind">Wind</option>
+                        <option value="Hydro">Hydro</option>
+                        <option value="Anaerobic digestion">Anaerobic Digestion</option>
+                        <option value="Micro CHP">Micro CHP</option>
+                    </select>
+                </div>
+                
+                <!-- Capacity Range - Dual Slider -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Capacity Range (MW)</label>
+                    <div class="slider-container">
+                        <div class="range-track"></div>
+                        <div id="capacityRangeBar"></div>
+                        <input type="range" id="minCapacity" min="0" max="10" step="0.1" value="0" 
+                               oninput="updateCapacityRange()">
+                        <input type="range" id="maxCapacity" min="0" max="10" step="0.1" value="10" 
+                               oninput="updateCapacityRange()">
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-2">
+                        <span id="minCapacityLabel">0 MW</span>
+                        <span id="maxCapacityLabel">10+ MW</span>
+                    </div>
+                </div>
+                
+                <!-- FIT Status -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Repowering Window</label>
+                    <select id="fitStatusFilter" onchange="updateMapFilters()" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        <option value="all">All Windows</option>
+                        <option value="IMMEDIATE">Immediate (High Priority)</option>
+                        <option value="URGENT">Urgent (Medium Priority)</option>
+                        <option value="OPTIMAL">Optimal (Strategic)</option>
+                        <option value="PLANNING">Planning (Long-term)</option>
+                    </select>
+                </div>
+                
+                <!-- Map View Mode -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Map View</label>
+                    <select id="viewMode" onchange="changeMapView()" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                        <option value="clusters">Cluster View (Groups of 5+)</option>
+                        <option value="all">Show All Sites (40K+ sites)</option>
+                        <option value="sample">Sample View (1K sites)</option>
+                    </select>
+                    <div class="text-xs text-gray-500 mt-1">
+                        <span id="viewModeNote">Currently showing clustered sites only</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="p-6">
+                <h3 class="text-lg font-semibold mb-4">Current View Statistics</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Sites:</span>
+                        <span id="totalSites" class="font-semibold">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total Capacity:</span>
+                        <span id="totalCapacity" class="font-semibold">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Urgent Sites:</span>
+                        <span id="urgentSites" class="font-semibold text-red-600">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Avg FIT Remaining:</span>
+                        <span id="avgFitRemaining" class="font-semibold">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CHROMA_API_BASE = '';
+        const CHAT_API_BASE = '';
+        
+        // Mapbox configuration - using free alternative
+        // mapboxgl.accessToken = 'pk.eyJ1IjoibWFyc3RhY2siLCJhIjoiY21ldmt0cHptMGhlYjJpc2Rvb3EzM3QxOSJ9.REl1LiSuYGu6zVXC27RzRQ';
+        
+        let map;
+        let markers = [];
+        let currentSearchResults = [];
+        
+        // Initialize map with OpenStreetMap
+        function initializeMap() {
+            // Use Leaflet instead of Mapbox for free mapping
+            map = L.map('map').setView([55.3781, -3.4360], 6);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Load initial data
+            loadInitialData();
+        }
+        
+        // Load initial site data
+        async function loadInitialData() {
+            const viewMode = document.getElementById('viewMode').value;
+            await loadDataForMode(viewMode);
+        }
+        
+        async function loadDataForMode(mode) {
+            try {
+                showSearchStatus(`Loading ${mode} data...`);
+                console.log(`Loading data for mode: ${mode}`);
+                
+                if (mode === 'clusters') {
+                    const response = await fetch(`${CHROMA_API_BASE}/api/chroma/clusters?min_sites=5&max_results=50`);
+                    const data = await response.json();
+                    console.log(`Clusters response:`, data);
+                    
+                    if (data.success && data.clusters) {
+                        displayClusters(data.clusters);
+                        document.getElementById('viewModeNote').textContent = 
+                            `Showing ${data.summary.total_clustered_sites.toLocaleString()} sites in ${data.clusters.length} clusters`;
+                    }
+                } else {
+                    // Load individual sites using business query
+                    const maxResults = mode === 'all' ? 5000 : 1000;
+                    console.log(`Requesting ${maxResults} individual sites`);
+                    
+                    const payload = {
+                        query: 'renewable energy sites',
+                        filters: {},
+                        max_results: maxResults
+                    };
+                    
+                    const response = await fetch(`${CHROMA_API_BASE}/api/chroma/business_query`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await response.json();
+                    console.log(`Individual sites response:`, data.business_intelligence);
+                    
+                    if (data.success && data.results) {
+                        console.log(`Got ${data.results.length} sites from API`);
+                        displayIndividualSites(data.results);
+                        document.getElementById('viewModeNote').textContent = 
+                            `Showing ${data.results.length.toLocaleString()} individual sites${mode === 'all' ? ' (capped at 5K for performance)' : ''}`;
+                    } else {
+                        console.error('No results from business query API:', data);
+                    }
+                }
+                
+                hideSearchStatus();
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                showSearchStatus('Failed to load data - check console');
+                setTimeout(hideSearchStatus, 3000);
+            }
+        }
+        
+        function changeMapView() {
+            const mode = document.getElementById('viewMode').value;
+            loadDataForMode(mode);
+        }
+        
+        function displayIndividualSites(sites) {
+            clearMarkers();
+            console.log(`Displaying ${sites.length} individual sites`);
+            
+            sites.forEach((site, index) => {
+                const metadata = site.metadata;
+                
+                // Extract postcode area from full postcode
+                const postcode = metadata.postcode || '';
+                let postcodeArea = '';
+                
+                if (postcode) {
+                    // Try to extract area (letters at start)
+                    const match = postcode.match(/^([A-Z]{1,2})/);
+                    postcodeArea = match ? match[1] : '';
+                }
+                
+                // Get coordinates from postcode mapping
+                let coords = postcodeCoords[postcodeArea] || postcodeCoords[''];
+                
+                // Add random offset to prevent exact overlap (within ~1km radius)
+                coords = [
+                    coords[0] + (Math.random() - 0.5) * 0.01,
+                    coords[1] + (Math.random() - 0.5) * 0.02
+                ];
+                
+                // Create marker with color based on urgency
+                const remainingYears = metadata.remaining_fit_years || 10;
+                let markerColor = '#7CC061'; // Green - normal
+                if (remainingYears < 0) {
+                    markerColor = '#EF4444'; // Red - expired
+                } else if (remainingYears < 1) {
+                    markerColor = '#DC2626'; // Dark red - very urgent
+                } else if (remainingYears < 2) {
+                    markerColor = '#F59E0B'; // Orange - urgent
+                } else if (remainingYears < 5) {
+                    markerColor = '#3B82F6'; // Blue - medium term
+                }
+                
+                const marker = L.circleMarker(coords, {
+                    radius: getSiteMarkerRadius(metadata.capacity_mw),
+                    fillColor: markerColor,
+                    color: 'white',
+                    weight: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+                
+                // Create detailed popup
+                const popupContent = createSitePopup(metadata, index);
+                marker.bindPopup(popupContent);
+                
+                marker.on('click', () => {
+                    showSiteDetails(metadata, index);
+                });
+                
+                markers.push(marker);
+            });
+            
+            console.log(`Added ${markers.length} markers to map`);
+            updateStatisticsFromSites(sites);
+        }
+        
+        function getSiteMarkerRadius(capacityMW) {
+            if (!capacityMW) return 3;
+            if (capacityMW < 0.05) return 2;
+            if (capacityMW < 0.5) return 4;
+            if (capacityMW < 1.0) return 6;
+            if (capacityMW < 5.0) return 8;
+            return 10;
+        }
+        
+        function createSitePopup(metadata, index) {
+            const remainingYears = metadata.remaining_fit_years || 0;
+            const urgencyClass = remainingYears < 2 ? 'text-red-600 font-semibold' : '';
+            
+            return `
+                <div class="p-2" style="min-width: 180px;">
+                    <h4 class="font-semibold text-sm mb-2">${metadata.technology || 'Unknown'} Site</h4>
+                    <div class="text-xs space-y-1">
+                        <p><strong>FIT ID:</strong> ${metadata.fit_id || 'N/A'}</p>
+                        <p><strong>Capacity:</strong> ${metadata.capacity_mw ? (metadata.capacity_mw * 1000).toFixed(0) + ' kW' : 'N/A'}</p>
+                        <p><strong>Location:</strong> ${metadata.postcode || 'N/A'}</p>
+                        <p><strong>FIT Remaining:</strong> <span class="${urgencyClass}">${remainingYears.toFixed(1)} years</span></p>
+                        <p><strong>Window:</strong> ${metadata.repowering_window || 'N/A'}</p>
+                    </div>
+                    ${remainingYears < 2 ? '<div class="mt-2 text-xs text-red-600 font-medium">⚠️ Urgent PPA Opportunity</div>' : ''}
+                </div>
+            `;
+        }
+        
+        function updateStatisticsFromSites(sites) {
+            const totalSites = sites.length;
+            const totalCapacity = sites.reduce((sum, s) => sum + (s.metadata.capacity_mw || 0), 0);
+            const urgentSites = sites.filter(s => (s.metadata.remaining_fit_years || 10) < 2).length;
+            const avgFit = sites.reduce((sum, s) => sum + (s.metadata.remaining_fit_years || 10), 0) / sites.length;
+            
+            document.getElementById('totalSites').textContent = totalSites.toLocaleString();
+            document.getElementById('totalCapacity').textContent = totalCapacity.toFixed(1) + ' MW';
+            document.getElementById('urgentSites').textContent = urgentSites.toLocaleString();
+            document.getElementById('avgFitRemaining').textContent = avgFit.toFixed(1) + ' years';
+        }
+        
+        // AI Search functionality
+        async function performAISearch() {
+            const query = document.getElementById('aiSearchInput').value.trim();
+            if (!query) return;
+            
+            showSearchStatus('Analyzing query with AI...');
+            
+            try {
+                // First, get AI response for context
+                const chatResponse = await fetch(`${CHAT_API_BASE}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: query,
+                        session_id: 'map_session'
+                    })
+                });
+                
+                const chatData = await chatResponse.json();
+                
+                if (chatData.success) {
+                    // Now get the actual site data for mapping
+                    let searchEndpoint;
+                    let searchPayload = {};
+                    
+                    // Determine search strategy based on intent
+                    if (chatData.intent && chatData.intent.analysis_type === 'geographic_search') {
+                        searchEndpoint = 'geographic_search';
+                        searchPayload = {
+                            location: chatData.intent.geographic_search.location,
+                            radius_miles: chatData.intent.geographic_search.radius_miles,
+                            technology: chatData.intent.technology_filter,
+                            max_results: 100
+                        };
+                    } else if (chatData.intent && chatData.intent.analysis_type === 'exact_search') {
+                        searchEndpoint = `exact_search/${chatData.intent.fit_id}`;
+                    } else {
+                        // Use business query for complex searches
+                        searchEndpoint = 'business_query';
+                        searchPayload = {
+                            query: query,
+                            // Handle absence of intent gracefully
+                            filters: buildFiltersFromIntent(chatData.intent || {}),
+                            max_results: 100
+                        };
+                    }
+                    
+                    // Fetch site data
+                    const endpoint = searchEndpoint.includes('/') ? 
+                        `${CHROMA_API_BASE}/api/chroma/${searchEndpoint}` :
+                        `${CHROMA_API_BASE}/api/chroma/${searchEndpoint}`;
+                        
+                    const siteResponse = await fetch(endpoint, {
+                        method: searchEndpoint.includes('/') ? 'GET' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: searchEndpoint.includes('/') ? undefined : JSON.stringify(searchPayload)
+                    });
+                    
+                    const siteData = await siteResponse.json();
+                    
+                    if (siteData.success && siteData.results) {
+                        displaySearchResults(siteData.results, chatData.response);
+                        showSearchResultsPanel(siteData.results, query);
+                    } else {
+                        showSearchStatus('No sites found matching your criteria');
+                        setTimeout(hideSearchStatus, 3000);
+                    }
+                }
+            } catch (error) {
+                console.error('AI search failed:', error);
+                showSearchStatus('Search failed. Please try again.');
+                setTimeout(hideSearchStatus, 3000);
+            }
+        }
+        
+        function buildFiltersFromIntent(intent) {
+            const filters = {};
+            
+            if (intent.technology_filter) {
+                filters.technology = intent.technology_filter;
+            }
+            
+            if (intent.urgency_level === 'high') {
+                filters.max_remaining_fit = 2.0;
+            } else if (intent.urgency_level === 'medium') {
+                filters.max_remaining_fit = 5.0;
+            }
+            
+            return filters;
+        }
+        
+        function displaySearchResults(results, aiResponse) {
+            clearMarkers();
+            currentSearchResults = results;
+            
+            results.forEach((result, index) => {
+                const metadata = result.metadata;
+                
+                // Create Leaflet marker
+                const marker = L.marker([metadata.latitude || 54.5, metadata.longitude || -2.5])
+                    .addTo(map);
+                
+                // Custom icon based on urgency
+                const remainingYears = metadata.remaining_fit_years || 10;
+                let iconColor = '#7CC061'; // Green - normal
+                if (remainingYears < 1) {
+                    iconColor = '#EF4444'; // Red - expired
+                } else if (remainingYears < 2) {
+                    iconColor = '#F59E0B'; // Orange - urgent
+                }
+                
+                // Create popup content
+                const popupContent = `
+                    <div class="p-2">
+                        <h4 class="font-semibold">${metadata.technology || 'Unknown'}</h4>
+                        <p><strong>Capacity:</strong> ${metadata.capacity_mw ? (metadata.capacity_mw * 1000).toFixed(0) + ' kW' : 'N/A'}</p>
+                        <p><strong>FIT Remaining:</strong> ${metadata.remaining_fit_years ? metadata.remaining_fit_years.toFixed(1) + ' years' : 'N/A'}</p>
+                        <p><strong>Postcode:</strong> ${metadata.postcode || 'N/A'}</p>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                marker.on('click', () => {
+                    showSiteDetails(metadata, index);
+                });
+                
+                markers.push(marker);
+            });
+            
+            // Fit map to show all results
+            if (results.length > 0) {
+                const group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+            
+            hideSearchStatus();
+        }
+        
+        function createSearchResultMarker(metadata, index) {
+            const el = document.createElement('div');
+            el.className = 'search-result-marker';
+            el.style.width = '20px';
+            el.style.height = '20px';
+            
+            // Color based on urgency
+            const remainingYears = metadata.remaining_fit_years || 10;
+            if (remainingYears < 1) {
+                el.style.background = '#EF4444'; // Red - expired
+            } else if (remainingYears < 2) {
+                el.style.background = '#F59E0B'; // Orange - urgent
+            } else {
+                el.style.background = '#7CC061'; // Green - normal
+            }
+            
+            el.addEventListener('click', () => {
+                showSiteDetails(metadata, index);
+            });
+            
+            return el;
+        }
+        
+        function showSiteDetails(metadata, index) {
+            const content = `
+                <div>
+                    <h4 class="text-lg font-semibold mb-3">${metadata.technology || 'Unknown'} Site</h4>
+                    
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="font-medium">FIT ID:</span>
+                            <span>${metadata.fit_id || 'N/A'}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Capacity:</span>
+                            <span>${metadata.capacity_mw ? (metadata.capacity_mw * 1000).toFixed(0) + ' kW' : 'N/A'}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Postcode:</span>
+                            <span>${metadata.postcode || 'N/A'}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">FIT Remaining:</span>
+                            <span class="${(metadata.remaining_fit_years || 0) < 2 ? 'text-red-600 font-semibold' : ''}">
+                                ${metadata.remaining_fit_years ? metadata.remaining_fit_years.toFixed(1) + ' years' : 'N/A'}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Commission Date:</span>
+                            <span>${metadata.commission_date || 'N/A'}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Window:</span>
+                            <span class="px-2 py-1 rounded text-xs font-medium ${getWindowClass(metadata.repowering_window)}">
+                                ${metadata.repowering_window || 'N/A'}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    ${metadata.remaining_fit_years < 2 ? `
+                        <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                <span class="text-sm font-medium text-red-800">Urgent PPA Opportunity</span>
+                            </div>
+                            <p class="text-xs text-red-700 mt-1">FIT expires soon - immediate action required</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="mt-4 pt-3 border-t">
+                        <button onclick="askAboutSite('${metadata.fit_id}')" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
+                            <i class="fas fa-brain mr-2"></i>Ask AI About This Site
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('siteDetailsContent').innerHTML = content;
+        }
+        
+        function getWindowClass(window) {
+            switch(window) {
+                case 'IMMEDIATE': return 'bg-red-100 text-red-800';
+                case 'URGENT': return 'bg-orange-100 text-orange-800';
+                case 'OPTIMAL': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+        
+        // UK postcode area to lat/lng mapping (approximate centers)
+        const postcodeCoords = {
+            // England
+            'B': [52.5, -1.9], 'BA': [51.3, -2.4], 'BB': [53.8, -2.5], 'BD': [53.8, -1.8], 'BH': [50.7, -1.9],
+            'BL': [53.6, -2.4], 'BN': [50.8, -0.1], 'BR': [51.4, 0.0], 'BS': [51.5, -2.6], 'BT': [54.6, -5.9],
+            'CA': [54.8, -3.2], 'CB': [52.2, 0.1], 'CF': [51.5, -3.6], 'CH': [53.2, -2.9], 'CM': [51.7, 0.5],
+            'CO': [51.9, 0.9], 'CR': [51.4, -0.1], 'CT': [51.3, 1.4], 'CV': [52.4, -1.5], 'CW': [53.1, -2.5],
+            'DA': [51.4, 0.2], 'DD': [56.5, -2.9], 'DE': [52.9, -1.5], 'DH': [54.8, -1.5], 'DL': [54.5, -1.8],
+            'DN': [53.6, -0.8], 'DT': [50.7, -2.4], 'DY': [52.5, -2.1], 'E': [51.5, -0.1], 'EC': [51.5, -0.1],
+            'EH': [55.9, -3.2], 'EN': [51.7, -0.1], 'EX': [50.8, -4.2], 'FK': [56.1, -3.8], 'FY': [53.8, -3.0],
+            'G': [55.9, -4.3], 'GL': [51.8, -2.2], 'GU': [51.2, -0.6], 'HA': [51.6, -0.3], 'HD': [53.6, -1.8],
+            'HG': [54.0, -1.5], 'HP': [51.7, -0.7], 'HR': [52.1, -2.7], 'HU': [53.7, -0.3], 'HX': [53.7, -2.0],
+            'IG': [51.6, 0.1], 'IP': [52.1, 1.2], 'IV': [57.5, -4.2], 'KA': [55.6, -4.6], 'KT': [51.4, -0.3],
+            'KW': [59.0, -3.0], 'KY': [56.1, -3.2], 'L': [53.4, -3.0], 'LA': [54.0, -2.8], 'LD': [52.2, -3.3],
+            'LE': [52.6, -1.1], 'LL': [53.3, -4.2], 'LN': [53.2, -0.5], 'LS': [53.8, -1.5], 'LU': [51.9, -0.4],
+            'M': [53.5, -2.2], 'ME': [51.4, 0.5], 'MK': [52.0, -0.8], 'ML': [55.6, -3.8], 'N': [51.5, -0.1],
+            'NE': [54.9, -1.6], 'NG': [52.9, -1.2], 'NN': [52.2, -0.9], 'NP': [51.6, -3.0], 'NR': [52.6, 1.3],
+            'NW': [51.5, -0.2], 'OL': [53.5, -2.1], 'OX': [51.8, -1.3], 'PA': [55.9, -5.1], 'PE': [52.6, -0.2],
+            'PH': [56.8, -4.0], 'PL': [50.6, -4.4], 'PO': [50.8, -1.1], 'PR': [53.8, -2.7], 'RG': [51.5, -1.0],
+            'RH': [51.2, -0.2], 'RM': [51.5, 0.2], 'S': [53.4, -1.5], 'SA': [51.6, -3.9], 'SE': [51.5, 0.0],
+            'SG': [51.8, -0.2], 'SK': [53.4, -2.0], 'SL': [51.5, -0.6], 'SM': [51.4, -0.2], 'SN': [51.6, -1.8],
+            'SO': [50.9, -1.4], 'SP': [51.0, -2.0], 'SR': [54.9, -1.4], 'SS': [51.5, 0.7], 'ST': [52.9, -2.1],
+            'SW': [51.5, -0.2], 'SY': [52.7, -2.8], 'TA': [51.0, -3.1], 'TD': [55.8, -2.1], 'TF': [52.7, -2.4],
+            'TN': [51.2, 0.3], 'TQ': [50.5, -3.5], 'TR': [50.3, -5.1], 'TS': [54.6, -1.2], 'TW': [51.4, -0.3],
+            'UB': [51.5, -0.5], 'W': [51.5, -0.2], 'WA': [53.4, -2.6], 'WC': [51.5, -0.1], 'WD': [51.7, -0.4],
+            'WF': [53.7, -1.4], 'WN': [53.5, -2.6], 'WR': [52.2, -2.2], 'WS': [52.6, -2.0], 'WV': [52.6, -2.1],
+            'YO': [54.0, -0.4], 'ZE': [60.2, -1.1],
+            // Default
+            'nan': [55.0, -3.0], '': [55.0, -3.0]
+        };
+
+        function displayClusters(clusters) {
+            clearMarkers();
+            
+            clusters.forEach(cluster => {
+                // Get coordinates from postcode mapping
+                const coords = postcodeCoords[cluster.postcode_area] || [55.0, -3.0];
+                
+                // Create circle marker for clusters  
+                const radius = Math.min(Math.max(cluster.site_count / 10, 8), 40);
+                const marker = L.circleMarker(coords, {
+                    radius: radius,
+                    fillColor: getClusterColor(cluster),
+                    color: 'white',
+                    weight: 2,
+                    fillOpacity: 0.8
+                }).addTo(map);
+                
+                // Add text overlay
+                const icon = L.divIcon({
+                    html: `<div style="text-align: center; color: white; font-weight: bold; line-height: ${radius*2}px; font-size: ${Math.min(radius/2, 14)}px;">${cluster.site_count}</div>`,
+                    className: 'cluster-label',
+                    iconSize: [radius*2, radius*2],
+                    iconAnchor: [radius, radius]
+                });
+                
+                const labelMarker = L.marker(coords, {icon}).addTo(map);
+                
+                // Add popup with technology breakdown
+                const techList = Object.entries(cluster.technology_mix)
+                    .map(([tech, count]) => `<li>${tech}: ${count} sites</li>`)
+                    .join('');
+                
+                const popupContent = `
+                    <div class="p-3" style="min-width: 200px;">
+                        <h4 class="font-semibold text-lg mb-2">${cluster.postcode_area || 'Unknown'} Cluster</h4>
+                        <div class="text-sm space-y-1 mb-3">
+                            <p><strong>Total Sites:</strong> ${cluster.site_count}</p>
+                            <p><strong>Capacity:</strong> ${cluster.total_capacity_mw.toFixed(1)} MW</p>
+                            <p><strong>Urgent Sites:</strong> <span class="text-red-600 font-semibold">${cluster.urgent_sites}</span></p>
+                            <p><strong>Avg FIT Remaining:</strong> ${cluster.average_remaining_fit_years.toFixed(1)} years</p>
+                        </div>
+                        <div class="text-xs">
+                            <strong>Technology Mix:</strong>
+                            <ul class="list-disc list-inside mt-1">
+                                ${techList}
+                            </ul>
+                        </div>
+                        <button onclick="searchClusterSites('${cluster.postcode_area}')" class="mt-3 w-full px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                            View Individual Sites
+                        </button>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markers.push(marker);
+                markers.push(labelMarker);
+            });
+            
+            // Update statistics
+            updateStatisticsFromClusters(clusters);
+        }
+        
+        function getClusterColor(cluster) {
+            const urgentRatio = cluster.urgent_sites / cluster.site_count;
+            if (urgentRatio > 0.1) return '#EF4444'; // Red - high urgency
+            if (urgentRatio > 0.05) return '#F59E0B'; // Orange - medium urgency  
+            if (cluster.total_capacity_mw > 10) return '#7CC061'; // Green - high value
+            return '#044D73'; // Blue - normal
+        }
+        
+        function updateStatisticsFromClusters(clusters) {
+            const totalSites = clusters.reduce((sum, c) => sum + c.site_count, 0);
+            const totalCapacity = clusters.reduce((sum, c) => sum + c.total_capacity_mw, 0);
+            const urgentSites = clusters.reduce((sum, c) => sum + c.urgent_sites, 0);
+            const avgFit = clusters.reduce((sum, c) => sum + c.average_remaining_fit_years, 0) / clusters.length;
+            
+            document.getElementById('totalSites').textContent = totalSites.toLocaleString();
+            document.getElementById('totalCapacity').textContent = totalCapacity.toFixed(1) + ' MW';
+            document.getElementById('urgentSites').textContent = urgentSites.toLocaleString();
+            document.getElementById('avgFitRemaining').textContent = avgFit.toFixed(1) + ' years';
+        }
+        
+        function searchClusterSites(postcodeArea) {
+            const query = `Show me all renewable energy sites in ${postcodeArea} postcode area`;
+            document.getElementById('aiSearchInput').value = query;
+            performAISearch();
+        }
+        
+        function clearMarkers() {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+        }
+        
+        // Dual slider functionality
+        function updateCapacityRange() {
+            const minSlider = document.getElementById('minCapacity');
+            const maxSlider = document.getElementById('maxCapacity');
+            const minLabel = document.getElementById('minCapacityLabel');
+            const maxLabel = document.getElementById('maxCapacityLabel');
+            const rangeBar = document.getElementById('capacityRangeBar');
+            
+            let minVal = parseFloat(minSlider.value);
+            let maxVal = parseFloat(maxSlider.value);
+            
+            // Ensure min is not greater than max
+            if (minVal > maxVal) {
+                minSlider.value = maxVal;
+                minVal = maxVal;
+            }
+            
+            // Update labels
+            minLabel.textContent = minVal.toFixed(1) + ' MW';
+            maxLabel.textContent = maxVal >= 10 ? '10+ MW' : maxVal.toFixed(1) + ' MW';
+            
+            // Update visual range bar
+            const minPercent = (minVal / 10) * 100;
+            const maxPercent = (maxVal / 10) * 100;
+            rangeBar.style.left = minPercent + '%';
+            rangeBar.style.width = (maxPercent - minPercent) + '%';
+            
+            // Trigger filter update
+            updateMapFilters();
+        }
+        
+        function zoomToCluster(lat, lng) {
+            map.setView([lat, lng], 10);
+        }
+        
+        function focusOnSite(index) {
+            if (currentSearchResults[index]) {
+                const metadata = currentSearchResults[index].metadata;
+                map.setView([metadata.latitude || 54.5, metadata.longitude || -2.5], 12);
+                showSiteDetails(metadata, index);
+            }
+        }
+        
+        function showSearchResultsPanel(results, query) {
+            const panel = document.getElementById('searchResultsPanel');
+            const list = document.getElementById('searchResultsList');
+            
+            list.innerHTML = results.slice(0, 10).map((result, index) => {
+                const metadata = result.metadata;
+                return `
+                    <div class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" 
+                         onclick="focusOnSite(${index})">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-medium text-sm">${metadata.technology || 'Unknown'}</p>
+                                <p class="text-xs text-gray-600">${metadata.postcode || 'Unknown location'}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-medium">${metadata.capacity_mw ? (metadata.capacity_mw * 1000).toFixed(0) + ' kW' : 'N/A'}</p>
+                                <p class="text-xs ${(metadata.remaining_fit_years || 0) < 2 ? 'text-red-600' : 'text-gray-600'}">
+                                    ${metadata.remaining_fit_years ? metadata.remaining_fit_years.toFixed(1) + 'y FIT' : 'N/A'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (results.length > 10) {
+                list.innerHTML += `<p class="text-center text-sm text-gray-500 pt-2">...and ${results.length - 10} more sites</p>`;
+            }
+            
+            panel.classList.remove('hidden');
+        }
+        
+        function focusOnSite(index) {
+            if (currentSearchResults[index]) {
+                const metadata = currentSearchResults[index].metadata;
+                map.flyTo({
+                    center: [metadata.longitude || -2.5, metadata.latitude || 54.5],
+                    zoom: 12
+                });
+                showSiteDetails(metadata, index);
+            }
+        }
+        
+        function closeSearchResults() {
+            document.getElementById('searchResultsPanel').classList.add('hidden');
+        }
+        
+        function showSearchStatus(message) {
+            document.getElementById('statusText').textContent = message;
+            document.getElementById('searchStatus').classList.remove('hidden');
+        }
+        
+        function hideSearchStatus() {
+            document.getElementById('searchStatus').classList.add('hidden');
+        }
+        
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                performAISearch();
+            }
+        }
+        
+        function quickSearch(query) {
+            document.getElementById('aiSearchInput').value = query;
+            performAISearch();
+        }
+        
+        async function askAboutSite(fitId) {
+            const query = `Tell me about FIT ID ${fitId} - what are the PPA opportunities and risks?`;
+            document.getElementById('aiSearchInput').value = query;
+            performAISearch();
+        }
+        
+        // Initialize dual sliders
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCapacityRange(); // Initialize the range display
+        });
+        
+        // Initialize the map when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+        });
+        
+        // Map filter functions
+        function updateMapFilters() {
+            // Re-load data with current filters applied
+            const mode = document.getElementById('viewMode').value;
+            loadDataForMode(mode);
+        }
+    </script>
+</body>
+</html>

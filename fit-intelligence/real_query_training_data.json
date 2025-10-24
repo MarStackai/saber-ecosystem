@@ -1,0 +1,253 @@
+{
+  "performance_baseline": {
+    "success_rate": 0.875,
+    "parsing_success_rate": 0.875,
+    "total_tests": 8,
+    "details": [
+      {
+        "query": "wind sites over 250kw in yorkshire",
+        "filters_parsed": {
+          "technology": "Wind",
+          "min_capacity_kw": 250
+        },
+        "parsing_correct": true,
+        "parsing_issues": [],
+        "total_results": 20,
+        "found_results": true,
+        "should_find_results": true,
+        "results_correct": true,
+        "overall_success": true
+      },
+      {
+        "query": "solar installations above 500kw",
+        "filters_parsed": {
+          "technology": "Photovoltaic"
+        },
+        "parsing_correct": false,
+        "parsing_issues": [
+          "Min capacity: expected 500kW, got NonekW"
+        ],
+        "total_results": 40,
+        "found_results": true,
+        "should_find_results": true,
+        "results_correct": true,
+        "overall_success": false
+      },
+      {
+        "query": "large wind farms over 1mw",
+        "filters_parsed": {
+          "technology": "Wind",
+          "min_capacity_kw": 1000
+        },
+        "parsing_correct": true,
+        "parsing_issues": [],
+        "total_results": 39,
+        "found_results": true,
+        "should_find_results": true,
+        "results_correct": true,
+        "overall_success": true
+      },
+      {
+        "query": "wind site fit ids for sites over 250kw around beverly",
+        "filters_parsed": {
+          "technology": "Wind",
+          "min_capacity_kw": 250,
+          "postcode_yorkshire": true
+        },
+        "parsing_correct": true,
+        "parsing_issues": [],
+        "total_results": 0,
+        "found_results": false,
+        "should_find_results": false,
+        "results_correct": true,
+        "overall_success": true
+      },
+      {
+        "query": "solar sites over 250kw in east anglia",
+        "filters_parsed": {
+          "technology": "Photovoltaic",
+          "min_capacity_kw": 250
+        },
+        "parsing_correct": true,
+        "parsing_issues": [],
+        "total_results": 20,
+        "found_results": true,
+        "should_find_results": true,
+        "results_correct": true,
+        "overall_success": true
+      },
+      {
+        "query": "hydro installations in scotland",
+        "filters_parsed": {
+          "technology": "Hydro",
+          "country": "Scotland"
+        },
+        "parsing_correct": true,
+        "parsing_issues": [],
+        "total_results": 20,
+        "found_results": true,
+        "should_find_results": true,
+        "results_correct": true,
+        "overall_success": true
+      },
+      {
+        "query": "anaerobic digestion sites over 100kw",
+        "filters_parsed": {
+          "technology": "Anaerobic digestion",
+          "min_capacity_kw": 100
+        },
+        "parsing_correct": true,
+        "parsing_issues": [],
+        "total_results": 20,
+        "found_results": true,
+        "should_find_results": true,
+        "results_correct": true,
+        "overall_success": true
+      },
+      {
+        "query": "renewable sites between 250 and 500kw in cornwall",
+        "filters_parsed": {
+          "min_capacity_mw": 0.25,
+          "max_capacity_mw": 0.5,
+          "min_capacity_kw": 250,
+          "max_capacity_kw": 500
+        },
+        "parsing_correct": true,
+        "parsing_issues": [],
+        "total_results": 20,
+        "found_results": true,
+        "should_find_results": true,
+        "results_correct": true,
+        "overall_success": true
+      }
+    ]
+  },
+  "training_examples": [
+    {
+      "text1": "sites over 250kw",
+      "text2": "installations above 250kw",
+      "similarity": 0.9
+    },
+    {
+      "text1": "projects greater than 250kw",
+      "text2": "facilities over 250kw",
+      "similarity": 0.9
+    },
+    {
+      "text1": "sites over 250 kilowatts",
+      "text2": "installations above 250 kW",
+      "similarity": 0.9
+    },
+    {
+      "text1": "large sites over 250kw",
+      "text2": "big installations above 250kw",
+      "similarity": 0.9
+    },
+    {
+      "text1": "commercial sites over 250kw",
+      "text2": "industrial installations above 250kw",
+      "similarity": 0.9
+    },
+    {
+      "text1": "wind sites",
+      "text2": "wind installations",
+      "similarity": 0.9
+    },
+    {
+      "text1": "wind farms",
+      "text2": "wind projects",
+      "similarity": 0.9
+    },
+    {
+      "text1": "solar sites",
+      "text2": "photovoltaic installations",
+      "similarity": 0.9
+    },
+    {
+      "text1": "solar farms",
+      "text2": "pv sites",
+      "similarity": 0.9
+    },
+    {
+      "text1": "hydro sites",
+      "text2": "hydro installations",
+      "similarity": 0.9
+    },
+    {
+      "text1": "anaerobic digestion",
+      "text2": "biogas sites",
+      "similarity": 0.9
+    },
+    {
+      "text1": "anaerobic digestion sites",
+      "text2": "AD installations",
+      "similarity": 0.9
+    },
+    {
+      "text1": "sites in yorkshire",
+      "text2": "installations in yorkshire",
+      "similarity": 0.9
+    },
+    {
+      "text1": "sites around liverpool",
+      "text2": "installations near liverpool",
+      "similarity": 0.9
+    },
+    {
+      "text1": "sites in east anglia",
+      "text2": "installations in east anglia",
+      "similarity": 0.9
+    },
+    {
+      "text1": "sites near beverly",
+      "text2": "installations around beverly",
+      "similarity": 0.9
+    },
+    {
+      "text1": "cornwall sites",
+      "text2": "sites in cornwall",
+      "similarity": 0.9
+    },
+    {
+      "text1": "wind sites over 250kw in yorkshire",
+      "text2": "wind installations above 250kw in yorkshire",
+      "similarity": 0.9
+    },
+    {
+      "text1": "solar sites over 250kw in east anglia",
+      "text2": "photovoltaic installations above 250kw in east anglia",
+      "similarity": 0.9
+    },
+    {
+      "text1": "large wind sites in scotland",
+      "text2": "big wind installations in scotland",
+      "similarity": 0.9
+    },
+    {
+      "text1": "wind site fit ids for sites over 250kw around beverly",
+      "text2": "wind installation ids for projects over 250kw near beverly",
+      "similarity": 0.9
+    },
+    {
+      "text1": "wind sites over 250kw",
+      "text2": "small solar installations",
+      "similarity": 0.2
+    },
+    {
+      "text1": "sites in yorkshire",
+      "text2": "installations in cornwall",
+      "similarity": 0.3
+    },
+    {
+      "text1": "large wind farms",
+      "text2": "small hydro sites",
+      "similarity": 0.1
+    },
+    {
+      "text1": "commercial installations",
+      "text2": "residential systems",
+      "similarity": 0.2
+    }
+  ],
+  "timestamp": "_CudaDeviceProperties(name='NVIDIA GeForce RTX 3090', major=8, minor=6, total_memory=24252MB, multi_processor_count=82, uuid=2e3dfae9-2820-da43-dca7-707de56a7814, L2_cache_size=6MB)"
+}

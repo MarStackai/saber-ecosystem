@@ -1,0 +1,52 @@
+[
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "return all biogas",
+    "output": "{\n  \"technology\": \"Anaerobic digestion\"\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "revenue for fit id 282",
+    "output": "{\n  \"query_type\": \"fit_rate_lookup\",\n  \"fit_id\": \"282\",\n  \"include_rate\": true,\n  \"include_revenue\": true\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "return wind installations in Yorkshire",
+    "output": "{\n  \"technology\": \"Wind\",\n  \"location\": \"Yorkshire\",\n  \"postcode_patterns\": [\n    \"YO\",\n    \"HU\",\n    \"DN\",\n    \"HD\",\n    \"WF\",\n    \"LS\",\n    \"BD\",\n    \"HX\",\n    \"S\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "find combined heat power installations above 100kW in Inner London",
+    "output": "{\n  \"technology\": \"Micro CHP\",\n  \"capacity_min_kw\": 100,\n  \"location\": \"London\",\n  \"postcode_patterns\": [\n    \"E\",\n    \"EC\",\n    \"N\",\n    \"NW\",\n    \"SE\",\n    \"SW\",\n    \"W\",\n    \"WC\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "return all water power",
+    "output": "{\n  \"technology\": \"Hydro\"\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "show me the tariff for fit 69",
+    "output": "{\n  \"query_type\": \"fit_rate_lookup\",\n  \"fit_id\": \"69\",\n  \"include_rate\": true,\n  \"include_revenue\": true\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "what are all solar energy",
+    "output": "{\n  \"technology\": \"Photovoltaic\"\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "all rooftop solar in Brum with capacity over 500kw",
+    "output": "{\n  \"technology\": \"Photovoltaic\",\n  \"capacity_min_kw\": 500,\n  \"location\": \"Birmingham\",\n  \"postcode_patterns\": [\n    \"B\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "all ground mounted solar in Reading area with capacity over 50kw",
+    "output": "{\n  \"technology\": \"Photovoltaic\",\n  \"capacity_min_kw\": 50,\n  \"location\": \"Berkshire\",\n  \"postcode_patterns\": [\n    \"RG\",\n    \"SL\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "photovoltaic over 1000kilowatts",
+    "output": "{\n  \"technology\": \"Photovoltaic\",\n  \"capacity_min_kw\": 1000\n}"
+  }
+]

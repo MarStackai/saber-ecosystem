@@ -1,0 +1,88 @@
+name = "saber-epc-portal"
+main = "src/index.js"
+compatibility_date = "2024-09-11"
+account_id = "7c1df500c062ab6ec160bdc6fd06d4b8"
+
+# Bind the Worker to the custom domain API routes
+routes = [
+  { pattern = "epc.saberrenewable.energy/api/*", zone_name = "saberrenewable.energy" },
+  { pattern = "epc.saberrenewable.energy/operations*", zone_name = "saberrenewable.energy" },
+  { pattern = "epc.saberrenewable.energy/form/*", zone_name = "saberrenewable.energy" }
+]
+
+[[d1_databases]]
+binding = "epc_form_data"
+database_name = "epc-form-data"
+database_id = "97a6cecc-1dec-46ad-b865-8495fa90a7bf"
+
+[[r2_buckets]]
+binding = "EPC_PARTNER_FILES"
+bucket_name = "epc-partner-files"
+
+[[r2_buckets]]
+binding = "EPC_DOCUMENTS"
+bucket_name = "epc-documents"
+
+[vars]
+ENVIRONMENT = "development"
+SHAREPOINT_CLIENT_ID = "bbbfe394-7cff-4ac9-9e01-33cbf116b930"
+SHAREPOINT_CLIENT_SECRET = ""
+SHAREPOINT_TENANT = "saberrenewables.onmicrosoft.com"
+# Using D1 + R2 for all data persistence (no Redis)
+NOTIFY_FROM_EMAIL = "sysadmin@saberrenewables.com"
+NOTIFY_INTERNAL_TO = "jess@saberrenewables.com,gerry@saberrenewables.com,rob@saberrenewables.com"
+
+[env.staging]
+name = "saber-epc-portal-staging"
+# Routes will be configured manually in Cloudflare dashboard
+# routes = [
+#   { pattern = "staging-epc.saberrenewable.energy/api/*", zone_name = "saberrenewable.energy" },
+#   { pattern = "staging-epc.saberrenewable.energy/operations/*", zone_name = "saberrenewable.energy" },
+#   { pattern = "staging-epc.saberrenewable.energy/form/*", zone_name = "saberrenewable.energy" }
+# ]
+
+[[env.staging.d1_databases]]
+binding = "epc_form_data"
+database_name = "staging-epc-form-data"
+database_id = "d580e1de-63ec-466e-9abf-32036f2ab8e8"
+
+[[env.staging.r2_buckets]]
+binding = "EPC_PARTNER_FILES"
+bucket_name = "staging-epc-partner-files"
+
+[[env.staging.r2_buckets]]
+binding = "EPC_DOCUMENTS"
+bucket_name = "staging-epc-documents"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+SHAREPOINT_CLIENT_ID = "bbbfe394-7cff-4ac9-9e01-33cbf116b930"
+SHAREPOINT_CLIENT_SECRET = ""
+SHAREPOINT_TENANT = "saberrenewables.onmicrosoft.com"
+NOTIFY_FROM_EMAIL = "rob@marstack.ai"
+NOTIFY_INTERNAL_TO = "rob@marstack.ai"
+
+[env.production]
+name = "saber-epc-portal"
+
+[[env.production.d1_databases]]
+binding = "epc_form_data"
+database_name = "epc-form-data"
+database_id = "97a6cecc-1dec-46ad-b865-8495fa90a7bf"
+
+[[env.production.r2_buckets]]
+binding = "EPC_PARTNER_FILES"
+bucket_name = "epc-partner-files"
+
+[[env.production.r2_buckets]]
+binding = "EPC_DOCUMENTS"
+bucket_name = "epc-documents"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+SHAREPOINT_CLIENT_ID = "bbbfe394-7cff-4ac9-9e01-33cbf116b930"
+SHAREPOINT_CLIENT_SECRET = ""
+SHAREPOINT_TENANT = "saberrenewables.onmicrosoft.com"
+# Production uses D1 + R2 for complete Cloudflare-native stack
+NOTIFY_FROM_EMAIL = "sysadmin@saberrenewables.com"
+NOTIFY_INTERNAL_TO = "jess@saberrenewables.com,gerry@saberrenewables.com,rob@saberrenewables.com"

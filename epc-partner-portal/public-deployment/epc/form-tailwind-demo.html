@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPC Partner Onboarding | Saber Renewables</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'saber-blue': '#044D73',
+                        'saber-green': '#7CC061',
+                        'saber-dark-blue': '#091922',
+                        'saber-dark-green': '#0A2515',
+                        'saber-gradient-dark': '#0d1138',
+                        'ops-surface': '#F8FAFB',
+                        'ops-border': '#E1E8ED',
+                        'status-success': '#10B981',
+                        'status-warning': '#F59E0B',
+                        'status-error': '#EF4444',
+                        'status-info': '#3B82F6',
+                        'text-primary': '#091922',
+                        'text-secondary': '#4B5563',
+                        'text-tertiary': '#9CA3AF',
+                    },
+                    fontFamily: {
+                        'heading': ['Montserrat', 'system-ui', 'sans-serif'],
+                        'body': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    fontSize: {
+                        'h1': ['2.5rem', { lineHeight: '2.875rem', fontWeight: '800' }],
+                        'h2': ['2rem', { lineHeight: '2.375rem', fontWeight: '700' }],
+                        'h3': ['1.75rem', { lineHeight: '2.125rem', fontWeight: '600' }],
+                        'h4': ['1.5rem', { lineHeight: '1.875rem', fontWeight: '600' }],
+                        'body-lg': ['1.125rem', { lineHeight: '1.75rem' }],
+                        'body': ['1rem', { lineHeight: '1.5rem' }],
+                        'body-sm': ['0.875rem', { lineHeight: '1.25rem' }],
+                        'caption': ['0.75rem', { lineHeight: '1rem' }],
+                    },
+                    width: {
+                        'logo-md': '180px',
+                    },
+                    height: {
+                        'logo-md': '51px',
+                    },
+                    backgroundImage: {
+                        'energy-gradient': 'linear-gradient(135deg, #7CC061 0%, #044D73 100%)',
+                        'professional-gradient': 'linear-gradient(135deg, #044D73 0%, #091922 100%)',
+                    },
+                    boxShadow: {
+                        'brand': '0 4px 14px -2px rgba(4, 77, 115, 0.2)',
+                        'brand-lg': '0 10px 25px -3px rgba(4, 77, 115, 0.3)',
+                        'energy': '0 4px 14px -2px rgba(124, 192, 97, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS for floating labels and animations -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+        
+        .floating-label {
+            position: relative;
+        }
+        
+        .floating-label input,
+        .floating-label textarea {
+            background: white;
+            border: 2px solid #E1E8ED;
+            border-radius: 8px;
+            padding: 16px 16px 16px 16px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        
+        .floating-label input:focus,
+        .floating-label textarea:focus {
+            outline: none;
+            border-color: #044D73;
+            box-shadow: 0 0 0 3px rgba(4, 77, 115, 0.1);
+        }
+        
+        .floating-label label {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            font-size: 1rem;
+            color: #9CA3AF;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            background: white;
+            padding: 0 4px;
+        }
+        
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label,
+        .floating-label textarea:focus + label,
+        .floating-label textarea:not(:placeholder-shown) + label {
+            top: -8px;
+            font-size: 0.875rem;
+            color: #044D73;
+            font-weight: 500;
+        }
+        
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        
+        .step-indicator.active {
+            background: #044D73;
+            color: white;
+            box-shadow: 0 4px 14px -2px rgba(4, 77, 115, 0.3);
+        }
+        
+        .step-indicator.completed {
+            background: #10B981;
+            color: white;
+        }
+        
+        .loading-spinner {
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-ops-surface font-body">
+    <!-- Header -->
+    <header class="bg-white shadow-brand border-b border-ops-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-logo-md h-logo-md bg-energy-gradient rounded-lg flex items-center justify-center">
+                        <span class="text-white font-heading font-bold text-2xl">S</span>
+                    </div>
+                    <div>
+                        <h1 class="font-heading text-h4 text-text-primary">Saber Renewables</h1>
+                        <p class="font-body text-body-sm text-text-secondary">EPC Partner Onboarding</p>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <span class="font-body text-body-sm text-text-tertiary">Secure Application Portal</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Progress Indicator -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-heading text-h3 text-text-primary">EPC Partner Application</h2>
+                <span class="font-body text-body-sm text-text-tertiary">Step <span id="currentStepText">1</span> of 4</span>
+            </div>
+            
+            <div class="flex justify-between mb-8">
+                <div class="flex flex-col items-center flex-1">
+                    <div class="step-indicator w-10 h-10 rounded-full bg-saber-blue text-white flex items-center justify-center font-semibold mb-2 active">1</div>
+                    <span class="text-body-sm font-medium text-saber-blue">Company Info</span>
+                </div>
+                <div class="flex-1 flex items-center justify-center mb-8">
+                    <div class="w-full h-0.5 bg-ops-border"></div>
+                </div>
+                <div class="flex flex-col items-center flex-1">
+                    <div class="step-indicator w-10 h-10 rounded-full bg-ops-border text-text-tertiary flex items-center justify-center font-semibold mb-2">2</div>
+                    <span class="text-body-sm text-text-tertiary">Services</span>
+                </div>
+                <div class="flex-1 flex items-center justify-center mb-8">
+                    <div class="w-full h-0.5 bg-ops-border"></div>
+                </div>
+                <div class="flex flex-col items-center flex-1">
+                    <div class="step-indicator w-10 h-10 rounded-full bg-ops-border text-text-tertiary flex items-center justify-center font-semibold mb-2">3</div>
+                    <span class="text-body-sm text-text-tertiary">Compliance</span>
+                </div>
+                <div class="flex-1 flex items-center justify-center mb-8">
+                    <div class="w-full h-0.5 bg-ops-border"></div>
+                </div>
+                <div class="flex flex-col items-center flex-1">
+                    <div class="step-indicator w-10 h-10 rounded-full bg-ops-border text-text-tertiary flex items-center justify-center font-semibold mb-2">4</div>
+                    <span class="text-body-sm text-text-tertiary">Review</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Container -->
+        <div class="bg-white rounded-xl shadow-brand overflow-hidden">
+            <div class="bg-ops-surface px-8 py-6 border-b border-ops-border">
+                <h3 class="font-heading text-h4 text-text-primary mb-2">Company Information</h3>
+                <p class="font-body text-body text-text-secondary">Please provide your company's basic details and contact information.</p>
+            </div>
+            
+            <div class="p-8">
+                <!-- Step 1: Company Information -->
+                <div id="step1" class="step-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="floating-label">
+                            <input type="text" id="companyName" name="companyName" required placeholder=" ">
+                            <label for="companyName">Company Name *</label>
+                        </div>
+
+                        <div class="floating-label">
+                            <input type="text" id="tradingName" name="tradingName" placeholder=" ">
+                            <label for="tradingName">Trading Name</label>
+                        </div>
+
+                        <div class="floating-label">
+                            <input type="text" id="companyRegNo" name="companyRegNo" required placeholder=" ">
+                            <label for="companyRegNo">Company Registration Number *</label>
+                        </div>
+
+                        <div class="floating-label">
+                            <input type="text" id="vatNo" name="vatNo" placeholder=" ">
+                            <label for="vatNo">VAT Number</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <div class="floating-label">
+                            <textarea id="registeredOffice" name="registeredOffice" required rows="3" placeholder=" "></textarea>
+                            <label for="registeredOffice">Registered Office Address *</label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="floating-label">
+                            <input type="text" id="primaryContactName" name="primaryContactName" required placeholder=" ">
+                            <label for="primaryContactName">Primary Contact Name *</label>
+                        </div>
+
+                        <div class="floating-label">
+                            <input type="email" id="primaryContactEmail" name="primaryContactEmail" required placeholder=" ">
+                            <label for="primaryContactEmail">Email Address *</label>
+                        </div>
+
+                        <div class="floating-label">
+                            <input type="tel" id="primaryContactPhone" name="primaryContactPhone" required placeholder=" ">
+                            <label for="primaryContactPhone">Phone Number *</label>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="button" class="inline-flex items-center gap-2 bg-saber-blue hover:bg-saber-blue/90 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 next-step">
+                            Next Step <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-saber-dark-blue py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="font-body text-body text-white/80">&copy; 2025 Saber Renewables. Infinite Power In Partnership.</p>
+        </div>
+    </footer>
+
+    <script>
+        console.log('Demo form loaded - authentication bypassed for preview');
+        
+        // Simple demo interactions
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Tailwind EPC Form Demo Ready');
+            
+            // Add some basic interactivity
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', (e) => {
+                    e.target.style.transform = 'scale(1.02)';
+                });
+                
+                input.addEventListener('blur', (e) => {
+                    e.target.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

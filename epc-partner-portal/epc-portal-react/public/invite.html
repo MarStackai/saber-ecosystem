@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Invitation - Saber Renewables</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 500px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        p {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #7CC061;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+            display: none;
+        }
+        .error.show {
+            display: block;
+        }
+        .manual-entry {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+        }
+        .manual-entry.show {
+            display: block;
+        }
+        .manual-entry h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .manual-entry input {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+        .manual-entry input::placeholder {
+            color: #94a3b8;
+        }
+        .manual-entry button {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background: #7CC061;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .manual-entry button:hover {
+            background: #6BAF50;
+        }
+        .manual-entry button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        a {
+            color: #7CC061;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner" id="spinner"></div>
+        <h1 id="title">Validating Your Invitation</h1>
+        <p id="status">Please wait while we verify your access code...</p>
+        
+        <div id="error" class="error">
+            <p id="error-message"></p>
+            <p><a href="#" onclick="showManualEntry(); return false;">Enter code manually</a> or <a href="mailto:sysadmin@saberrenewables.com">contact support</a></p>
+        </div>
+        
+        <div id="manual-entry" class="manual-entry">
+            <h2>Enter Invitation Code</h2>
+            <form onsubmit="handleManualSubmit(event)">
+                <input 
+                    type="text" 
+                    id="manual-code" 
+                    placeholder="Enter your invitation code" 
+                    required
+                    oninput="this.value = this.value.toUpperCase()"
+                />
+                <button type="submit" id="submit-btn">Validate Code</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get invitation code from URL
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('invitationCode') || params.get('code') || params.get('c');
+        
+        if (!code) {
+            // No code in URL, show manual entry form
+            showManualEntry();
+        } else {
+            // Validate the invitation code
+            validateAndRedirect(code);
+        }
+
+        async function validateAndRedirect(invitationCode) {
+            try {
+                const response = await fetch('/api/validate-invitation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ invitationCode: invitationCode.toUpperCase() })
+                });
+
+                const result = await response.json();
+
+                if (result.valid) {
+                    // Success - redirect to form
+                    document.getElementById('status').textContent = 'Success! Redirecting to application form...';
+                    window.location.replace(`/form?invitationCode=${encodeURIComponent(invitationCode.toUpperCase())}`);
+                } else {
+                    showError(result.message || 'Invalid invitation code');
+                }
+            } catch (error) {
+                console.error('Validation error:', error);
+                showError('Unable to validate invitation code. Please try again.');
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('title').textContent = 'Validation Failed';
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error').classList.add('show');
+        }
+
+        function showManualEntry() {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('title').textContent = 'Enter Invitation Code';
+            document.getElementById('status').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('manual-entry').classList.add('show');
+        }
+
+        async function handleManualSubmit(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('submit-btn');
+            const codeInput = document.getElementById('manual-code');
+            const code = codeInput.value.trim();
+            
+            if (!code) return;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Validating...';
+            
+            try {
+                const response = await fetch('/api/validate-invitation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ invitationCode: code.toUpperCase() })
+                });
+
+                const result = await response.json();
+
+                if (result.valid) {
+                    submitBtn.textContent = 'Success! Redirecting...';
+                    window.location.replace(`/form?invitationCode=${encodeURIComponent(code.toUpperCase())}`);
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Validate Code';
+                    alert(result.message || 'Invalid invitation code. Please check your code and try again.');
+                    codeInput.focus();
+                }
+            } catch (error) {
+                console.error('Validation error:', error);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Validate Code';
+                alert('Unable to validate invitation code. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

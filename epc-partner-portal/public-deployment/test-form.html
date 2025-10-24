@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Live EPC Form Submission</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .result { margin: 1rem 0; padding: 1rem; border: 1px solid #ccc; background: #f9f9f9; }
+        button { padding: 0.5rem 1rem; margin: 0.5rem; cursor: pointer; }
+        .success { border-color: green; background: #e8f5e8; }
+        .error { border-color: red; background: #ffe8e8; }
+    </style>
+</head>
+<body>
+    <h1>Test Live EPC Form Submission</h1>
+    
+    <p>Testing different endpoints and data formats:</p>
+    
+    <button onclick="testCurrentAPI()">Test Current API (/api/submit)</button>
+    <button onclick="testNewEndpoint()">Test New Endpoint (/submit-epc-application)</button>
+    <button onclick="testFormDataStructure()">Test Form Data Structure</button>
+    
+    <div id="results"></div>
+    
+    <script>
+    async function testCurrentAPI() {
+        const data = {
+            invitationCode: 'ABCD1234',
+            companyName: 'Test Company Ltd',
+            email: 'test@example.com'
+        };
+        
+        await testSubmission('/api/submit', data, 'Current API with correct fields');
+    }
+    
+    async function testNewEndpoint() {
+        const data = {
+            invitationCode: 'ABCD1234',
+            companyName: 'Test Company Ltd', 
+            companyRegNo: '12345678',
+            primaryContactName: 'John Smith',
+            primaryContactEmail: 'test@example.com',
+            primaryContactPhone: '01234567890',
+            registeredOffice: '123 Test St, Test City',
+            yearsTrading: '5',
+            coverageRegion: ['North West', 'Yorkshire']
+        };
+        
+        await testSubmission('/submit-epc-application', data, 'New endpoint with form fields');
+    }
+    
+    async function testFormDataStructure() {
+        // Simulate what the actual form sends
+        const formData = {
+            invitationCode: 'ABCD1234',
+            companyName: 'Test EPC Company Ltd',
+            tradingName: 'Test EPC',
+            companyRegNo: '12345678',
+            vatNo: 'GB123456789',
+            yearsTrading: '5',
+            primaryContactName: 'John Smith',
+            primaryContactEmail: 'john@testepc.com',
+            primaryContactPhone: '01234567890',
+            registeredOffice: '123 Test Street, Test City, TE1 2ST',
+            coverageRegion: ['North West', 'Yorkshire', 'Midlands'],
+            certifications: 'PAS 2035, ISO 9001',
+            agreeToTerms: true,
+            Status: 'Submitted',
+            SubmissionDate: new Date().toISOString(),
+            AttachmentCount: 0
+        };
+        
+        await testSubmission('/submit-epc-application', formData, 'Full form data structure');
+    }
+    
+    async function testSubmission(endpoint, data, description) {
+        const resultsDiv = document.getElementById('results');
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'result';
+        
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.text();
+            
+            if (response.ok) {
+                resultDiv.className += ' success';
+                resultDiv.innerHTML = `
+                    <h3>✓ ${description} - SUCCESS</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${result}</pre>
+                `;
+            } else {
+                resultDiv.className += ' error';
+                resultDiv.innerHTML = `
+                    <h3>✗ ${description} - FAILED</h3>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${result}</pre>
+                `;
+            }
+        } catch (error) {
+            resultDiv.className += ' error';
+            resultDiv.innerHTML = `
+                <h3>✗ ${description} - ERROR</h3>
+                <p><strong>Error:</strong> ${error.message}</p>
+            `;
+        }
+        
+        resultsDiv.appendChild(resultDiv);
+    }
+    </script>
+</body>
+</html>

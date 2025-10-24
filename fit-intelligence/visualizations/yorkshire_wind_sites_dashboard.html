@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yorkshire Wind Sites | Saber Renewable Energy</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Mapbox GL JS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --saber-blue: #044D73;
+            --saber-green: #7CC061;
+            --dark-blue: #091922;
+            --dark-green: #0A2515;
+            --gradient-dark: #0d1138;
+            --saber-light-blue: #0A5F8E;
+            --saber-light-green: #95D47E;
+        }
+        
+        /* Typography */
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-weight: 400;
+            background: linear-gradient(135deg, var(--dark-blue) 0%, var(--gradient-dark) 100%);
+            min-height: 100vh;
+        }
+        
+        .saber-gradient {
+            background: linear-gradient(135deg, var(--saber-blue) 0%, var(--saber-light-blue) 50%, var(--saber-blue) 100%);
+        }
+        
+        .saber-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(124, 192, 97, 0.2);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(4, 77, 115, 0.9) 0%, rgba(4, 77, 115, 0.8) 100%);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+            color: white;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -2px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--saber-green), var(--saber-blue));
+        }
+        
+        #map {
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--saber-blue);
+        }
+        
+        .mapboxgl-popup-content {
+            border-radius: 12px;
+            padding: 15px;
+            min-width: 250px;
+            max-width: 300px;
+            box-shadow: 0 8px 20px rgba(4, 77, 115, 0.3);
+        }
+        
+        .mapboxgl-popup-close-button {
+            color: var(--saber-blue);
+            font-size: 18px;
+            padding: 5px;
+        }
+        
+        .saber-btn {
+            background: linear-gradient(135deg, var(--saber-green), var(--saber-light-green));
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(124, 192, 97, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .saber-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 192, 97, 0.4);
+        }
+        
+        .saber-btn-secondary {
+            background: linear-gradient(135deg, var(--saber-blue), var(--saber-light-blue));
+            box-shadow: 0 4px 15px rgba(4, 77, 115, 0.3);
+        }
+        
+        .filter-pill {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(124, 192, 97, 0.3);
+            color: var(--saber-blue);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .filter-pill:hover {
+            background: rgba(124, 192, 97, 0.2);
+            border-color: var(--saber-green);
+            transform: scale(1.05);
+        }
+        
+        .filter-pill.active {
+            background: linear-gradient(135deg, var(--saber-green), var(--saber-light-green));
+            border-color: transparent;
+            color: white;
+        }
+        
+        /* Priority chart container - FIXED HEIGHT */
+        #priorityChartContainer {
+            height: 200px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="saber-gradient text-white shadow-2xl relative">
+        <div class="container mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4" style="min-width: 200px;">
+                        <?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 495.2 101.48">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #7dbf61;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <path class="cls-2" d="M214.57,49.54c4.73,2.21,9.77,3.78,15.45,3.78s11.35-2.21,11.35-6.94-5.05-6.31-11.67-8.83c-8.2-3.15-17.34-7.25-17.34-18.92S221.82.03,232.86.03s13.56.95,20.18,3.47l-3.15,11.04c-5.05-1.89-9.77-3.15-15.77-3.15s-8.83,2.52-8.83,5.99c0,5.05,5.05,6.94,11.35,9.14,8.51,3.15,17.66,7.25,17.66,18.6s-10.09,19.86-23.65,19.86-15.14-2.21-19.86-5.05l4.1-10.09h0l-.32-.32Z"/>
+      <path class="cls-2" d="M284.26.98l13.24-.63,23.96,63.38-13.56.63-5.99-17.03h-21.76l-5.68,16.4h-13.56L284.26.98ZM298.44,36.61l-4.1-11.35-3.47-11.04-3.47,11.04-3.78,11.35h14.82Z"/>
+      <path class="cls-2" d="M331.24.98h21.44c13.87,0,21.13,5.68,21.13,15.77s-3.15,10.72-7.88,12.93h0c6.62,2.21,11.04,6.62,11.04,15.14s-9.14,19.23-23.02,19.23h-22.39V.98h-.32ZM355.2,26.52c4.1-1.26,5.68-4.1,5.68-7.88s-3.78-6.62-9.14-6.62h-7.88v14.19h11.35v.32ZM353.62,52.38c6.62,0,10.09-3.15,10.09-7.88s-3.78-6.62-8.83-7.25h-10.72v15.14h9.46Z"/>
+      <path class="cls-2" d="M389.89.98h39.1l-.63,11.35h-26.17v14.19h24.28v10.72h-24.28v15.14h28.06l-.63,11.35h-40.04V.98h.32Z"/>
+      <path class="cls-2" d="M443.49.98h20.81c15.77,0,23.96,6.62,23.96,18.92s-4.41,13.56-10.72,16.71l17.34,27.12-14.19.95-14.82-23.96h-9.77v23.02h-12.61V.98h0ZM468.08,29.67c4.1-1.26,6.94-4.1,6.94-8.83s-4.73-8.2-11.98-8.2h-6.94v17.34h11.98v-.32Z"/>
+      <path class="cls-1" d="M219.3,95.89c.95-.32,1.58-.95,1.89-1.58s.63-1.58.63-2.52,0-1.89-.63-2.52c0-.63-1.26-1.26-1.89-1.58-.95-.32-1.89-.63-3.15-.63h-5.36v14.19h1.89v-4.41h4.41l3.15,4.41h2.21l-3.47-4.73h0v-.63h.32ZM215.83,94.63h-3.47v-6.31h3.47c1.26,0,2.21,0,2.84.95.63.63.95,1.26.95,2.21s0,1.89-.95,2.21c-.63.63-1.58.95-2.84.95Z"/>
+      <path class="cls-1" d="M231.28,94.63h6.94v-1.58h-6.94v-4.41h7.88v-1.89h-9.77v14.19h10.09v-1.89h-8.2v-4.41Z"/>
+      <path class="cls-1" d="M256.82,97.15l-8.51-10.41h-1.58v14.19h1.89v-10.41l8.51,10.41h1.58v-14.19h-1.89v10.41Z"/>
+      <path class="cls-1" d="M268.8,94.63h6.94v-1.58h-6.94v-4.41h7.88v-1.89h-9.77v14.19h10.09v-1.89h-8.2v-4.41Z"/>
+      <path class="cls-1" d="M298.13,98.1l-3.78-11.35h-1.89l-4.1,11.35-3.78-11.35h-2.21l4.73,14.19h2.21l3.78-11.35,3.78,11.35h2.21l4.73-14.19h-1.89l-3.78,11.35Z"/>
+      <path class="cls-1" d="M314.21,86.74l-6.31,14.19h2.21l1.58-3.47h7.57l1.58,3.47h2.21l-6.31-14.19s-2.52,0-2.52,0ZM312.32,95.57l3.15-6.94,3.15,6.94h-6.31Z"/>
+      <path class="cls-1" d="M338.8,93.68h-.63c.63,0,.95-.63,1.26-1.26,0-.63.63-1.26.63-1.89,0-1.26,0-1.89-1.26-2.52-.95-.63-2.21-.95-3.78-.95h-6.31v14.19h6.62c1.89,0,3.15,0,4.1-.95s1.26-1.58,1.26-2.84,0-1.58-.63-1.89c0-.63-.95-.95-1.58-1.26h0v-.63h.32ZM330.61,88.32h4.1c.95,0,1.89,0,2.52.63.63.32.95.95.95,1.58s0,1.26-.95,1.58c-.63.32-1.26.63-2.52.63h-4.1v-4.41ZM337.86,98.41c-.63.32-1.58.63-2.52.63h-4.73v-4.73h4.73c1.26,0,1.89,0,2.52.63.63.32.95.95.95,1.89s0,1.26-.95,1.89h0v-.32Z"/>
+      <path class="cls-1" d="M349.84,86.74h-1.89v14.19h9.46v-1.89h-7.57v-12.3Z"/>
+      <path class="cls-1" d="M365.92,94.63h6.94v-1.58h-6.94v-4.41h7.88v-1.89h-9.77v14.19h10.09v-1.89h-8.2v-4.41Z"/>
+      <path class="cls-1" d="M392.72,94.63h6.94v-1.58h-6.94v-4.41h7.88v-1.89h-9.77v14.19h10.09v-1.89h-8.2s0-4.41,0-4.41Z"/>
+      <path class="cls-1" d="M418.26,97.15l-8.51-10.41h-1.58v14.19h1.89v-10.41l8.51,10.41h1.58v-14.19h-1.89v10.41Z"/>
+      <path class="cls-1" d="M430.56,94.63h6.94v-1.58h-6.94v-4.41h7.88v-1.89h-9.77v14.19h10.09v-1.89h-8.2v-4.41h0Z"/>
+      <path class="cls-1" d="M454.52,95.89c.95-.32,1.58-.95,1.89-1.58s.63-1.58.63-2.52,0-1.89-.63-2.52c-.32-.63-1.26-1.26-1.89-1.58-.95-.32-1.89-.63-3.15-.63h-5.36v14.19h1.89v-4.41h4.41l3.15,4.41h2.21l-3.47-4.73h.32s0-.63,0-.63ZM451.37,94.63h-3.47v-6.31h3.47c1.26,0,2.21,0,2.84.95.63.63.95,1.26.95,2.21s-.32,1.89-.95,2.21c-.63.63-1.58.95-2.84.95Z"/>
+      <path class="cls-1" d="M466.82,89.9c.63-.63.95-.95,1.89-1.26.63,0,1.58-.32,2.21-.32s1.58,0,2.21.32c.63,0,1.26.63,1.89,1.26l1.26-1.26c-.63-.63-1.26-1.26-2.21-1.58s-1.89-.63-3.15-.63-2.21,0-3.15.63c-.95.32-1.58.95-2.52,1.58-.63.63-1.26,1.26-1.58,2.21s-.63,1.89-.63,2.84,0,1.89.63,2.84c.32.95.95,1.58,1.58,2.21s1.58,1.26,2.52,1.58,1.89.63,2.84.63,1.89,0,2.84-.32c.95,0,1.89-.63,2.52-1.26v-5.36h-1.89v4.41c-.32,0-.63.32-1.26.63-.63,0-1.26.32-2.21.32s-1.58,0-2.21-.32c-.63,0-1.26-.63-1.89-1.26-.63-.63-.95-.95-1.26-1.58,0-.63-.32-1.26-.32-2.21s0-1.58.32-2.21c0-.63.63-1.26,1.26-1.58h.32v-.32Z"/>
+      <path class="cls-1" d="M492.99,86.74l-4.41,7.25-4.41-7.25h-2.21l5.68,9.14v5.05h1.89v-4.73l5.68-9.14h-2.21v-.32Z"/>
+      <path class="cls-2" d="M65.11,24.31c-14.5-8.51-33.11-3.47-41.62,11.04-8.51,14.5-3.47,33.11,11.04,41.62,11.98,6.94,27.12,5.05,36.89-4.73l38.15-38.15c8.2-6.62,19.86-6.62,28.06.32l-51.71,51.71c-19.86,19.55-51.71,19.55-71.26,0-19.55-19.86-19.55-51.71,0-71.26C31.69-2.8,59.44-5.01,79.3,9.81l-14.5,14.5h.32Z"/>
+      <path class="cls-1" d="M107.36,76.65c14.5,8.51,33.11,3.47,41.62-11.04,8.51-14.5,3.47-33.11-11.04-41.62-11.98-6.94-27.12-5.05-36.89,4.73l-38.15,38.15c-8.2,6.62-19.86,6.62-28.06-.32L87.18,14.85c19.86-19.55,51.71-19.55,71.26,0,19.55,19.86,19.55,51.71,0,71.26-19.55,19.55-45.41,19.55-65.27,5.05l14.5-14.5h-.32Z"/>
+    </g>
+  </g>
+</svg>
+                    </div>
+                    <div class="border-l-2 border-white/30 pl-6">
+                        <h1 class="text-2xl">Wind Repowering Intelligence</h1>
+                        <p class="text-sm opacity-90 font-light">Expert Analysis for Strategic Renewable Energy Decisions</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="saber_solar_dashboard.html" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-white/30 transition text-white text-sm">
+                        <i class="fas fa-solar-panel mr-1.5 text-sm"></i>Solar
+                    </a>
+                    <a href="saber_analytics_dashboard.html" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-white/30 transition text-white text-sm">
+                        <i class="fas fa-chart-line mr-1.5 text-sm"></i>Analytics
+                    </a>
+                    <a href="platform_main_menu.html" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-white/30 transition text-white text-sm">
+                        <i class="fas fa-th mr-1.5 text-sm"></i>Menu
+                    </a>
+                    <button onclick="location.reload()" class="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg hover:bg-white/30 transition text-white text-sm">
+                        <i class="fas fa-sync-alt mr-1.5 text-sm"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Dashboard - Full Width -->
+    <div class="w-full px-6 py-8">
+        <!-- Key Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+            <div class="stat-card saber-card p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-xs uppercase tracking-wider font-semibold">Total Sites</p>
+                        <p class="text-3xl font-bold text-white" id="headerTotalSites">0</p>
+                        <p class="text-xs text-white/60 mt-1" id="headerTotalSitesLabel">Loading...</p>
+                    </div>
+                    <div class="text-4xl text-white/30">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card saber-card p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-xs uppercase tracking-wider font-semibold">Capacity</p>
+                        <p class="text-3xl font-bold text-white" id="headerCapacity">0</p>
+                        <p class="text-xs text-white/60 mt-1" id="headerCapacityUnit">Megawatts</p>
+                    </div>
+                    <div class="text-4xl text-white/30">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card saber-card p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-xs uppercase tracking-wider font-semibold">Urgent</p>
+                        <p class="text-3xl font-bold text-red-400" id="headerUrgent">0</p>
+                        <p class="text-xs text-white/60 mt-1">2-5 years FIT</p>
+                    </div>
+                    <div class="text-4xl text-red-400/30">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card saber-card p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-xs uppercase tracking-wider font-semibold">Optimal</p>
+                        <p class="text-3xl font-bold" style="color: var(--saber-light-green)" id="headerOptimal">0</p>
+                        <p class="text-xs text-white/60 mt-1">5-10 years FIT</p>
+                    </div>
+                    <div class="text-4xl text-white/30">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card saber-card p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-xs uppercase tracking-wider font-semibold">Avg FIT</p>
+                        <p class="text-3xl font-bold text-white" id="headerAvgFIT">0.0</p>
+                        <p class="text-xs text-white/60 mt-1">Years remaining</p>
+                    </div>
+                    <div class="text-4xl text-white/30">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card saber-card p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-xs uppercase tracking-wider font-semibold">Potential</p>
+                        <p class="text-3xl font-bold" style="color: var(--saber-light-green)" id="headerPotential">0</p>
+                        <p class="text-xs text-white/60 mt-1" id="headerPotentialUnit">£M opportunity</p>
+                    </div>
+                    <div class="text-4xl text-white/30">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Map Section -->
+            <div class="lg:col-span-2">
+                <div class="saber-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl">
+                            <i class="fas fa-map-marked-alt mr-3" style="color: var(--saber-green)"></i>
+                            Strategic Site Analysis
+                            <span id="filteredCount" class="text-sm font-normal text-gray-500 ml-2"></span>
+                        </h2>
+                        <div class="flex space-x-2">
+                            <button onclick="resetMap()" class="px-4 py-2 rounded-lg text-white text-sm" style="background: var(--saber-blue);">
+                                <i class="fas fa-compress-arrows-alt mr-2"></i>Reset
+                            </button>
+                            <button onclick="toggle3D()" id="btn3D" class="px-4 py-2 rounded-lg text-white text-sm" style="background: var(--saber-blue);">
+                                <i class="fas fa-cube mr-2"></i>3D View
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Pills -->
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <button onclick="filterByWindow('all')" class="filter-pill active px-4 py-2 rounded-full text-sm font-semibold">
+                            All Sites (<span id="btnAllCount">0</span>)
+                        </button>
+                        <button onclick="filterByWindow('IMMEDIATE')" class="filter-pill px-4 py-2 rounded-full text-sm font-semibold">
+                            <span class="inline-block w-2 h-2 rounded-full bg-red-600 mr-2"></span>
+                            Immediate (<span id="btnImmediateCount">0</span>)
+                        </button>
+                        <button onclick="filterByWindow('URGENT')" class="filter-pill px-4 py-2 rounded-full text-sm font-semibold">
+                            <span class="inline-block w-2 h-2 rounded-full bg-orange-500 mr-2"></span>
+                            Urgent (<span id="btnUrgentCount">0</span>)
+                        </button>
+                        <button onclick="filterByWindow('OPTIMAL')" class="filter-pill px-4 py-2 rounded-full text-sm font-semibold">
+                            <span class="inline-block w-2 h-2 rounded-full mr-2" style="background-color: var(--saber-green)"></span>
+                            Optimal (<span id="btnOptimalCount">0</span>)
+                        </button>
+                        <button onclick="filterByWindow('TOO_LATE')" class="filter-pill px-4 py-2 rounded-full text-sm font-semibold">
+                            <span class="inline-block w-2 h-2 rounded-full bg-gray-500 mr-2"></span>
+                            Expiring (<span id="btnExpiredCount">0</span>)
+                        </button>
+                    </div>
+                    
+                    <!-- Map Container -->
+                    <div id="map" class="relative" style="height: calc(100vh - 450px); min-height: 800px; max-height: 1000px;"></div>
+                    
+                    <!-- Capacity Filter Buttons - Multi-Select -->
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-sm font-semibold text-gray-700">Capacity:</span>
+                            <button onclick="toggleAllCapacity()" class="capacity-all-btn px-3 py-1 bg-gray-700 text-white rounded text-xs transition hover:opacity-80">All</button>
+                            <span class="text-gray-400">|</span>
+                            <button onclick="toggleCapacity('0-50')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="0-50">0-50kW</button>
+                            <button onclick="toggleCapacity('50-100')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="50-100">50-100kW</button>
+                            <button onclick="toggleCapacity('100-200')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="100-200">100-200kW</button>
+                            <button onclick="toggleCapacity('200-300')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="200-300">200-300kW</button>
+                            <button onclick="toggleCapacity('300-400')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="300-400">300-400kW</button>
+                            <button onclick="toggleCapacity('400-500')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="400-500">400-500kW</button>
+                            <button onclick="toggleCapacity('500-750')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="500-750">500-750kW</button>
+                            <button onclick="toggleCapacity('750-1000')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="750-1000">750kW-1MW</button>
+                            <button onclick="toggleCapacity('1000+')" class="capacity-btn px-3 py-1 bg-gray-200 text-gray-700 rounded text-xs transition hover:bg-gray-300" data-range="1000+">1MW+</button>
+                        </div>
+                        <div class="mt-2 text-xs text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>Click to toggle ranges on/off (multi-select)
+                        </div>
+                    </div>
+                    
+                    <!-- Regional Summary Card -->
+                    <div id="regionalSummary" class="mt-4 p-4 bg-white rounded-lg shadow-md">
+                        <h3 class="text-lg font-bold mb-3">
+                            <i class="fas fa-chart-bar mr-2" style="color: var(--saber-green)"></i>
+                            Filtered Market Summary
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-3 rounded">
+                                <h4 class="font-semibold text-sm text-blue-900 mb-2">England & Wales</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Sites:</span>
+                                        <span class="font-bold" id="ewSites">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Capacity:</span>
+                                        <span class="font-bold" id="ewCapacity">0 MW</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Optimal:</span>
+                                        <span class="font-bold text-green-600" id="ewOptimal">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Urgent:</span>
+                                        <span class="font-bold text-orange-600" id="ewUrgent">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Expiring:</span>
+                                        <span class="font-bold text-red-600" id="ewExpiring">0</span>
+                                    </div>
+                                    <div class="flex justify-between pt-2 mt-2 border-t border-blue-200">
+                                        <span class="text-gray-600">Annual Income:</span>
+                                        <span class="font-bold text-green-700" id="ewIncome">£0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-purple-50 p-3 rounded">
+                                <h4 class="font-semibold text-sm text-purple-900 mb-2">Scotland</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Sites:</span>
+                                        <span class="font-bold" id="scotSites">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Capacity:</span>
+                                        <span class="font-bold" id="scotCapacity">0 MW</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Optimal:</span>
+                                        <span class="font-bold text-green-600" id="scotOptimal">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Urgent:</span>
+                                        <span class="font-bold text-orange-600" id="scotUrgent">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Expiring:</span>
+                                        <span class="font-bold text-red-600" id="scotExpiring">0</span>
+                                    </div>
+                                    <div class="flex justify-between pt-2 mt-2 border-t border-purple-200">
+                                        <span class="text-gray-600">Annual Income:</span>
+                                        <span class="font-bold text-green-700" id="scotIncome">£0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-green-50 p-3 rounded">
+                                <h4 class="font-semibold text-sm text-green-900 mb-2">Total UK</h4>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Sites:</span>
+                                        <span class="font-bold" id="totalSites">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Capacity:</span>
+                                        <span class="font-bold" id="totalCapacity">0 MW</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Avg Size:</span>
+                                        <span class="font-bold" id="avgSize">0 kW</span>
+                                    </div>
+                                    <div class="flex justify-between pt-2 mt-2 border-t border-green-200">
+                                        <span class="text-gray-600">Total Annual:</span>
+                                        <span class="font-bold text-green-700" id="totalIncome">£0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Total Remaining:</span>
+                                        <span class="font-bold text-green-700" id="totalRemaining">£0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Side Panel -->
+            <div class="space-y-6">
+                <!-- Selected Site Info - MOVED TO TOP -->
+                <div id="siteInfo" class="saber-card p-6 hidden">
+                    <h3 class="text-lg mb-4">
+                        <i class="fas fa-info-circle mr-2" style="color: var(--saber-green)"></i>
+                        Site Intelligence
+                    </h3>
+                    <div id="siteDetails" class="space-y-3 text-sm"></div>
+                </div>
+                
+                <!-- Regional Intelligence - ALL REGIONS -->
+                <div class="saber-card p-6">
+                    <h3 class="text-lg mb-4">
+                        <i class="fas fa-chart-bar mr-2" style="color: var(--saber-green)"></i>
+                        Regional Distribution
+                    </h3>
+                    <div class="space-y-3 overflow-y-auto pr-2" id="regionalDistribution" style="min-height: 400px; max-height: calc(100vh - 700px);"></div>
+                </div>
+                
+                <!-- Priority Analysis with FIXED HEIGHT -->
+                <div class="saber-card p-6">
+                    <h3 class="text-lg mb-4">
+                        <i class="fas fa-chart-pie mr-2" style="color: var(--saber-green)"></i>
+                        Priority Analysis
+                    </h3>
+                    <div id="priorityChartContainer">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Keep original regional content but hidden for now -->
+                <div class="hidden">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Orkney Islands</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">770</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 100%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Aberdeenshire</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">524</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 68%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Cornwall</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">409</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 53%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Highland</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">342</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 44%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Yorkshire</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">298</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 39%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Wales</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">276</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 36%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Northumberland</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">218</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 28%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Devon</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">186</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 24%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Cumbria</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">164</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 21%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-semibold">Norfolk</span>
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">142</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: 18%; background: linear-gradient(90deg, var(--saber-green), var(--saber-light-green))"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="mt-12 py-8 text-white text-center" style="background: var(--dark-blue)">
+        <p class="text-sm opacity-80">© 2025 Saber Renewable Energy Ltd. All rights reserved.</p>
+        <p class="text-xs opacity-60 mt-2">Wind Repowering Intelligence Platform | Expert • Clear • Strategic</p>
+    </footer>
+    
+    <script>
+        // Mapbox access token
+        // DEMO MODE: Hardcoded token for reliability in internal demo.
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFyc3RhY2siLCJhIjoiY21ldmt0cHptMGhlYjJpc2Rvb3EzM3QxOSJ9.REl1LiSuYGu6zVXC27RzRQ';
+        // To restore dynamic config, replace with fetch('/api/config') logic.
+        
+        // Embed GeoJSON data directly
+                const turbineGeoJSON = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -1.41,
+                    53.25
+                ]
+            },
+            "properties": {
+                "id": "869099",
+                "score": 0.85,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 4,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "S41 - UK",
+                "postcode": "S41",
+                "age_years": 8,
+                "tariff_p_kwh": 12.5,
+                "annual_income": 150000,
+                "total_remaining_value": 600000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "Chesterfield",
+                "llsoa_code": "E01019574",
+                "mlsoa_code": "E02004055"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.7,
+                    53.6
+                ]
+            },
+            "properties": {
+                "id": "869095",
+                "score": 0.88,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 4,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "DN14 - UK",
+                "postcode": "DN14",
+                "age_years": 8,
+                "tariff_p_kwh": 12.5,
+                "annual_income": 150000,
+                "total_remaining_value": 600000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013016",
+                "mlsoa_code": "E02002720"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.1,
+                    53.7
+                ]
+            },
+            "properties": {
+                "id": "869092",
+                "score": 0.92,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 4,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "HU12 - UK",
+                "postcode": "HU12",
+                "age_years": 8,
+                "tariff_p_kwh": 12.5,
+                "annual_income": 150000,
+                "total_remaining_value": 600000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013102",
+                "mlsoa_code": "E02002712"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.2,
+                    53.8
+                ]
+            },
+            "properties": {
+                "id": "869083",
+                "score": 0.88,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 5,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "HU12 - UK",
+                "postcode": "HU12",
+                "age_years": 9,
+                "tariff_p_kwh": 14.9,
+                "annual_income": 176207,
+                "total_remaining_value": 881035,
+                "annual_generation_mwh": 1182.6,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013081",
+                "mlsoa_code": "E02002714"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.11767559437325464,
+                    53.52559462016213
+                ]
+            },
+            "properties": {
+                "id": "889",
+                "score": 0.95,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 12,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "HU19 - UK",
+                "postcode": "HU19",
+                "age_years": 13,
+                "tariff_p_kwh": 21.5,
+                "annual_income": 256350,
+                "total_remaining_value": 3076200,
+                "annual_generation_mwh": 1182.6,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013082",
+                "mlsoa_code": "E02002714"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.05,
+                    53.9
+                ]
+            },
+            "properties": {
+                "id": "869010",
+                "score": 0.86,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 6,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "YO25 - UK",
+                "postcode": "YO25",
+                "age_years": 10,
+                "tariff_p_kwh": 17.8,
+                "annual_income": 213000,
+                "total_remaining_value": 1278000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013048",
+                "mlsoa_code": "E02002693"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.4,
+                    53.6
+                ]
+            },
+            "properties": {
+                "id": "869009",
+                "score": 0.84,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 6,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "YO43 - UK",
+                "postcode": "YO43",
+                "age_years": 10,
+                "tariff_p_kwh": 17.8,
+                "annual_income": 213000,
+                "total_remaining_value": 1278000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013023",
+                "mlsoa_code": "E02002701"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.35,
+                    53.65
+                ]
+            },
+            "properties": {
+                "id": "743341",
+                "score": 0.83,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 6,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "YO43 - UK",
+                "postcode": "YO43",
+                "age_years": 10,
+                "tariff_p_kwh": 17.8,
+                "annual_income": 213000,
+                "total_remaining_value": 1278000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013121",
+                "mlsoa_code": "E02002698"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.15,
+                    53.75
+                ]
+            },
+            "properties": {
+                "id": "743352",
+                "score": 0.89,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 6,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "YO25 - UK",
+                "postcode": "YO25",
+                "age_years": 10,
+                "tariff_p_kwh": 17.8,
+                "annual_income": 213000,
+                "total_remaining_value": 1278000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01012984",
+                "mlsoa_code": "E02006891"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -1.3,
+                    53.7
+                ]
+            },
+            "properties": {
+                "id": "779790",
+                "score": 0.87,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 4,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "WF8 - UK",
+                "postcode": "WF8",
+                "age_years": 8,
+                "tariff_p_kwh": 12.5,
+                "annual_income": 150000,
+                "total_remaining_value": 600000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "Wakefield",
+                "llsoa_code": "E01011849",
+                "mlsoa_code": "E02002471"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.8,
+                    53.4
+                ]
+            },
+            "properties": {
+                "id": "779801",
+                "score": 0.91,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 3,
+                "repowering_window": "URGENT",
+                "capacity_mw": 0.5,
+                "location": "DN17 - UK",
+                "postcode": "DN17",
+                "age_years": 7,
+                "tariff_p_kwh": 10.2,
+                "annual_income": 122400,
+                "total_remaining_value": 367200,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "North Lincolnshire",
+                "llsoa_code": "E01013247",
+                "mlsoa_code": "E02002754"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.25,
+                    53.72
+                ]
+            },
+            "properties": {
+                "id": "779760",
+                "score": 0.85,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 5,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "HU12 - UK",
+                "postcode": "HU12",
+                "age_years": 9,
+                "tariff_p_kwh": 14.9,
+                "annual_income": 178800,
+                "total_remaining_value": 894000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013087",
+                "mlsoa_code": "E02002722"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -1.1,
+                    53.5
+                ]
+            },
+            "properties": {
+                "id": "746159",
+                "score": 0.82,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 5,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "DN8 - UK",
+                "postcode": "DN8",
+                "age_years": 9,
+                "tariff_p_kwh": 14.9,
+                "annual_income": 178800,
+                "total_remaining_value": 894000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "Doncaster",
+                "llsoa_code": "E01007632",
+                "mlsoa_code": "E02001539"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -1.0,
+                    53.6
+                ]
+            },
+            "properties": {
+                "id": "744925",
+                "score": 0.94,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 7,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "WF11 - UK",
+                "postcode": "WF11",
+                "age_years": 11,
+                "tariff_p_kwh": 19.2,
+                "annual_income": 230400,
+                "total_remaining_value": 1612800,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "Selby",
+                "llsoa_code": "E01027891",
+                "mlsoa_code": "E02005817"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -0.6,
+                    53.8
+                ]
+            },
+            "properties": {
+                "id": "746630",
+                "score": 0.86,
+                "priority": "MEDIUM",
+                "remaining_fit_years": 4,
+                "repowering_window": "OPTIMAL",
+                "capacity_mw": 0.5,
+                "location": "DN14 - UK",
+                "postcode": "DN14",
+                "age_years": 8,
+                "tariff_p_kwh": 12.5,
+                "annual_income": 150000,
+                "total_remaining_value": 600000,
+                "annual_generation_mwh": 1200.0,
+                "local_authority": "East Riding of Yorkshire",
+                "llsoa_code": "E01013075",
+                "mlsoa_code": "E02002725"
+            }
+        }
+    ]
+};
+        
+        // Initialize map
+        function initMap() {
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/light-v11',  // Changed to light theme for better contrast
+                center: [-0.8, 53.7],
+                zoom: 9,
+                pitch: 0,
+                bearing: 0
+            });
+            
+            // Add navigation controls
+            map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+            
+            // Add scale
+            map.addControl(new mapboxgl.ScaleControl(), 'bottom-right');
+            
+            // Load turbine data
+            map.on('load', () => {
+                // Surface mapbox load errors to help debugging
+                map.on('error', (e) => { try { console.error('Mapbox GL error:', e && e.error ? e.error : e); } catch (_) {} });
+                // Store original data
+                allTurbineData = turbineGeoJSON;
+                
+                // Add source
+                map.addSource('turbines', {
+                    type: 'geojson',
+                    data: turbineGeoJSON,  // Use embedded data
+                    cluster: true,
+                    clusterMaxZoom: 10,
+                    clusterRadius: 40
+                });
+                
+                // Update all statistics on load
+                updateAllStatistics();
+                
+                // Add cluster layer
+                map.addLayer({
+                    id: 'clusters',
+                    type: 'circle',
+                    source: 'turbines',
+                    filter: ['has', 'point_count'],
+                    paint: {
+                        'circle-color': [
+                            'step',
+                            ['get', 'point_count'],
+                            '#95D47E',
+                            10, '#7CC061',
+                            50, '#0A5F8E',
+                            100, '#044D73',
+                            500, '#091922'
+                        ],
+                        'circle-radius': [
+                            'step',
+                            ['get', 'point_count'],
+                            20,
+                            10, 25,
+                            50, 30,
+                            100, 35,
+                            500, 40
+                        ],
+                        'circle-stroke-width': 2,
+                        'circle-stroke-color': '#ffffff'
+                    }
+                });
+                
+                // Add cluster count
+                map.addLayer({
+                    id: 'cluster-count',
+                    type: 'symbol',
+                    source: 'turbines',
+                    filter: ['has', 'point_count'],
+                    layout: {
+                        'text-field': '{point_count_abbreviated}',
+                        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                        'text-size': 12
+                    },
+                    paint: {
+                        'text-color': '#ffffff'
+                    }
+                });
+                
+                // Add individual points
+                map.addLayer({
+                    id: 'unclustered-point',
+                    type: 'circle',
+                    source: 'turbines',
+                    filter: ['!', ['has', 'point_count']],
+                    paint: {
+                        'circle-color': [
+                            'match',
+                            ['get', 'repowering_window'],
+                            'URGENT', '#FF4444',
+                            'OPTIMAL', '#7CC061',
+                            'TOO_EARLY', '#27AE60',
+                            'TOO_LATE', '#6B7280',
+                            '#999999'
+                        ],
+                        'circle-radius': [
+                            'interpolate',
+                            ['linear'],
+                            ['zoom'],
+                            5, 3,
+                            10, 6,
+                            15, 10
+                        ],
+                        'circle-stroke-width': 2,
+                        'circle-stroke-color': '#ffffff',
+                        'circle-opacity': 0.9
+                    }
+                });
+                
+                // Click on clusters - show regional stats
+                map.on('click', 'clusters', (e) => {
+                    const features = map.queryRenderedFeatures(e.point, {
+                        layers: ['clusters']
+                    });
+                    const clusterId = features[0].properties.cluster_id;
+                    const clusterCount = features[0].properties.point_count;
+                    const coordinates = features[0].geometry.coordinates.slice();
+                    
+                    // Get all points in this cluster
+                    map.getSource('turbines').getClusterLeaves(clusterId, clusterCount, 0, (err, clusterFeatures) => {
+                        if (err) {
+                            console.error('Error getting cluster features:', err);
+                            return;
+                        }
+                        
+                        // Calculate cluster statistics
+                        const stats = calculateClusterStats(clusterFeatures);
+                        
+                        // Close existing popup if any
+                        if (currentPopup) {
+                            currentPopup.remove();
+                        }
+                        
+                        // Create new popup with stats
+                        currentPopup = new mapboxgl.Popup({
+                            closeButton: true,
+                            closeOnClick: false,
+                            maxWidth: '350px'
+                        })
+                            .setLngLat(coordinates)
+                            .setHTML(createClusterPopupContent(stats, clusterCount))
+                            .addTo(map);
+                        
+                        // Clear popup reference when closed
+                        currentPopup.on('close', () => {
+                            currentPopup = null;
+                        });
+                    });
+                });
+                
+                // Double-click clusters to zoom
+                map.on('dblclick', 'clusters', (e) => {
+                    const features = map.queryRenderedFeatures(e.point, {
+                        layers: ['clusters']
+                    });
+                    const clusterId = features[0].properties.cluster_id;
+                    map.getSource('turbines').getClusterExpansionZoom(
+                        clusterId,
+                        (err, zoom) => {
+                            if (err) return;
+                            
+                            map.easeTo({
+                                center: features[0].geometry.coordinates,
+                                zoom: zoom
+                            });
+                        }
+                    );
+                    e.preventDefault();
+                });
+                
+                // Click on individual points
+                map.on('click', 'unclustered-point', (e) => {
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    const props = e.features[0].properties;
+                    
+                    // Close existing popup if any
+                    if (currentPopup) {
+                        currentPopup.remove();
+                    }
+                    
+                    // Show new popup
+                    currentPopup = new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(createPopupContent(props))
+                        .addTo(map);
+                    
+                    // Clear popup reference when closed
+                    currentPopup.on('close', () => {
+                        currentPopup = null;
+                    });
+                    
+                    showSiteInfo(props);
+                });
+                
+                // Change cursor on hover
+                map.on('mouseenter', 'clusters', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'clusters', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+                map.on('mouseenter', 'unclustered-point', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'unclustered-point', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+            });
+        }
+        
+        // Calculate cluster statistics
+        function calculateClusterStats(features) {
+            const stats = {
+                totalCapacity: 0,
+                totalIncome: 0,
+                avgCapacity: 0,
+                avgAge: 0,
+                avgScore: 0,
+                avgFitRemaining: 0,
+                windows: {
+                    URGENT: 0,
+                    OPTIMAL: 0,
+                    TOO_EARLY: 0,
+                    TOO_LATE: 0
+                },
+                priorities: {
+                    CRITICAL: 0,
+                    HIGH: 0,
+                    MEDIUM: 0,
+                    LOW: 0,
+                    MONITOR: 0
+                },
+                locations: {},
+                topLocation: ''
+            };
+            
+            features.forEach(feature => {
+                const props = feature.properties;
+                stats.totalCapacity += props.capacity_mw;
+                stats.totalIncome += props.annual_income || 0;
+                stats.avgAge += props.age_years;
+                stats.avgScore += props.score;
+                stats.avgFitRemaining += props.remaining_fit_years;
+                
+                // Count windows
+                if (stats.windows[props.repowering_window] !== undefined) {
+                    stats.windows[props.repowering_window]++;
+                }
+                
+                // Count priorities
+                if (stats.priorities[props.priority] !== undefined) {
+                    stats.priorities[props.priority]++;
+                }
+                
+                // Count locations
+                const location = props.location.split(' - ')[0]; // Get first part of location
+                stats.locations[location] = (stats.locations[location] || 0) + 1;
+            });
+            
+            const count = features.length;
+            stats.avgCapacity = stats.totalCapacity / count;
+            stats.avgAge = stats.avgAge / count;
+            stats.avgScore = stats.avgScore / count;
+            stats.avgFitRemaining = stats.avgFitRemaining / count;
+            
+            // Find top location
+            let maxCount = 0;
+            for (const [loc, cnt] of Object.entries(stats.locations)) {
+                if (cnt > maxCount) {
+                    maxCount = cnt;
+                    stats.topLocation = loc;
+                }
+            }
+            
+            return stats;
+        }
+        
+        // Create cluster popup content
+        function createClusterPopupContent(stats, count) {
+            const urgentPct = ((stats.windows.URGENT / count) * 100).toFixed(0);
+            const optimalPct = ((stats.windows.OPTIMAL / count) * 100).toFixed(0);
+            
+            return `
+                <div class="p-3">
+                    <h4 class="font-bold text-lg mb-3" style="color: var(--saber-blue)">
+                        <i class="fas fa-layer-group mr-2"></i>Regional Cluster Analysis
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-600">Total Sites</p>
+                            <p class="text-xl font-bold" style="color: var(--saber-blue)">${count}</p>
+                        </div>
+                        <div class="bg-gray-50 rounded p-2">
+                            <p class="text-xs text-gray-600">Total Capacity</p>
+                            <p class="text-xl font-bold" style="color: var(--saber-green)">${stats.totalCapacity < 1 ? (stats.totalCapacity * 1000).toFixed(0) + ' kW' : stats.totalCapacity.toFixed(2) + ' MW'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 rounded p-2 mb-3">
+                        <p class="text-xs text-gray-600">Combined Annual Income</p>
+                        <p class="text-lg font-bold text-green-700">£${stats.totalIncome ? stats.totalIncome.toLocaleString('en-GB', {maximumFractionDigits: 0}) : '0'}</p>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm border-t pt-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Primary Region:</span>
+                            <span class="font-semibold">${stats.topLocation}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Avg Age:</span>
+                            <span class="font-semibold">${Math.round(stats.avgAge)} years</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Avg FIT Remaining:</span>
+                            <span class="font-semibold">${Math.round(stats.avgFitRemaining)} years</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Avg Score:</span>
+                            <span class="font-semibold">${stats.avgScore.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 pt-3 border-t">
+                        <p class="text-xs font-semibold text-gray-600 mb-2">Repowering Windows:</p>
+                        <div class="space-y-1">
+                            ${stats.windows.URGENT > 0 ? `
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs flex items-center">
+                                    <span class="w-2 h-2 rounded-full bg-red-500 mr-1"></span>
+                                    Urgent (2-5yr)
+                                </span>
+                                <span class="text-xs font-bold">${stats.windows.URGENT} (${urgentPct}%)</span>
+                            </div>` : ''}
+                            ${stats.windows.OPTIMAL > 0 ? `
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs flex items-center">
+                                    <span class="w-2 h-2 rounded-full mr-1" style="background: var(--saber-green)"></span>
+                                    Optimal (5-10yr)
+                                </span>
+                                <span class="text-xs font-bold">${stats.windows.OPTIMAL} (${optimalPct}%)</span>
+                            </div>` : ''}
+                            ${stats.windows.TOO_LATE > 0 ? `
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs flex items-center">
+                                    <span class="w-2 h-2 rounded-full bg-gray-500 mr-1"></span>
+                                    Expiring (<2yr)
+                                </span>
+                                <span class="text-xs font-bold">${stats.windows.TOO_LATE}</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 pt-2 border-t text-center">
+                        <p class="text-xs text-gray-500">
+                            <i class="fas fa-hand-pointer mr-1"></i>
+                            Double-click to zoom into cluster
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Create popup content
+        function createPopupContent(props) {
+            return `
+                <div class="p-2">
+                    <h4 class="font-bold text-lg mb-2" style="color: var(--saber-blue)">
+                        Site ${props.id}
+                    </h4>
+                    <div class="space-y-1 text-sm">
+                        <div><strong>Location:</strong> ${props.location}</div>
+                        <div><strong>Capacity:</strong> ${props.capacity_mw < 1 ? (props.capacity_mw * 1000).toFixed(0) + ' kW' : props.capacity_mw.toFixed(2) + ' MW'}</div>
+                        <div><strong>FIT Remaining:</strong> ${Math.round(props.remaining_fit_years)} years</div>
+                        <div><strong>FIT Rate:</strong> ${props.tariff_p_kwh ? props.tariff_p_kwh.toFixed(1) + 'p/kWh' : 'N/A'}</div>
+                        <div><strong>Annual Income:</strong> £${props.annual_income ? props.annual_income.toLocaleString('en-GB', {maximumFractionDigits: 0}) : '0'}</div>
+                        <div><strong>Total Remaining:</strong> £${props.total_remaining_value ? props.total_remaining_value.toLocaleString('en-GB', {maximumFractionDigits: 0}) : '0'}</div>
+                        <div class="pt-2 mt-2 border-t">
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold text-white"
+                                  style="background: ${windowColors[props.repowering_window] || '#999'}">
+                                ${props.repowering_window}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Show site info
+        function showSiteInfo(props) {
+            const siteInfo = document.getElementById('siteInfo');
+            const siteDetails = document.getElementById('siteDetails');
+            
+            siteInfo.classList.remove('hidden');
+            siteDetails.innerHTML = `
+                <div class="space-y-3">
+                    <div class="pb-3 border-b border-gray-200">
+                        <strong class="text-gray-600">Site ID:</strong>
+                        <span class="font-bold" style="color: var(--saber-blue)">${props.id}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <p class="text-gray-600 text-xs uppercase">Postcode</p>
+                            <p class="font-semibold">${props.postcode}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-xs uppercase">Capacity</p>
+                            <p class="font-semibold">${props.capacity_mw < 1 ? (props.capacity_mw * 1000).toFixed(0) + ' kW' : props.capacity_mw.toFixed(2) + ' MW'}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-xs uppercase">Age</p>
+                            <p class="font-semibold">${Math.round(props.age_years)} years</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-xs uppercase">FIT Remaining</p>
+                            <p class="font-semibold">${Math.round(props.remaining_fit_years)} years</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-xs uppercase">FIT Rate</p>
+                            <p class="font-semibold">${props.tariff_p_kwh ? props.tariff_p_kwh.toFixed(1) + 'p/kWh' : 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-xs uppercase">Generation</p>
+                            <p class="font-semibold">${props.annual_generation_mwh ? props.annual_generation_mwh.toFixed(0) + ' MWh/yr' : 'N/A'}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <p class="text-gray-700 text-xs uppercase mb-2 font-semibold">Financial Summary</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 text-sm">Est. Annual Income:</span>
+                                <span class="font-bold text-green-700">£${props.annual_income ? props.annual_income.toLocaleString('en-GB', {maximumFractionDigits: 0}) : '0'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 text-sm">Est. Revenue Remaining:</span>
+                                <span class="font-bold text-green-700">£${props.total_remaining_value ? props.total_remaining_value.toLocaleString('en-GB', {maximumFractionDigits: 0}) : '0'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Filter by window
+        function filterByWindow(window) {
+            currentFilter = window;
+            
+            // Update button states
+            document.querySelectorAll('.filter-pill').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            applyFilters();
+        }
+        
+        // Toggle capacity filter (multi-select)
+        function toggleCapacity(range) {
+            const btn = event.target;
+            
+            if (selectedCapacityRanges.has(range)) {
+                selectedCapacityRanges.delete(range);
+                btn.classList.remove('bg-gray-700', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            } else {
+                selectedCapacityRanges.add(range);
+                btn.classList.remove('bg-gray-200', 'text-gray-700');
+                btn.classList.add('bg-gray-700', 'text-white');
+            }
+            
+            // Update all button
+            const allBtn = document.querySelector('.capacity-all-btn');
+            if (selectedCapacityRanges.size === 0) {
+                allBtn.classList.add('bg-gray-700', 'text-white');
+                allBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            } else {
+                allBtn.classList.remove('bg-gray-700', 'text-white');
+                allBtn.classList.add('bg-gray-200', 'text-gray-700');
+            }
+            
+            applyFilters();
+        }
+        
+        // Select all capacity ranges
+        function toggleAllCapacity() {
+            selectedCapacityRanges.clear();
+            
+            // Reset all buttons
+            document.querySelectorAll('.capacity-btn').forEach(btn => {
+                btn.classList.remove('bg-gray-700', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            
+            // Highlight all button
+            event.target.classList.add('bg-gray-700', 'text-white');
+            event.target.classList.remove('bg-gray-200', 'text-gray-700');
+            
+            applyFilters();
+        }
+        
+        // Apply combined filters
+        function applyFilters() {
+            let filters = ['all', ['!', ['has', 'point_count']]];
+            
+            // Window filter
+            if (currentFilter !== 'all') {
+                filters.push(['==', ['get', 'repowering_window'], currentFilter]);
+            }
+            
+            // Capacity filter (multi-select)
+            if (selectedCapacityRanges.size > 0) {
+                const capacityKw = ['*', ['get', 'capacity_mw'], 1000];
+                const rangeFilters = [];
+                
+                selectedCapacityRanges.forEach(range => {
+                    switch(range) {
+                        case '0-50':
+                            rangeFilters.push(['<', capacityKw, 50]);
+                            break;
+                        case '50-100':
+                            rangeFilters.push(['all', ['>=', capacityKw, 50], ['<', capacityKw, 100]]);
+                            break;
+                        case '100-200':
+                            rangeFilters.push(['all', ['>=', capacityKw, 100], ['<', capacityKw, 200]]);
+                            break;
+                        case '200-300':
+                            rangeFilters.push(['all', ['>=', capacityKw, 200], ['<', capacityKw, 300]]);
+                            break;
+                        case '300-400':
+                            rangeFilters.push(['all', ['>=', capacityKw, 300], ['<', capacityKw, 400]]);
+                            break;
+                        case '400-500':
+                            rangeFilters.push(['all', ['>=', capacityKw, 400], ['<', capacityKw, 500]]);
+                            break;
+                        case '500-750':
+                            rangeFilters.push(['all', ['>=', capacityKw, 500], ['<', capacityKw, 750]]);
+                            break;
+                        case '750-1000':
+                            rangeFilters.push(['all', ['>=', capacityKw, 750], ['<', capacityKw, 1000]]);
+                            break;
+                        case '1000+':
+                            rangeFilters.push(['>=', capacityKw, 1000]);
+                            break;
+                    }
+                });
+                
+                if (rangeFilters.length === 1) {
+                    filters.push(rangeFilters[0]);
+                } else if (rangeFilters.length > 1) {
+                    filters.push(['any', ...rangeFilters]);
+                }
+            }
+            
+            map.setFilter('unclustered-point', filters);
+            
+            // Update filtered data for clustering
+            const filteredData = filterGeoJSON();
+            map.getSource('turbines').setData(filteredData);
+            
+            // Update all statistics after filtering
+            updateAllStatistics();
+        }
+        
+        // Filter GeoJSON data
+        function filterGeoJSON() {
+            if (!allTurbineData) return turbineGeoJSON;
+            
+            const filtered = {
+                type: 'FeatureCollection',
+                features: allTurbineData.features.filter(feature => {
+                    const props = feature.properties;
+                    
+                    // Window filter
+                    if (currentFilter !== 'all' && props.repowering_window !== currentFilter) {
+                        return false;
+                    }
+                    
+                    // Capacity filter (multi-select)
+                    if (selectedCapacityRanges.size > 0) {
+                        const capacityKw = props.capacity_mw * 1000;
+                        let matchesAnyRange = false;
+                        
+                        selectedCapacityRanges.forEach(range => {
+                            switch(range) {
+                                case '0-50':
+                                    if (capacityKw < 50) matchesAnyRange = true;
+                                    break;
+                                case '50-100':
+                                    if (capacityKw >= 50 && capacityKw < 100) matchesAnyRange = true;
+                                    break;
+                                case '100-200':
+                                    if (capacityKw >= 100 && capacityKw < 200) matchesAnyRange = true;
+                                    break;
+                                case '200-300':
+                                    if (capacityKw >= 200 && capacityKw < 300) matchesAnyRange = true;
+                                    break;
+                                case '300-400':
+                                    if (capacityKw >= 300 && capacityKw < 400) matchesAnyRange = true;
+                                    break;
+                                case '400-500':
+                                    if (capacityKw >= 400 && capacityKw < 500) matchesAnyRange = true;
+                                    break;
+                                case '500-750':
+                                    if (capacityKw >= 500 && capacityKw < 750) matchesAnyRange = true;
+                                    break;
+                                case '750-1000':
+                                    if (capacityKw >= 750 && capacityKw < 1000) matchesAnyRange = true;
+                                    break;
+                                case '1000+':
+                                    if (capacityKw >= 1000) matchesAnyRange = true;
+                                    break;
+                            }
+                        });
+                        
+                        if (!matchesAnyRange) return false;
+                    }
+                    
+                    return true;
+                })
+            };
+            
+            return filtered;
+        }
+        
+        // Update regional summary
+        // Update all dashboard statistics
+        function updateAllStatistics() {
+            const allData = turbineGeoJSON;
+            const filteredData = filterGeoJSON();
+            
+            // Calculate stats for all data
+            let totalSites = allData.features.length;
+            let totalCapacity = 0;
+            let totalUrgent = 0;
+            let totalOptimal = 0;
+            let totalImmediate = 0;
+            let totalExpired = 0;
+            let totalFITYears = 0;
+            let totalAnnualIncome = 0;
+            let totalRemainingValue = 0;
+            
+            allData.features.forEach(feature => {
+                const props = feature.properties;
+                totalCapacity += props.capacity_mw || 0;
+                totalFITYears += props.remaining_fit_years || 0;
+                totalAnnualIncome += props.annual_income || 0;
+                totalRemainingValue += props.total_remaining_value || 0;
+                
+                if (props.repowering_window === 'URGENT') totalUrgent++;
+                if (props.repowering_window === 'OPTIMAL') totalOptimal++;
+                if (props.repowering_window === 'IMMEDIATE') totalImmediate++;
+                if (props.repowering_window === 'TOO_LATE') totalExpired++;
+            });
+            
+            // Update header statistics
+            document.getElementById('headerTotalSites').textContent = totalSites.toLocaleString();
+            document.getElementById('headerTotalSitesLabel').textContent = 'Wind turbines';
+            document.getElementById('headerCapacity').textContent = Math.round(totalCapacity).toLocaleString();
+            document.getElementById('headerUrgent').textContent = totalUrgent.toLocaleString();
+            document.getElementById('headerOptimal').textContent = totalOptimal.toLocaleString();
+            document.getElementById('headerAvgFIT').textContent = totalSites > 0 ? (totalFITYears / totalSites).toFixed(1) : '0.0';
+            
+            // Update potential value in millions
+            const potentialMillion = totalRemainingValue / 1000000;
+            document.getElementById('headerPotential').textContent = potentialMillion.toFixed(1);
+            
+            // Update filter button counts
+            document.getElementById('btnAllCount').textContent = totalSites.toLocaleString();
+            document.getElementById('btnImmediateCount').textContent = totalImmediate.toLocaleString();
+            document.getElementById('btnUrgentCount').textContent = totalUrgent.toLocaleString();
+            document.getElementById('btnOptimalCount').textContent = totalOptimal.toLocaleString();
+            document.getElementById('btnExpiredCount').textContent = totalExpired.toLocaleString();
+            
+            // Update filtered count display
+            const filteredCount = filteredData.features.length;
+            if (currentFilter !== 'all' || selectedCapacityRanges.length > 0) {
+                document.getElementById('filteredCount').textContent = 
+                    `(${filteredCount.toLocaleString()} of ${totalSites.toLocaleString()} shown)`;
+            } else {
+                document.getElementById('filteredCount').textContent = '';
+            }
+            
+            // Update regional summary with filtered data
+            updateRegionalSummary();
+            
+            // Update priority chart
+            updatePriorityChart();
+            
+            // Update regional distribution
+            updateRegionalDistribution();
+        }
+        
+        function updateRegionalSummary() {
+            const filteredData = filterGeoJSON();
+            
+            // Scottish postcodes: AB (Aberdeen), DD (Dundee), DG (Dumfries), EH (Edinburgh), FK (Falkirk), 
+            // G (Glasgow), HS (Hebrides), IV (Inverness), KA (Kilmarnock), KW (Kirkwall), 
+            // KY (Kirkcaldy), ML (Motherwell), PA (Paisley), PH (Perth), TD (Borders), ZE (Shetland)
+            const scotlandPostcodes = ['AB', 'DD', 'DG', 'EH', 'FK', 'G', 'HS', 'IV', 'KA', 'KW', 'KY', 'ML', 'PA', 'PH', 'TD', 'ZE'];
+            
+            let ewSites = 0, ewCapacity = 0, ewOptimal = 0, ewUrgent = 0, ewExpiring = 0, ewIncome = 0;
+            let scotSites = 0, scotCapacity = 0, scotOptimal = 0, scotUrgent = 0, scotExpiring = 0, scotIncome = 0;
+            let totalRemainingValue = 0;
+            
+            filteredData.features.forEach(feature => {
+                const props = feature.properties;
+                const postcode = props.postcode || '';
+                // Check if postcode starts with Scottish prefix
+                const postcodePrefix = postcode.substring(0, 2).toUpperCase();
+                const isScotland = scotlandPostcodes.includes(postcodePrefix) || 
+                                 (postcode.substring(0, 1).toUpperCase() === 'G' && scotlandPostcodes.includes('G'));
+                
+                if (isScotland) {
+                    scotSites++;
+                    scotCapacity += props.capacity_mw;
+                    scotIncome += props.annual_income || 0;
+                    if (props.repowering_window === 'OPTIMAL') scotOptimal++;
+                    if (props.repowering_window === 'URGENT') scotUrgent++;
+                    if (props.repowering_window === 'TOO_LATE') scotExpiring++;
+                } else {
+                    ewSites++;
+                    ewCapacity += props.capacity_mw;
+                    ewIncome += props.annual_income || 0;
+                    if (props.repowering_window === 'OPTIMAL') ewOptimal++;
+                    if (props.repowering_window === 'URGENT') ewUrgent++;
+                    if (props.repowering_window === 'TOO_LATE') ewExpiring++;
+                }
+                totalRemainingValue += props.total_remaining_value || 0;
+            });
+            
+            // Format capacity display
+            function formatCapacity(mw) {
+                if (mw < 1) {
+                    return (mw * 1000).toFixed(0) + ' kW';
+                } else {
+                    return mw.toFixed(2) + ' MW';
+                }
+            }
+            
+            // Update display
+            document.getElementById('ewSites').textContent = ewSites.toLocaleString();
+            document.getElementById('ewCapacity').textContent = formatCapacity(ewCapacity);
+            document.getElementById('ewOptimal').textContent = ewOptimal.toLocaleString();
+            document.getElementById('ewUrgent').textContent = ewUrgent.toLocaleString();
+            document.getElementById('ewExpiring').textContent = ewExpiring.toLocaleString();
+            document.getElementById('ewIncome').textContent = '£' + ewIncome.toLocaleString('en-GB', {maximumFractionDigits: 0});
+            
+            document.getElementById('scotSites').textContent = scotSites.toLocaleString();
+            document.getElementById('scotCapacity').textContent = formatCapacity(scotCapacity);
+            document.getElementById('scotOptimal').textContent = scotOptimal.toLocaleString();
+            document.getElementById('scotUrgent').textContent = scotUrgent.toLocaleString();
+            document.getElementById('scotExpiring').textContent = scotExpiring.toLocaleString();
+            document.getElementById('scotIncome').textContent = '£' + scotIncome.toLocaleString('en-GB', {maximumFractionDigits: 0});
+            
+            const totalSites = ewSites + scotSites;
+            const totalCapacity = ewCapacity + scotCapacity;
+            document.getElementById('totalSites').textContent = totalSites.toLocaleString();
+            document.getElementById('totalCapacity').textContent = formatCapacity(totalCapacity);
+            document.getElementById('avgSize').textContent = totalSites > 0 ? 
+                ((totalCapacity * 1000) / totalSites).toFixed(0) + ' kW' : '0 kW';
+            document.getElementById('totalIncome').textContent = '£' + (ewIncome + scotIncome).toLocaleString('en-GB', {maximumFractionDigits: 0});
+            document.getElementById('totalRemaining').textContent = '£' + totalRemainingValue.toLocaleString('en-GB', {maximumFractionDigits: 0});
+        }
+        
+        // Toggle 3D view
+        function toggle3D() {
+            is3D = !is3D;
+            const btn = document.getElementById('btn3D');
+            
+            if (is3D) {
+                map.easeTo({
+                    pitch: 60,
+                    bearing: -20
+                });
+                btn.innerHTML = '<i class="fas fa-map mr-2"></i>2D View';
+            } else {
+                map.easeTo({
+                    pitch: 0,
+                    bearing: 0
+                });
+                btn.innerHTML = '<i class="fas fa-cube mr-2"></i>3D View';
+            }
+        }
+        
+        // Reset map
+        function resetMap() {
+            map.flyTo({
+                center: [-0.8, 53.7],
+                zoom: 9,
+                pitch: 0,
+                bearing: 0
+            });
+            is3D = false;
+            document.getElementById('btn3D').innerHTML = '<i class="fas fa-cube mr-2"></i>3D View';
+        }
+        
+        // Store chart instance globally
+        let priorityChartInstance = null;
+        
+        // Initialize priority chart with FIXED container
+        function initPriorityChart() {
+            const ctx = document.getElementById('priorityChart').getContext('2d');
+            
+            priorityChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Urgent', 'Optimal', 'Immediate', 'Expired'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#FF8C00', '#7CC061', '#FF4444', '#6B7280'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: { size: 11 },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        const income = data.datasets[0].income ? data.datasets[0].income[i] : 0;
+                                        const incomeStr = income > 1000000 ? `£${(income/1000000).toFixed(1)}M` : `£${(income/1000).toFixed(0)}k`;
+                                        return {
+                                            text: `${label}: ${percentage}% (${incomeStr})`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    const income = context.dataset.income ? context.dataset.income[context.dataIndex] : 0;
+                                    const incomeStr = income > 1000000 ? `£${(income/1000000).toFixed(1)}M` : `£${(income/1000).toFixed(0)}k`;
+                                    return [`${label}: ${value} sites (${percentage}%)`, `Annual Income: ${incomeStr}`];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Update with real data
+            updatePriorityChart();
+        }
+        
+        // Update priority chart with current data
+        function updatePriorityChart() {
+            if (!priorityChartInstance) return;
+            
+            const filteredData = filterGeoJSON();
+            let urgent = 0, optimal = 0, immediate = 0, expired = 0;
+            let urgentIncome = 0, optimalIncome = 0, immediateIncome = 0, expiredIncome = 0;
+            
+            filteredData.features.forEach(feature => {
+                const props = feature.properties;
+                const income = props.annual_income || 0;
+                
+                if (props.repowering_window === 'URGENT') {
+                    urgent++;
+                    urgentIncome += income;
+                } else if (props.repowering_window === 'OPTIMAL') {
+                    optimal++;
+                    optimalIncome += income;
+                } else if (props.repowering_window === 'IMMEDIATE') {
+                    immediate++;
+                    immediateIncome += income;
+                } else if (props.repowering_window === 'EXPIRED' || props.repowering_window === 'TOO_LATE') {
+                    expired++;
+                    expiredIncome += income;
+                }
+            });
+            
+            priorityChartInstance.data.datasets[0].data = [urgent, optimal, immediate, expired];
+            priorityChartInstance.data.datasets[0].income = [urgentIncome, optimalIncome, immediateIncome, expiredIncome];
+            priorityChartInstance.update();
+        }
+        
+        // Update regional distribution chart with capacity breakdown
+        function updateRegionalDistribution() {
+            const filteredData = filterGeoJSON();
+            const regions = {};
+            
+            // Count sites by region and capacity bands
+            filteredData.features.forEach(feature => {
+                const postcode = feature.properties.postcode || 'Unknown';
+                const region = postcode.substring(0, 2).toUpperCase();
+                const capacity_kw = (feature.properties.capacity_mw || 0) * 1000;
+                
+                if (!regions[region]) {
+                    regions[region] = { 
+                        count: 0, 
+                        income: 0,
+                        bands: {
+                            '0-100': 0,
+                            '100-500': 0,
+                            '500-1000': 0,
+                            '1MW+': 0
+                        }
+                    };
+                }
+                
+                regions[region].count++;
+                regions[region].income += feature.properties.annual_income || 0;
+                
+                // Categorize by capacity
+                if (capacity_kw <= 100) {
+                    regions[region].bands['0-100']++;
+                } else if (capacity_kw <= 500) {
+                    regions[region].bands['100-500']++;
+                } else if (capacity_kw <= 1000) {
+                    regions[region].bands['500-1000']++;
+                } else {
+                    regions[region].bands['1MW+']++;
+                }
+            });
+            
+            // Sort regions by count - show ALL regions
+            const sortedRegions = Object.entries(regions)
+                .sort(([, a], [, b]) => b.count - a.count);
+            
+            // Get region names mapping
+            const regionNames = {
+                'AB': 'Aberdeenshire', 'KW': 'Orkney & Caithness', 'DD': 'Dundee & Angus',
+                'IV': 'Highlands', 'ML': 'Lanarkshire', 'TD': 'Scottish Borders',
+                'KY': 'Fife', 'PH': 'Perthshire', 'PA': 'Argyll', 'EH': 'Edinburgh & Lothian',
+                'YO': 'Yorkshire', 'HU': 'East Yorkshire', 'NR': 'Norfolk', 'PE': 'Cambridgeshire',
+                'IP': 'Suffolk', 'EX': 'Devon', 'TR': 'Cornwall', 'PL': 'Plymouth & Cornwall',
+                'SA': 'Swansea & West Wales', 'LL': 'North Wales', 'CF': 'Cardiff & South Wales',
+                'NAN': 'Unknown', 'FK': 'Stirlingshire', 'G': 'Glasgow', 'HS': 'Hebrides',
+                'DG': 'Dumfries & Galloway', 'LA': 'Lancashire', 'CA': 'Cumbria'
+            };
+            
+            // Band colors
+            const bandColors = {
+                '0-100': '#93C5FD',    // light blue
+                '100-500': '#60A5FA',  // medium blue
+                '500-1000': '#3B82F6', // dark blue
+                '1MW+': '#1E40AF'      // very dark blue
+            };
+            
+            // Build HTML for regional distribution with capacity bands
+            const maxCount = sortedRegions[0] ? sortedRegions[0][1].count : 1;
+            const html = sortedRegions.map(([region, data]) => {
+                const name = regionNames[region] || region;
+                const incomeStr = data.income > 1000000 ? `£${(data.income/1000000).toFixed(1)}M` : `£${(data.income/1000).toFixed(0)}k`;
+                
+                // Calculate percentages for each band
+                const bandBars = Object.entries(data.bands).map(([band, count]) => {
+                    const percentage = (count / maxCount) * 100;
+                    const bandLabel = band === '1MW+' ? '1MW+' : band + 'kW';
+                    
+                    return count > 0 ? `
+                        <div class="flex items-center space-x-2 text-xs">
+                            <div class="w-16 text-gray-600">${bandLabel}:</div>
+                            <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                <div class="h-1.5 rounded-full" style="width: ${percentage}%; background: ${bandColors[band]}"></div>
+                            </div>
+                            <div class="w-8 text-right text-gray-700">${count}</div>
+                        </div>
+                    ` : '';
+                }).filter(bar => bar).join('');
+                
+                return `
+                    <div class="border-b border-gray-100 pb-2 mb-2">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-bold">${name}</span>
+                            <div class="text-right">
+                                <span class="text-sm font-bold" style="color: var(--saber-blue)">${data.count} sites</span>
+                                <span class="text-xs text-gray-500 ml-2">${incomeStr}/yr</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1 pl-2">
+                            ${bandBars}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Add legend at the bottom
+            const legend = `
+                <div class="mt-3 pt-2 border-t border-gray-200">
+                    <div class="flex justify-between text-xs text-gray-600">
+                        <span class="font-semibold">Capacity bands:</span>
+                        <div class="flex space-x-3">
+                            <span><span class="inline-block w-3 h-3 rounded" style="background: ${bandColors['0-100']}"></span> 0-100kW</span>
+                            <span><span class="inline-block w-3 h-3 rounded" style="background: ${bandColors['100-500']}"></span> 100-500kW</span>
+                            <span><span class="inline-block w-3 h-3 rounded" style="background: ${bandColors['500-1000']}"></span> 500kW-1MW</span>
+                            <span><span class="inline-block w-3 h-3 rounded" style="background: ${bandColors['1MW+']}"></span> 1MW+</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('regionalDistribution').innerHTML = html + legend;
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Precompute stats so the dashboard isn't blank even if map tiles fail
+            try { updateAllStatistics(); } catch (e) { console.warn('Initial stats update failed', e); }
+            initMap();
+            initPriorityChart();
+        });
+    </script>
+</body>
+</html>

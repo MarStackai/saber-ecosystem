@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPC Partner Onboarding | Saber Renewables</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="saber-header">
+        <div class="saber-container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="saber-logo.svg" alt="Saber Renewables" class="saber-logo">
+                    <span class="tagline">Expert • Clear • Strategic</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="energy-pulse"></div>
+        <div class="saber-container">
+            <h1 class="hero-title">EPC Partner Onboarding</h1>
+            <p class="hero-subtitle">Join Saber's network of certified Energy Performance Certificate partners</p>
+        </div>
+    </section>
+
+    <!-- Main Form -->
+    <main class="form-section">
+        <div class="saber-container">
+            <div class="form-wrapper saber-card">
+                <!-- Progress Bar -->
+                <div class="progress-bar">
+                    <div class="progress-step active" data-step="1">
+                        <span class="step-number">1</span>
+                        <span class="step-label">Company Details</span>
+                    </div>
+                    <div class="progress-step" data-step="2">
+                        <span class="step-number">2</span>
+                        <span class="step-label">Contact Information</span>
+                    </div>
+                    <div class="progress-step" data-step="3">
+                        <span class="step-number">3</span>
+                        <span class="step-label">Compliance & Accreditations</span>
+                    </div>
+                    <div class="progress-step" data-step="4">
+                        <span class="step-number">4</span>
+                        <span class="step-label">Documents & Terms</span>
+                    </div>
+                </div>
+
+                <form id="epcOnboardingForm" class="saber-form" action="#" method="post" onsubmit="return false;">
+                    <!-- Step 1: Company Details -->
+                    <div class="form-step active" data-step="1">
+                        <h2 class="step-title">Company Information</h2>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="text" id="companyName" name="companyName" placeholder=" " required>
+                                    <label for="companyName">Company Name *</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="text" id="tradingName" name="tradingName" placeholder=" ">
+                                    <label for="tradingName">Trading Name</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <div class="floating-label">
+                                    <textarea id="registeredOffice" name="registeredOffice" rows="3" placeholder=" " required></textarea>
+                                    <label for="registeredOffice">Registered Office Address *</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="text" id="companyRegNo" name="companyRegNo" placeholder=" " required>
+                                    <label for="companyRegNo">Company Registration Number *</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="text" id="vatNo" name="vatNo" placeholder=" ">
+                                    <label for="vatNo">VAT Number</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="number" id="yearsTrading" name="yearsTrading" min="0" placeholder=" " required>
+                                    <label for="yearsTrading">Years Trading *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="saber-btn next-step">
+                                Next Step <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Contact Information -->
+                    <div class="form-step" data-step="2">
+                        <h2 class="step-title">Primary Contact</h2>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="text" id="primaryContactName" name="primaryContactName" placeholder=" " required>
+                                    <label for="primaryContactName">Contact Name *</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="email" id="primaryContactEmail" name="primaryContactEmail" placeholder=" " required>
+                                    <label for="primaryContactEmail">Email Address *</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="tel" id="primaryContactPhone" name="primaryContactPhone" placeholder=" " required>
+                                    <label for="primaryContactPhone">Phone Number *</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="section-label">Coverage Regions *</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="coverageRegion" value="North West">
+                                        <span>North West</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="coverageRegion" value="North East">
+                                        <span>North East</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="coverageRegion" value="Yorkshire">
+                                        <span>Yorkshire</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="coverageRegion" value="Midlands">
+                                        <span>Midlands</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="coverageRegion" value="South East">
+                                        <span>South East</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="coverageRegion" value="South West">
+                                        <span>South West</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="coverageRegion" value="Scotland">
+                                        <span>Scotland</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="coverageRegion" value="Wales">
+                                        <span>Wales</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="saber-btn-secondary prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button type="button" class="saber-btn next-step">
+                                Next Step <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Compliance & Accreditations -->
+                    <div class="form-step" data-step="3">
+                        <h2 class="step-title">Compliance & Accreditations</h2>
+                        
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="section-label">ISO Standards</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="isoStandards" value="ISO 9001">
+                                        <span>ISO 9001 (Quality Management)</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="isoStandards" value="ISO 14001">
+                                        <span>ISO 14001 (Environmental)</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="isoStandards" value="ISO 45001">
+                                        <span>ISO 45001 (Health & Safety)</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="isoStandards" value="ISO 50001">
+                                        <span>ISO 50001 (Energy Management)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="section-label">Acts as Principal Contractor? *</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="actsAsPrincipalContractor" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="actsAsPrincipalContractor" value="No" required>
+                                        <span>No</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="section-label">Acts as Principal Designer? *</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="actsAsPrincipalDesigner" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="actsAsPrincipalDesigner" value="No" required>
+                                        <span>No</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="section-label">Has GDPR Policy? *</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="hasGDPRPolicy" value="Yes" required>
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="hasGDPRPolicy" value="No" required>
+                                        <span>No</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="number" id="hsqIncidents" name="hsqIncidents" min="0" placeholder=" " required>
+                                    <label for="hsqIncidents">HSEQ Incidents (Last 5 Years) *</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="floating-label">
+                                    <input type="number" id="riddor" name="riddor" min="0" placeholder=" " required>
+                                    <label for="riddor">RIDDOR Reportable (Last 3 Years) *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="saber-btn-secondary prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button type="button" class="saber-btn next-step">
+                                Next Step <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Documents & Terms -->
+                    <div class="form-step" data-step="4">
+                        <h2 class="step-title">Documents & Agreement</h2>
+                        
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="section-label">Supporting Documents</label>
+                                <div class="file-upload-area" id="fileUploadArea">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag & drop files here or click to browse</p>
+                                    <p class="file-info">Accepted: PDF, DOC, DOCX, JPG, PNG (Max 10MB each)</p>
+                                    <input type="file" id="fileInput" name="documents" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" hidden>
+                                </div>
+                                <div id="fileList" class="file-list"></div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <div class="floating-label">
+                                    <textarea id="notes" name="notes" rows="4" placeholder=" "></textarea>
+                                    <label for="notes">Notes or Clarifications</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="checkbox-item terms">
+                                    <input type="checkbox" id="agreeToTerms" name="agreeToTerms" required>
+                                    <span>I agree to Saber's <a href="#" target="_blank">Terms and Conditions</a> *</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <div class="info-box">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>By submitting this form, you consent to Saber processing your data in accordance with our Privacy Policy and GDPR regulations.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="saber-btn-secondary prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button type="submit" class="saber-btn submit-btn">
+                                <i class="fas fa-paper-plane"></i> Submit Application
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="saber-footer">
+        <div class="saber-container">
+            <p>&copy; 2024 Saber Renewables. Leading the transition to sustainable energy.</p>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content saber-card">
+            <i class="fas fa-check-circle success-icon"></i>
+            <h2>Application Submitted Successfully!</h2>
+            <p>Thank you for your interest in partnering with Saber Renewables. Our team will review your application and contact you within 2-3 business days.</p>
+            <button class="saber-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script-fixed.js"></script>
+</body>
+</html>

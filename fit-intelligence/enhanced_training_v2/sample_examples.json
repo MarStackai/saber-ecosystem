@@ -1,0 +1,82 @@
+[
+  {
+    "input": "300kw in cornwall",
+    "output": "{\"capacity\":300,\"location\":\"Cornwall\",\"postcode_patterns\":[\"TR\",\"PL\",\"EX\"]}"
+  },
+  {
+    "input": "hydro 330kw in cornwall",
+    "output": "{\"technology\":\"Hydro\",\"capacity\":330,\"location\":\"Cornwall\",\"postcode_patterns\":[\"TR\",\"PL\",\"EX\"]}"
+  },
+  {
+    "input": "2000kw in devon",
+    "output": "{\"capacity\":2000,\"location\":\"Devon\",\"postcode_patterns\":[\"EX\",\"TQ\",\"PL\"]}"
+  },
+  {
+    "input": "wind 2000kw in scotland",
+    "output": "{\"technology\":\"Wind\",\"capacity\":2000,\"location\":\"Scotland\",\"postcode_patterns\":[\"AB\",\"DD\",\"DG\"]}"
+  },
+  {
+    "input": "solar 300kw in scotland",
+    "output": "{\"technology\":\"Photovoltaic\",\"capacity\":300,\"location\":\"Scotland\",\"postcode_patterns\":[\"AB\",\"DD\",\"DG\"]}"
+  },
+  {
+    "input": "hydro 1000kw in scotland",
+    "output": "{\"technology\":\"Hydro\",\"capacity\":1000,\"location\":\"Scotland\",\"postcode_patterns\":[\"AB\",\"DD\",\"DG\"]}"
+  },
+  {
+    "input": "wind 750kw in norfolk",
+    "output": "{\"technology\":\"Wind\",\"capacity\":750,\"location\":\"Norfolk\",\"postcode_patterns\":[\"NR\",\"IP\"]}"
+  },
+  {
+    "input": "wind turbine 50kw in durham",
+    "output": "{\"technology\":\"Wind\",\"capacity\":50,\"location\":\"Durham\",\"postcode_patterns\":[\"DH\",\"DL\",\"SR\"]}"
+  },
+  {
+    "input": "hydro 250kw in devon",
+    "output": "{\"technology\":\"Hydro\",\"capacity\":250,\"location\":\"Devon\",\"postcode_patterns\":[\"EX\",\"TQ\",\"PL\"]}"
+  },
+  {
+    "input": "solar 150kw in durham",
+    "output": "{\"technology\":\"Photovoltaic\",\"capacity\":150,\"location\":\"Durham\",\"postcode_patterns\":[\"DH\",\"DL\",\"SR\"]}"
+  },
+  {
+    "input": "wind 50kw in yorkshire",
+    "output": "{\"technology\":\"Wind\",\"capacity\":50,\"location\":\"Yorkshire\",\"postcode_patterns\":[\"YO\",\"HU\",\"DN\"]}"
+  },
+  {
+    "input": "250kw in norfolk",
+    "output": "{\"capacity\":250,\"location\":\"Norfolk\",\"postcode_patterns\":[\"NR\",\"IP\"]}"
+  },
+  {
+    "input": "solar 150kw in ryedale",
+    "output": "{\"technology\":\"Photovoltaic\",\"capacity\":150,\"location\":\"Ryedale\",\"postcode_patterns\":[\"YO17\",\"YO18\"]}"
+  },
+  {
+    "input": "250kw wind in cumbria",
+    "output": "{\"technology\":\"Wind\",\"capacity\":250,\"location\":\"Cumbria\",\"postcode_patterns\":[\"CA\",\"LA\"]}"
+  },
+  {
+    "input": "wind in cornwall",
+    "output": "{\"technology\":\"Wind\",\"location\":\"Cornwall\",\"postcode_patterns\":[\"TR\",\"PL\",\"EX\"]}"
+  },
+  {
+    "input": "1000kw wind in london",
+    "output": "{\"technology\":\"Wind\",\"capacity\":1000,\"location\":\"London\",\"postcode_patterns\":[\"E\",\"EC\",\"N\"]}"
+  },
+  {
+    "input": "1500kw in suffolk",
+    "output": "{\"capacity\":1500,\"location\":\"Suffolk\",\"postcode_patterns\":[\"IP\",\"CO\"]}"
+  },
+  {
+    "input": "under 500kw in ryedale",
+    "output": "{\"capacity_max\":500,\"location\":\"Ryedale\",\"postcode_patterns\":[\"YO17\",\"YO18\"]}"
+  },
+  {
+    "input": "wind 50kw in norfolk",
+    "output": "{\"technology\":\"Wind\",\"capacity\":50,\"location\":\"Norfolk\",\"postcode_patterns\":[\"NR\",\"IP\"]}"
+  },
+  {
+    "input": "150kw wind in devon",
+    "output": "{\"technology\":\"Wind\",\"capacity\":150,\"location\":\"Devon\",\"postcode_patterns\":[\"EX\",\"TQ\",\"PL\"]}"
+  }
+]

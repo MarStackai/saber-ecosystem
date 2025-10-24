@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Access | Saber EPC Partner Portal</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Saber Brand Variables */
+        :root {
+            --saber-blue: #044D73;
+            --saber-green: #7CC061;
+            --dark-blue: #091922;
+            --dark-green: #0A2515;
+            --gradient-dark: #0d1138;
+            --white-98: rgba(255, 255, 255, 0.98);
+            --glass-white: rgba(255, 255, 255, 0.95);
+            --shadow-green: rgba(124, 192, 97, 0.2);
+            --shadow-blue: rgba(4, 77, 115, 0.2);
+        }
+
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, var(--dark-blue) 0%, var(--gradient-dark) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Saber Card */
+        .saber-card {
+            background: var(--glass-white);
+            border-radius: 16px;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .saber-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25), 
+                        0 0 0 2px var(--saber-green);
+        }
+
+        /* Logo Container with Saber Blue Background */
+        .logo-container {
+            background: var(--saber-blue);
+            margin: -2.5rem -2.5rem 2rem -2.5rem;
+            padding: 2rem;
+            border-radius: 16px 16px 0 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(124, 192, 97, 0.1));
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .saber-logo-svg {
+            width: 200px;
+            height: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .verify-container {
+            max-width: 500px;
+            width: 100%;
+            margin: 2rem;
+            text-align: center;
+        }
+
+        .verify-container h2 {
+            color: var(--saber-blue);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .intro-text {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .verify-form {
+            margin-top: 2rem;
+        }
+
+        .verify-form .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        /* Floating Labels */
+        .floating-label {
+            position: relative;
+        }
+
+        .floating-label input {
+            width: 100%;
+            padding: 1rem 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .floating-label label {
+            position: absolute;
+            top: 50%;
+            left: 0.75rem;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: white;
+            padding: 0 0.25rem;
+        }
+
+        .floating-label input:focus,
+        .floating-label input:not(:placeholder-shown) {
+            outline: none;
+            border-color: var(--saber-green);
+            box-shadow: 0 0 0 3px var(--shadow-green);
+        }
+
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label {
+            top: 0;
+            transform: translateY(-50%);
+            font-size: 0.85rem;
+            color: var(--saber-green);
+            font-weight: 600;
+        }
+
+        .code-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--saber-blue);
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .code-input-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .code-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .code-input:focus {
+            border-color: var(--saber-green);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--shadow-green);
+        }
+
+        /* Saber Button */
+        .saber-btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--saber-green), #95D47E);
+            color: white;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .saber-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px var(--shadow-green);
+        }
+
+        .error-message,
+        .success-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .success-message {
+            color: var(--saber-green);
+            background: rgba(124, 192, 97, 0.1);
+        }
+
+        .error-message.show,
+        .success-message.show {
+            display: block;
+        }
+
+        .help-text {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .help-text a {
+            color: var(--saber-blue);
+            text-decoration: none;
+        }
+
+        .help-text a:hover {
+            text-decoration: underline;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin: 1rem auto;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .security-badge i {
+            color: var(--saber-green);
+        }
+
+        /* Energy Pulse Background */
+        .energy-pulse {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, var(--saber-green), var(--saber-blue));
+            opacity: 0.05;
+            animation: pulse 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.03; transform: scale(1); }
+            50% { opacity: 0.08; transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="energy-pulse"></div>
+    
+    <div class="verify-container saber-card">
+        <div class="logo-container">
+            <!-- Saber Logo -->
+            <img src="../images/Saber-logo-wob-green.svg" alt="Saber Renewables" class="saber-logo-svg">
+        </div>
+        
+        <h2>EPC Partner Portal</h2>
+        
+        <p class="intro-text">
+            Welcome to Saber's exclusive EPC Partner onboarding portal. 
+            Please enter your email address and the invitation code you received.
+        </p>
+        
+        <form id="verifyForm" class="verify-form">
+            <div class="form-group">
+                <div class="floating-label">
+                    <input type="email" id="email" placeholder=" " required>
+                    <label for="email">Email Address</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="code-label">Invitation Code</label>
+                <div class="code-input-group">
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <span style="padding: 0 0.25rem; line-height: 50px;">-</span>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="saber-btn">
+                <i class="fas fa-shield-alt"></i> Verify Access
+            </button>
+            
+            <div class="security-badge">
+                <i class="fas fa-lock"></i>
+                <span>Secure verification process</span>
+            </div>
+        </form>
+        
+        <div id="loadingSpinner" class="loading-spinner">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--saber-green);"></i>
+        </div>
+        
+        <div id="errorMsg" class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText">Invalid email or invitation code. Please check and try again.</span>
+        </div>
+        
+        <div id="successMsg" class="success-message">
+            <i class="fas fa-check-circle"></i>
+            <span>Access verified! Redirecting to application form...</span>
+        </div>
+        
+        <div class="help-text">
+            Don't have an invitation code? 
+            <a href="mailto:sysadmin@saberrenewable.energy">Contact our partner team</a>
+            <br><br>
+            For technical support: 
+            <a href="mailto:sysadmin@saberrenewable.energy">sysadmin@saberrenewable.energy</a>
+        </div>
+    </div>
+    
+    <script>
+        // Code input handling
+        const codeInputs = document.querySelectorAll('.code-input');
+        
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1) {
+                    // Move to next input
+                    if (index < codeInputs.length - 1) {
+                        codeInputs[index + 1].focus();
+                    }
+                }
+            });
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '') {
+                    // Move to previous input
+                    if (index > 0) {
+                        codeInputs[index - 1].focus();
+                    }
+                }
+            });
+            
+            // Convert to uppercase
+            input.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        });
+        
+        // Form submission
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get values
+            const email = document.getElementById('email').value;
+            const code = Array.from(codeInputs).map(input => input.value).join('');
+            
+            // Hide messages
+            document.getElementById('errorMsg').classList.remove('show');
+            document.getElementById('successMsg').classList.remove('show');
+            
+            // Show loading
+            document.getElementById('loadingSpinner').classList.add('show');
+            document.querySelector('.saber-btn').disabled = true;
+            
+            try {
+                // Simulate verification (replace with actual API call)
+                const isValid = await verifyInvitation(email, code);
+                
+                if (isValid) {
+                    // Show success
+                    document.getElementById('successMsg').classList.add('show');
+                    
+                    // Store authentication
+                    sessionStorage.setItem('epcAuth', JSON.stringify({
+                        email: email,
+                        code: code,
+                        timestamp: Date.now(),
+                        verified: true
+                    }));
+                    
+                    // Redirect after delay - USE ABSOLUTE URL
+                    setTimeout(() => {
+                        // Redirect to the main form page with invitation code
+                        window.location.href = `/epc/form.html?code=${encodeURIComponent(code)}`;
+                    }, 2000);
+                } else {
+                    // Show error
+                    document.getElementById('errorMsg').classList.add('show');
+                    
+                    // Clear code inputs
+                    codeInputs.forEach(input => input.value = '');
+                    codeInputs[0].focus();
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                document.getElementById('errorText').textContent = 'An error occurred. Please try again.';
+                document.getElementById('errorMsg').classList.add('show');
+            } finally {
+                document.getElementById('loadingSpinner').classList.remove('show');
+                document.querySelector('.saber-btn').disabled = false;
+            }
+        });
+        
+        async function verifyInvitation(email, code) {
+            // Accept any valid 8-character alphanumeric code
+            // Updated to accept all letters A-Z and numbers 0-9
+            const validCodePattern = /^[A-Z0-9]{8}$/;
+            
+            // Check if code matches the valid pattern (case-insensitive)
+            if (code && code.length === 8 && validCodePattern.test(code.toUpperCase())) {
+                return true;
+            }
+            
+            // Also accept legacy test codes
+            const testCodes = ['ABCD1234', 'TEST1234', 'DEMO1234', 'TEST2024', 'DEMO2024'];
+            if (testCodes.includes(code)) {
+                return true;
+            }
+            
+            // For future: Call Power Automate HTTP endpoint to validate against SharePoint
+            // This would check if the code exists, isn't used, and hasn't expired
+            try {
+                // Placeholder for future SharePoint validation
+                console.log('Code validation:', code);
+            } catch (error) {
+                console.error('API call failed:', error);
+            }
+            
+            // Fallback
+            return false;
+        }
+        
+        // Check URL parameters for pre-filled code
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlCode = urlParams.get('code');
+        
+        if (urlCode && urlCode.length === 8) {
+            // Pre-fill code inputs
+            urlCode.split('').forEach((char, index) => {
+                if (codeInputs[index]) {
+                    codeInputs[index].value = char.toUpperCase();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

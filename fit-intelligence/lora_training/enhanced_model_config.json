@@ -1,0 +1,12 @@
+{
+  "model_name": "fit-intelligence-enhanced",
+  "base_model": "llama2:13b",
+  "enhanced": true,
+  "temperature": 0.1,
+  "critical_assertions": {
+    "manchester_m_only": true,
+    "yorkshire_full_set": true,
+    "capacity_exact": true,
+    "technology_normalized": true
+  }
+}

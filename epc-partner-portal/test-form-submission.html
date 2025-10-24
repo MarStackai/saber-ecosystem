@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test EPC Form Submission</title>
+</head>
+<body>
+    <h1>Test EPC Form Submission</h1>
+    
+    <button onclick="testSubmission()">Test API Submission</button>
+    
+    <div id="result"></div>
+    
+    <script>
+    async function testSubmission() {
+        const testData = {
+            companyName: "Test Company Ltd",
+            primaryContactEmail: "test@example.com",
+            invitationCode: "C451C8E8",
+            Status: "Submitted",
+            SubmissionDate: new Date().toISOString()
+        };
+        
+        document.getElementById('result').innerHTML = 'Submitting...';
+        
+        try {
+            // Try the API endpoint on the same domain
+            const response = await fetch('/api/submit-application', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(testData)
+            });
+            
+            const result = await response.text();
+            document.getElementById('result').innerHTML = `
+                <h3>Response:</h3>
+                <pre>${result}</pre>
+                <p>Status: ${response.status}</p>
+            `;
+        } catch (error) {
+            document.getElementById('result').innerHTML = `
+                <h3>Error:</h3>
+                <pre>${error.message}</pre>
+            `;
+        }
+    }
+    </script>
+</body>
+</html>

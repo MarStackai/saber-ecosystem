@@ -1,0 +1,439 @@
+{
+  "name": "a795ca0b-3293-4ae7-8f80-5e00148594cd",
+  "id": "/providers/Microsoft.Flow/flows/a795ca0b-3293-4ae7-8f80-5e00148594cd",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "EPC Application Submission Processor",
+    "definition": {
+      "metadata": {
+        "workflowEntityId": null,
+        "processAdvisorMetadata": null,
+        "flowChargedByPaygo": null,
+        "flowclientsuspensionreason": "None",
+        "flowclientsuspensiontime": null,
+        "flowclientsuspensionreasondetails": null,
+        "creator": {
+          "id": "e82d7ff1-337a-4e63-a34c-9de13137248c",
+          "type": "User",
+          "tenantId": "dd0eeaf2-2c36-4709-9554-6e2b2639c3d1"
+        },
+        "provisioningMethod": "FromDefinition",
+        "failureAlertSubscription": true,
+        "clientLastModifiedTime": "2025-09-10T11:35:56.652252Z",
+        "connectionKeySavedTimeKey": "2025-09-10T11:35:56.652252Z",
+        "creationSource": "Portal",
+        "modifiedSources": "Portal"
+      },
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "undefined",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {},
+          "type": "Request",
+          "kind": "Http",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "invitationCode": {
+                  "type": "string"
+                },
+                "companyName": {
+                  "type": "string"
+                },
+                "registrationNumber": {
+                  "type": "string"
+                },
+                "contactName": {
+                  "type": "string"
+                },
+                "contactTitle": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "phone": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "string"
+                },
+                "services": {
+                  "type": "array"
+                },
+                "yearsExperience": {
+                  "type": "number"
+                },
+                "teamSize": {
+                  "type": "number"
+                },
+                "coverage": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "primaryContact": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string"
+                    },
+                    "fullName": {
+                      "type": "string"
+                    },
+                    "jobTitle": {
+                      "type": "string"
+                    },
+                    "phone": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "submission": {
+                  "type": "object",
+                  "properties": {
+                    "additionalInformation": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "insurance": {
+                  "type": "object",
+                  "properties": {
+                    "employersLiabilityInsurance": {
+                      "type": "boolean"
+                    },
+                    "professionalIndemnityInsurance": {
+                      "type": "boolean"
+                    },
+                    "publicLiabilityInsurance": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "rolesCapabilities": {
+                  "type": "object",
+                  "properties": {
+                    "principalContractor": {
+                      "type": "boolean"
+                    },
+                    "principalDesigner": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "servicesExperience": {
+                  "type": "object",
+                  "properties": {
+                    "averageProjectsPerMonth": {
+                      "type": "number"
+                    },
+                    "softwareTools": {
+                      "type": "string"
+                    },
+                    "specializations": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "agreement": {
+                  "type": "object",
+                  "properties": {
+                    "dataProcessingConsent": {
+                      "type": "boolean"
+                    },
+                    "agreeToCodes": {
+                      "type": "boolean"
+                    },
+                    "marketingConsent": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "referenceNumber": {
+                  "type": "string"
+                },
+                "projectReferences": {
+                  "type": "object",
+                  "properties": {
+                    "nationwideCoverage": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "companyInfo": {
+                  "type": "object",
+                  "properties": {
+                    "parentCompany": {
+                      "type": "string"
+                    },
+                    "tradingName": {
+                      "type": "string"
+                    },
+                    "companyName": {
+                      "type": "string"
+                    },
+                    "yearsTrading": {
+                      "type": "number"
+                    },
+                    "vatNumber": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "certifications": {
+                  "type": "object",
+                  "properties": {
+                    "niceicContractor": {
+                      "type": "boolean"
+                    },
+                    "mcsApproved": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            },
+            "triggerAuthenticationType": "All"
+          }
+        }
+      },
+      "actions": {
+        "Get_items": {
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://saberrenewables.sharepoint.com/sites/SaberEPCPartners",
+              "table": "ae795135-d308-40d0-a2f2-90d66dbf7e2c",
+              "$filter": "Code eq '@{triggerBody()?['invitationCode']}'"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "connectionName": "shared_sharepointonline",
+              "operationId": "GetItems"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Condition": {
+          "actions": {
+            "Create_item": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://saberrenewables.sharepoint.com/sites/SaberEPCPartners",
+                  "table": "67c6199a-fdfc-4c17-a8e5-3914130cfabd",
+                  "item/Title": "@triggerBody()?['companyName']",
+                  "item/CompanyName": "@triggerBody()?['companyName']",
+                  "item/RegistrationNumber": "@triggerBody()?['registrationNumber']",
+                  "item/ContactName": "@triggerBody()?['contactName']",
+                  "item/ContactTitle": "@triggerBody()?['contactTitle']",
+                  "item/Email": "@triggerBody()?['email']",
+                  "item/Phone": "@triggerBody()?['phone']",
+                  "item/Address": "@triggerBody()?['address']",
+                  "item/YearsExperience": "@triggerBody()?['yearsExperience']",
+                  "item/TeamSize": "@triggerBody()?['teamSize']",
+                  "item/Coverage": "@triggerBody()?['coverage']",
+                  "item/InvitationCode": "@triggerBody()?['invitationCode']",
+                  "item/SubmissionDate": "@triggerBody()?['timestamp']",
+                  "item/Status/Value": "New",
+                  "item/SubmissionHandled": false,
+                  "item/PPL_Text": "@if(equals(triggerBody()?['insurance']?['publicLiabilityInsurance'], true), 'Yes', 'No')",
+                  "item/PrincipalContractorText": "@if(equals(triggerBody()?['rolesCapabilities']?['principalContractor'], true), 'Yes', 'No')",
+                  "item/MarketingConsentText": "@if(equals(triggerBody()?['agreement']?['marketingConsent'], true), 'Yes', 'No')",
+                  "item/AgreeToCodesText": "@if(equals(triggerBody()?['agreement']?['agreeToCodes'], true), 'Yes', 'No')",
+                  "item/NICEIC_Text": "@if(equals(triggerBody()?['certifications']?['niceicContractor'], true), 'Yes', 'No')",
+                  "item/PrimaryContactEmail": "@coalesce(triggerBody()?['primaryContact']?['email'], triggerBody()?['email'])",
+                  "item/YearsTrading": "@triggerBody()?['companyInfo']?['yearsTrading']",
+                  "item/Specialisations": "@triggerBody()?['servicesExperience']?['specializations']",
+                  "item/SubmissionStatus": "Submitted",
+                  "item/GDPRConsentText": "@if(equals(triggerBody()?['agreement']?['dataProcessingConsent'], true), 'Yes', 'No')",
+                  "item/MCS_Text": "@if(equals(triggerBody()?['certifications']?['mcsApproved'], true), 'Yes', 'No')",
+                  "item/AdditionalInfo": "@triggerBody()?['submission']?['additionalInformation']",
+                  "item/PI_Text": "@if(equals(triggerBody()?['insurance']?['professionalIndemnityInsurance'], true), 'Yes', 'No')",
+                  "item/ParentCompany": "@triggerBody()?['companyInfo']?['parentCompany']",
+                  "item/VATNumber": "@triggerBody()?['companyInfo']?['vatNumber']",
+                  "item/TradingName": "@triggerBody()?['companyInfo']?['tradingName']",
+                  "item/ReferenceNumber": "@coalesce(triggerBody()?['referenceNumber'], concat('EPC-', utcNow('yyyyMMddHHmmss')))",
+                  "item/ProjectsPerMonth": "@triggerBody()?['servicesExperience']?['averageProjectsPerMonth']",
+                  "item/EL_Text": "@if(equals(triggerBody()?['insurance']?['employersLiabilityInsurance'], true), 'Yes', 'No')",
+                  "item/PrincipalDesignerText": "@if(equals(triggerBody()?['rolesCapabilities']?['principalDesigner'], true), 'Yes', 'No')",
+                  "item/PrimaryContactName": "@coalesce(triggerBody()?['primaryContact']?['fullName'], triggerBody()?['contactName'])",
+                  "item/PrimaryContactTitle": "@coalesce(triggerBody()?['primaryContact']?['jobTitle'], triggerBody()?['contactTitle'])",
+                  "item/SoftwareUsed": "@triggerBody()?['servicesExperience']?['softwareTools']",
+                  "item/NationwideCoverageText": "@if(equals(triggerBody()?['projectReferences']?['nationwideCoverage'], true), 'Yes', 'No')",
+                  "item/PrimaryContactPhone": "@coalesce(triggerBody()?['primaryContact']?['phone'], triggerBody()?['phone'])"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "PostItem"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Update_item": {
+              "runAfter": {
+                "Create_item": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://saberrenewables.sharepoint.com/sites/SaberEPCPartners",
+                  "table": "ae795135-d308-40d0-a2f2-90d66dbf7e2c",
+                  "id": "@first(body('Get_items')?['value'])?['ID']",
+                  "item/Title": "@first(body('Get_items')?['value'])?['Title']",
+                  "item/CompanyName": "@triggerBody()?['companyName']",
+                  "item/ContactEmail": "@triggerBody()?['email']",
+                  "item/Code": "@triggerBody()?['invitationCode']",
+                  "item/InvitationSent": false,
+                  "item/Used": true,
+                  "item/UsedBy": "@triggerBody()?['email']",
+                  "item/UsedDate": "@utcNow()"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "connectionName": "shared_sharepointonline",
+                  "operationId": "PatchItem"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Response": {
+              "runAfter": {
+                "Update_item": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 200,
+                "body": {
+                  "success": true,
+                  "message": "Application submitted successfully",
+                  "referenceNumber": "@{body('Create_item')?['ID']}"
+                }
+              }
+            },
+            "Send_an_email_(V2)": {
+              "runAfter": {
+                "Send_an_email_(V2)_1": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "emailMessage/To": "SysAdmin@saberrenewables.com;Jess@saberrenewables.com;Rob@saberrenewables.com;gerry@saberrenewables.com",
+                  "emailMessage/Subject": "New EPC Application - @{coalesce(triggerBody()?['companyInfo']?['companyName'], triggerBody()?['companyName'])}",
+                  "emailMessage/Body": "<h2>New EPC Application Received</h2>\n<table border=\"1\" style=\"border-collapse: collapse; width: 100%;\">\n<tbody>\n<tr><td><strong>Company</strong></td><td>@{coalesce(triggerBody()?['companyInfo']?['companyName'], triggerBody()?['companyName'])}</td></tr>\n<tr><td><strong>Trading Name</strong></td><td>@{triggerBody()?['companyInfo']?['tradingName']}</td></tr>\n<tr><td><strong>VAT Number</strong></td><td>@{triggerBody()?['companyInfo']?['vatNumber']}</td></tr>\n<tr><td><strong>Contact</strong></td><td>@{coalesce(triggerBody()?['primaryContact']?['fullName'], triggerBody()?['contactName'])}</td></tr>\n<tr><td><strong>Email</strong></td><td>@{coalesce(triggerBody()?['primaryContact']?['email'], triggerBody()?['email'])}</td></tr>\n<tr><td><strong>Phone</strong></td><td>@{coalesce(triggerBody()?['primaryContact']?['phone'], triggerBody()?['phone'])}</td></tr>\n<tr><td><strong>SharePoint ID</strong></td><td>@{body('Create_item')?['ID']}</td></tr>\n<tr><td><strong>Code Used</strong></td><td>@{triggerBody()?['invitationCode']}</td></tr>\n</tbody>\n</table>\n\n<h3>Extended Form Data</h3>\n<ul>\n<li><strong>Specializations:</strong> @{triggerBody()?['servicesExperience']?['specializations']}</li>\n<li><strong>Software Used:</strong> @{triggerBody()?['servicesExperience']?['softwareTools']}</li>\n<li><strong>Projects Per Month:</strong> @{triggerBody()?['servicesExperience']?['averageProjectsPerMonth']}</li>\n<li><strong>Years Trading:</strong> @{triggerBody()?['companyInfo']?['yearsTrading']}</li>\n<li><strong>Principal Contractor:</strong> @{if(equals(triggerBody()?['rolesCapabilities']?['principalContractor'], true), 'Yes', 'No')}</li>\n<li><strong>Principal Designer:</strong> @{if(equals(triggerBody()?['rolesCapabilities']?['principalDesigner'], true), 'Yes', 'No')}</li>\n<li><strong>NICEIC CPS:</strong> @{if(equals(triggerBody()?['certifications']?['niceicContractor'], true), 'Yes', 'No')}</li>\n<li><strong>MCS Approved:</strong> @{if(equals(triggerBody()?['certifications']?['mcsApproved'], true), 'Yes', 'No')}</li>\n<li><strong>Insurance Present:</strong> PPL: @{if(equals(triggerBody()?['insurance']?['publicLiabilityInsurance'], true), 'Yes', 'No')}, EL: @{if(equals(triggerBody()?['insurance']?['employersLiabilityInsurance'], true), 'Yes', 'No')}, PI: @{if(equals(triggerBody()?['insurance']?['professionalIndemnityInsurance'], true), 'Yes', 'No')}</li>\n<li><strong>Nationwide Coverage:</strong> @{if(equals(triggerBody()?['projectReferences']?['nationwideCoverage'], true), 'Yes', 'No')}</li>\n<li><strong>GDPR Consent:</strong> @{if(equals(triggerBody()?['agreement']?['dataProcessingConsent'], true), 'Yes', 'No')}</li>\n</ul>\n\n<p><a href=\"https://saberrenewables.sharepoint.com/sites/SaberEPCPartners/Lists/EPC%20Onboarding\">View in SharePoint</a></p>",
+                  "emailMessage/Importance": "Normal"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                  "connectionName": "shared_office365",
+                  "operationId": "SendEmailV2"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "Send_an_email_(V2)_1": {
+              "runAfter": {
+                "Response": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "emailMessage/To": "@triggerBody()?['email']",
+                  "emailMessage/Subject": "Application Received - @{coalesce(triggerBody()?['companyInfo']?['companyName'], triggerBody()?['companyName'])}",
+                  "emailMessage/Body": "  <h2>Thank you for your application!</h2><br>  <p>Dear @{triggerBody()?['contactName']},</p><br>  <p>We have received your application to join the Saber Renewables EPC Partner Network.</p><br>  <h3>Application Details:</h3><br>  <ul><br>  <li><strong>Company:</strong> @{triggerBody()?['companyName']}</li><br>  <li><strong>Reference:</strong> @{body('Create_item')?['ID']}</li><br>  <li><strong>Submitted:</strong> @{utcNow()}</li><br>  </ul><br>  <p>Our team will review your application within 5 business days.</p><br>  <p>Kind regards,<br><br>  Saber Renewables Partner Team</p><br><p></p><br>",
+                  "emailMessage/Importance": "Normal"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                  "connectionName": "shared_office365",
+                  "operationId": "SendEmailV2"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "Get_items": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {
+              "Response_1": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                  "statusCode": 400,
+                  "body": {
+                    "success": false,
+                    "message": "Invalid or expired invitation code"
+                  }
+                }
+              }
+            }
+          },
+          "expression": {
+            "and": [
+              {
+                "greater": [
+                  "@length(body('Get_items')?['value'])",
+                  0
+                ]
+              }
+            ]
+          },
+          "type": "If"
+        }
+      },
+      "description": ""
+    },
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "connectionName": "shared-sharepointonl-038b749e-d3fc-4c29-b1a7-dcbd63e9350a",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+        "tier": "NotSpecified",
+        "apiName": "sharepointonline",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_office365": {
+        "connectionName": "shared-office365-4149f3cb-f5ed-4b42-9670-07a0ec993e6b",
+        "source": "Embedded",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified",
+        "apiName": "office365",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    },
+    "flowFailureAlertSubscribed": false,
+    "isManaged": false
+  }
+}

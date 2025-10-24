@@ -1,0 +1,52 @@
+[
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "anaerobic digestion sites good for repowering in London",
+    "output": "{\n  \"query_type\": \"business_opportunity\",\n  \"technology\": \"Anaerobic digestion\",\n  \"location\": \"London\",\n  \"postcode_patterns\": [\n    \"E\",\n    \"EC\",\n    \"N\",\n    \"NW\",\n    \"SE\",\n    \"SW\",\n    \"W\",\n    \"WC\"\n  ],\n  \"fit_remaining_max_years\": 10,\n  \"include_revenue\": true,\n  \"include_regional\": true\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "give me photovoltaic installations in East Yorkshire",
+    "output": "{\n  \"technology\": \"Photovoltaic\",\n  \"location\": \"Yorkshire\",\n  \"postcode_patterns\": [\n    \"YO\",\n    \"HU\",\n    \"DN\",\n    \"HD\",\n    \"WF\",\n    \"LS\",\n    \"BD\",\n    \"HX\",\n    \"S\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "which is better photovoltaic or anaerobic digestion in Scotland",
+    "output": "{\n  \"query_type\": \"comparison\",\n  \"technologies\": [\n    \"Photovoltaic\",\n    \"Anaerobic digestion\"\n  ],\n  \"location\": \"Scotland\",\n  \"postcode_patterns\": [\n    \"AB\",\n    \"DD\",\n    \"DG\",\n    \"EH\",\n    \"FK\",\n    \"G\",\n    \"IV\",\n    \"KA\",\n    \"KW\",\n    \"KY\",\n    \"ML\",\n    \"PA\",\n    \"PH\",\n    \"TD\",\n    \"ZE\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "show regional adjusted revenue for anaerobic digestion in Berkshire",
+    "output": "{\n  \"query_type\": \"regional_analysis\",\n  \"technology\": \"Anaerobic digestion\",\n  \"location\": \"Berkshire\",\n  \"postcode_patterns\": [\n    \"RG\",\n    \"SL\"\n  ],\n  \"include_regional\": true,\n  \"include_revenue\": true\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "find me hydro installations in Reading area",
+    "output": "{\n  \"technology\": \"Hydro\",\n  \"location\": \"Berkshire\",\n  \"postcode_patterns\": [\n    \"RG\",\n    \"SL\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "what are wind installations in Highlands",
+    "output": "{\n  \"technology\": \"Wind\",\n  \"location\": \"Scotland\",\n  \"postcode_patterns\": [\n    \"AB\",\n    \"DD\",\n    \"DG\",\n    \"EH\",\n    \"FK\",\n    \"G\",\n    \"IV\",\n    \"KA\",\n    \"KW\",\n    \"KY\",\n    \"ML\",\n    \"PA\",\n    \"PH\",\n    \"TD\",\n    \"ZE\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "I want hydro installations in North Wales",
+    "output": "{\n  \"technology\": \"Hydro\",\n  \"location\": \"Wales\",\n  \"postcode_patterns\": [\n    \"CF\",\n    \"LL\",\n    \"NP\",\n    \"SA\",\n    \"SY\",\n    \"LD\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "all solar in Scottish with capacity over 100kw",
+    "output": "{\n  \"technology\": \"Photovoltaic\",\n  \"capacity_min_kw\": 100,\n  \"location\": \"Scotland\",\n  \"postcode_patterns\": [\n    \"AB\",\n    \"DD\",\n    \"DG\",\n    \"EH\",\n    \"FK\",\n    \"G\",\n    \"IV\",\n    \"KA\",\n    \"KW\",\n    \"KY\",\n    \"ML\",\n    \"PA\",\n    \"PH\",\n    \"TD\",\n    \"ZE\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "show me photovoltaic installations in South Yorkshire",
+    "output": "{\n  \"technology\": \"Photovoltaic\",\n  \"location\": \"Yorkshire\",\n  \"postcode_patterns\": [\n    \"YO\",\n    \"HU\",\n    \"DN\",\n    \"HD\",\n    \"WF\",\n    \"LS\",\n    \"BD\",\n    \"HX\",\n    \"S\"\n  ]\n}"
+  },
+  {
+    "instruction": "Parse this FIT database query into structured filters",
+    "input": "look for all anaerobic",
+    "output": "{\n  \"technology\": \"Anaerobic digestion\"\n}"
+  }
+]

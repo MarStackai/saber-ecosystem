@@ -1,0 +1,7 @@
+{
+  "total_examples": 3195,
+  "train_size": 2556,
+  "val_size": 319,
+  "test_size": 320,
+  "unique_queries": 2176
+}

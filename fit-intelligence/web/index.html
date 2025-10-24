@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: #764ba2;
+        }
+        
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .search-box {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .search-input-group {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+        
+        .search-btn {
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 12px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            max-width: 70%;
+        }
+        
+        .user-message {
+            background: #f0f0f0;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            border: 1px solid #764ba240;
+        }
+        
+        .chat-input-container {
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .results-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: none;
+        }
+        
+        .results-container.show {
+            display: block;
+        }
+        
+        .result-item {
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .result-item:hover {
+            border-color: #764ba2;
+            background: #f9f9f9;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-id {
+            font-weight: bold;
+            color: #764ba2;
+        }
+        
+        .result-tech {
+            background: #667eea20;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #764ba2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔋 FIT Intelligence Platform</h1>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span>Total Installations:</span>
+                <span class="stat-value" id="totalInstalls">Loading...</span>
+            </div>
+            <div class="stat-item">
+                <span>Data Source:</span>
+                <span class="stat-value">ChromaDB</span>
+            </div>
+            <div class="stat-item">
+                <span>Status:</span>
+                <span class="stat-value" id="systemStatus">Connecting...</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="search-box">
+            <h2 style="margin-bottom: 1rem;">Search FIT Installations</h2>
+            <div class="search-input-group">
+                <input type="text" class="search-input" id="searchInput" 
+                       placeholder="Try: 'FIT ID 764485' or 'Wind farms in Wales' or 'Solar expiring soon'">
+                <button class="search-btn" onclick="performSearch()">Search</button>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    Welcome to FIT Intelligence! I have access to 40,194 commercial renewable installations. 
+                    Try asking about specific FIT IDs, locations, or technologies.
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" 
+                       placeholder="Ask about FIT installations..." 
+                       onkeypress="if(event.key==='Enter') sendMessage()">
+                <button class="search-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+            <h3>Search Results</h3>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Searching ChromaDB...</p>
+            </div>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Load stats on page load
+        window.onload = function() {
+            loadStats();
+            // Test with FIT ID 764485
+            document.getElementById('searchInput').value = 'FIT ID 764485';
+        };
+        
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalInstalls').textContent = 
+                        data.stats.total_installations.toLocaleString();
+                    document.getElementById('systemStatus').textContent = 'Connected';
+                    document.getElementById('systemStatus').style.color = '#22c55e';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('systemStatus').textContent = 'Error';
+                document.getElementById('systemStatus').style.color = '#ef4444';
+            }
+        }
+        
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            if (!query) return;
+            
+            const resultsContainer = document.getElementById('resultsContainer');
+            const loading = document.getElementById('loading');
+            const resultsList = document.getElementById('resultsList');
+            
+            resultsContainer.classList.add('show');
+            loading.classList.add('show');
+            resultsList.innerHTML = '';
+            
+            try {
+                // Check if it's a FIT ID search
+                const fitIdMatch = query.match(/(?:FIT ID\s*)?(\d+)/i);
+                
+                if (fitIdMatch && fitIdMatch[1].length >= 4) {
+                    // Direct FIT ID lookup
+                    const fitId = fitIdMatch[1];
+                    const response = await fetch(`/api/fit/${fitId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        displayResults([data.data]);
+                    } else {
+                        resultsList.innerHTML = '<p>No results found</p>';
+                    }
+                } else {
+                    // Natural language search
+                    const response = await fetch('/api/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.results.length > 0) {
+                        displayResults(data.results);
+                    } else {
+                        resultsList.innerHTML = '<p>No results found</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                resultsList.innerHTML = '<p>Error performing search</p>';
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+        
+        function displayResults(results) {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+            
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `
+                    <div class="result-header">
+                        <span class="result-id">FIT ID: ${result.fit_id}</span>
+                        <span class="result-tech">${result.technology}</span>
+                    </div>
+                    <div class="result-details">
+                        <div>Capacity: ${result.capacity_mw?.toFixed(2) || (result.capacity_kw/1000).toFixed(2)} MW</div>
+                        <div>Location: ${result.location || result.postcode}</div>
+                        <div>FIT Remaining: ${result.remaining_fit_years?.toFixed(1) || 'N/A'} years</div>
+                        <div>Window: ${result.repowering_window || 'Unknown'}</div>
+                    </div>
+                `;
+                resultsList.appendChild(div);
+            });
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user-message';
+            userMsg.textContent = message;
+            messagesContainer.appendChild(userMsg);
+            
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                
+                // Add bot response
+                const botMsg = document.createElement('div');
+                botMsg.className = 'message bot-message';
+                botMsg.textContent = data.response || 'Sorry, I encountered an error.';
+                messagesContainer.appendChild(botMsg);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+            } catch (error) {
+                console.error('Chat error:', error);
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'message bot-message';
+                errorMsg.textContent = 'Sorry, I encountered an error connecting to the server.';
+                messagesContainer.appendChild(errorMsg);
+            }
+        }
+    </script>
+</body>
+</html>

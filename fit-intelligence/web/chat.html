@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FIT Intelligence - Natural Language Interface</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        #chat-box {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        
+        .message {
+            margin: 15px 0;
+            padding: 12px 15px;
+            border-radius: 10px;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-msg {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-left: 20%;
+            text-align: right;
+        }
+        
+        .bot-msg {
+            background: white;
+            border: 2px solid #e0e0e0;
+            margin-right: 20%;
+        }
+        
+        .error-msg {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+        
+        .high-confidence {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .medium-confidence {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .low-confidence {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        #user-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        #send-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        #send-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        #send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .status-ok {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .examples {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .examples h3 {
+            margin-top: 0;
+            color: #666;
+        }
+        
+        .example-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .confidence-score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .analysis-details {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 FIT Intelligence</h1>
+        <p class="subtitle">Natural Language Query Interface</p>
+        
+        <div id="status" class="status">Checking connection...</div>
+        
+        <div id="chat-box">
+            <div class="message bot-msg">
+                Welcome! I understand natural language queries about FIT installations. Try asking:
+                <ul>
+                    <li>"What about FIT ID 764485?"</li>
+                    <li>"Check a 300kW wind turbine in Beverly"</li>
+                    <li>"330kW installation in Ryedale YO17"</li>
+                    <li>"Find wind farms in East Yorkshire"</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Ask about any FIT installation..." autofocus>
+            <button id="send-btn" onclick="sendQuery()">Send</button>
+        </div>
+        
+        <div class="examples">
+            <h3>Quick Examples:</h3>
+            <button class="example-btn" onclick="tryExample('fit id 764485')">FIT ID 764485</button>
+            <button class="example-btn" onclick="tryExample('300kW wind turbine in Beverly area')">300kW Beverly</button>
+            <button class="example-btn" onclick="tryExample('330kW in Ryedale YO17')">330kW Ryedale</button>
+            <button class="example-btn" onclick="tryExample('Check 225kW installation in Selby DN6')">225kW Selby</button>
+            <button class="example-btn" onclick="tryExample('500kW turbine in East Riding HU15')">500kW East Riding</button>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:5000';
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const statusDiv = document.getElementById('status');
+        
+        // Generate or retrieve session ID
+        let sessionId = localStorage.getItem('chatSessionId');
+        if (!sessionId) {
+            sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('chatSessionId', sessionId);
+        }
+        console.log('Session ID:', sessionId);
+        
+        // Check API status on load
+        async function checkStatus() {
+            try {
+                const response = await fetch(API_URL + '/api/health');
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    statusDiv.className = 'status status-ok';
+                    statusDiv.textContent = '✅ System Online - ChromaDB Connected';
+                } else {
+                    statusDiv.className = 'status status-ok';
+                    statusDiv.textContent = '✅ System Online';
+                }
+            } catch (error) {
+                statusDiv.className = 'status status-error';
+                statusDiv.textContent = '❌ Cannot connect to API - Make sure server is running on port 5000';
+            }
+        }
+        
+        function addMessage(content, className = 'bot-msg') {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + className;
+            msgDiv.innerHTML = content;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        function parseNaturalLanguage(text) {
+            console.log('Parsing:', text);
+            
+            const result = {
+                technology: 'Wind',
+                mpan_prefix: '23'  // Default for Yorkshire
+            };
+            
+            // Parse FIT ID
+            const fitIdPatterns = [
+                /fit\s*(?:id)?\s*[:=]?\s*(\d+)/i,
+                /(?:id|ID)\s*[:=]?\s*(\d+)/i,
+                /^(\d{6})$/  // Just 6 digits
+            ];
+            
+            for (const pattern of fitIdPatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    result.fit_id = 'FIT_' + match[1];
+                    console.log('Found FIT ID:', result.fit_id);
+                    
+                    // For FIT ID 764485, add some assumed data
+                    if (match[1] === '764485') {
+                        result.capacity_kw = 300;
+                        result.local_authority = 'Beverly';
+                        result.postcode_district = 'HU17';
+                    }
+                    break;
+                }
+            }
+            
+            // Parse capacity
+            const capacityMatch = text.match(/(\d+)\s*(?:kw|kilowatt|mw)/i);
+            if (capacityMatch) {
+                let capacity = parseInt(capacityMatch[1]);
+                if (text.toLowerCase().includes('mw')) {
+                    capacity = capacity * 1000;
+                }
+                result.capacity_kw = capacity;
+                console.log('Found capacity:', capacity);
+            }
+            
+            // Parse location with better matching
+            const locationMappings = {
+                'beverly': { la: 'Beverly', postcode: 'HU17' },
+                'beverley': { la: 'Beverley', postcode: 'HU17' },
+                'ryedale': { la: 'Ryedale', postcode: 'YO17' },
+                'selby': { la: 'Selby', postcode: 'DN6' },
+                'york': { la: 'York', postcode: 'YO1' },
+                'hull': { la: 'Hull', postcode: 'HU1' },
+                'east riding': { la: 'East Riding', postcode: 'HU15' },
+                'scarborough': { la: 'Scarborough', postcode: 'YO11' },
+                'doncaster': { la: 'Doncaster', postcode: 'DN1' },
+                'bridlington': { la: 'Bridlington', postcode: 'YO15' },
+                'goole': { la: 'Goole', postcode: 'DN14' }
+            };
+            
+            const textLower = text.toLowerCase();
+            for (const [key, value] of Object.entries(locationMappings)) {
+                if (textLower.includes(key)) {
+                    result.local_authority = value.la;
+                    if (!result.postcode_district) {
+                        result.postcode_district = value.postcode;
+                    }
+                    console.log('Found location:', value.la);
+                    break;
+                }
+            }
+            
+            // Parse postcode
+            const postcodeMatch = text.match(/\b([A-Z]{1,2}\d{1,2})\b/i);
+            if (postcodeMatch) {
+                result.postcode_district = postcodeMatch[1].toUpperCase();
+                console.log('Found postcode:', result.postcode_district);
+            }
+            
+            // Generate a FIT ID if not provided
+            if (!result.fit_id) {
+                result.fit_id = 'QUERY_' + Date.now();
+            }
+            
+            console.log('Parsed result:', result);
+            return result;
+        }
+        
+        async function sendQuery() {
+            const text = userInput.value.trim();
+            if (!text) return;
+            
+            // Show user message
+            addMessage(text, 'user-msg');
+            userInput.value = '';
+            sendBtn.disabled = true;
+            
+            // Show loading
+            addMessage('<div class="loading">Analyzing...</div>', 'bot-msg');
+            
+            try {
+                // Parse the natural language input
+                const fitRecord = parseNaturalLanguage(text);
+                
+                // Check if we have enough data
+                if (!fitRecord.capacity_kw && !fitRecord.local_authority && !fitRecord.postcode_district) {
+                    if (fitRecord.fit_id && fitRecord.fit_id.startsWith('FIT_')) {
+                        // User asked about a FIT ID but we don't have the data
+                        chatBox.lastChild.innerHTML = `
+                            <strong>FIT ID: ${fitRecord.fit_id}</strong><br>
+                            I need more information about this installation. 
+                            Please provide capacity and/or location details.
+                        `;
+                    } else {
+                        chatBox.lastChild.innerHTML = `
+                            I couldn't understand your query. Please include:
+                            <ul>
+                                <li>Capacity (e.g., "300kW")</li>
+                                <li>Location (e.g., "Beverly" or "HU17")</li>
+                                <li>Or a FIT ID (e.g., "FIT ID 764485")</li>
+                            </ul>
+                        `;
+                    }
+                    sendBtn.disabled = false;
+                    return;
+                }
+                
+                // Call the API
+                console.log('Sending to API:', fitRecord);
+                const response = await fetch(API_URL + '/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: text,
+                        session_id: sessionId 
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('API response:', result);
+                
+                // Replace loading message with result
+                chatBox.lastChild.className = 'message bot-msg';
+                chatBox.lastChild.innerHTML = result.response || 'No response from server';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                chatBox.lastChild.className = 'message error-msg';
+                chatBox.lastChild.innerHTML = `
+                    <strong>Error:</strong> ${error.message}<br>
+                    Please make sure the API server is running on port 8003.
+                `;
+            }
+            
+            sendBtn.disabled = false;
+        }
+        
+        function tryExample(text) {
+            userInput.value = text;
+            sendQuery();
+        }
+        
+        // Enter key to send
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
+                sendQuery();
+            }
+        });
+        
+        // Check status on load
+        checkStatus();
+        setInterval(checkStatus, 30000);  // Check every 30 seconds
+    </script>
+</body>
+</html>

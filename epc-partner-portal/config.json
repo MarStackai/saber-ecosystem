@@ -1,0 +1,16 @@
+{
+  "SharePoint": {
+    "SiteUrl": "https://saberrenewables.sharepoint.com/sites/SaberEPCPartners",
+    "ClientId": "bbbfe394-7cff-4ac9-9e01-33cbf116b930",
+    "Tenant": "saberrenewables.onmicrosoft.com"
+  },
+  "Processing": {
+    "RunInterval": "*/5 * * * *",
+    "LogPath": "/home/marstack/saber_business_ops/logs/epc_processor.log",
+    "WhatIfMode": false
+  },
+  "Lists": {
+    "OnboardingList": "EPC Onboarding",
+    "DocumentLibrary": "EPC Submissions"
+  }
+}

@@ -1,0 +1,17 @@
+[Unit]
+Description=Cloudflare Tunnel for FIT Intelligence
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/marstack
+ExecStart=/usr/bin/cloudflared tunnel --config /home/marstack/organized/configs/cloudflare-tunnel-config.yml run fit-tunnel
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+RestartSec=5
+StandardOutput=append:%h/cloudflared-fit.log
+StandardError=append:%h/cloudflared-fit.err
+
+[Install]
+WantedBy=default.target

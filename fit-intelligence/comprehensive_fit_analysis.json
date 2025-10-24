@@ -1,0 +1,167 @@
+{
+  "timestamp": "2025-08-21T15:44:39.716364",
+  "statistics": {
+    "total_sites": 80388,
+    "unique_technologies": 5,
+    "total_capacity_gw": 7.069151956000001,
+    "chroma_collections": 3,
+    "chroma_documents": 75194
+  },
+  "patterns": {
+    "tech_anaerobic_digestion_stats": {
+      "count": 876,
+      "min_capacity": 14.0,
+      "max_capacity": 5000.0,
+      "mean_capacity": 684.1541095890411,
+      "std_capacity": 718.9917357594711,
+      "percentiles": {
+        "25": 249.0,
+        "50": 499.0,
+        "75": 600.0,
+        "95": 2378.0
+      }
+    },
+    "tech_hydro_stats": {
+      "count": 1790,
+      "min_capacity": 3.0,
+      "max_capacity": 2253.0,
+      "mean_capacity": 293.1238748603352,
+      "std_capacity": 454.3108794661211,
+      "percentiles": {
+        "25": 45.0,
+        "50": 99.0,
+        "75": 400.0,
+        "95": 1355.4999999999995
+      }
+    },
+    "tech_solar_stats": {
+      "count": 71234,
+      "min_capacity": 0.2,
+      "max_capacity": 4999.8,
+      "mean_capacity": 62.99279220596907,
+      "std_capacity": 369.1782365156881,
+      "percentiles": {
+        "25": 3.92,
+        "50": 10.0,
+        "75": 40.0,
+        "95": 149.76
+      }
+    },
+    "tech_wind_stats": {
+      "count": 6412,
+      "min_capacity": 1.4,
+      "max_capacity": 5000.0,
+      "mean_capacity": 227.35202121023084,
+      "std_capacity": 474.28388244062387,
+      "percentiles": {
+        "25": 15.0,
+        "50": 80.0,
+        "75": 330.0,
+        "95": 700.0
+      }
+    },
+    "tech_chp_stats": {
+      "count": 76,
+      "min_capacity": 0.75,
+      "max_capacity": 2.0,
+      "mean_capacity": 1.730263157894737,
+      "std_capacity": 0.3362994189245278,
+      "percentiles": {
+        "25": 1.5,
+        "50": 2.0,
+        "75": 2.0,
+        "95": 2.0
+      }
+    }
+  },
+  "business_insights": [
+    {
+      "pattern": "repowering_opportunity",
+      "sites_count": 1746,
+      "total_capacity_mw": 54.172902,
+      "average_age": 16.938144329896907,
+      "technologies": {
+        "Anaerobic digestion": 12,
+        "Hydro": 94,
+        "Photovoltaic": 1146,
+        "Wind": 494
+      }
+    }
+  ],
+  "training_scenarios": [
+    {
+      "query_type": "capacity_range",
+      "query": "anaerobic_digestion sites over 600.0kW",
+      "expected_results": 219.0,
+      "filters": {
+        "technology": "anaerobic_digestion",
+        "min_capacity": 600.0
+      }
+    },
+    {
+      "query_type": "capacity_range",
+      "query": "hydro sites over 400.0kW",
+      "expected_results": 447.5,
+      "filters": {
+        "technology": "hydro",
+        "min_capacity": 400.0
+      }
+    },
+    {
+      "query_type": "capacity_range",
+      "query": "solar sites over 40.0kW",
+      "expected_results": 17808.5,
+      "filters": {
+        "technology": "solar",
+        "min_capacity": 40.0
+      }
+    },
+    {
+      "query_type": "capacity_range",
+      "query": "wind sites over 330.0kW",
+      "expected_results": 1603.0,
+      "filters": {
+        "technology": "wind",
+        "min_capacity": 330.0
+      }
+    },
+    {
+      "query_type": "capacity_range",
+      "query": "chp sites over 2.0kW",
+      "expected_results": 19.0,
+      "filters": {
+        "technology": "chp",
+        "min_capacity": 2.0
+      }
+    },
+    {
+      "query_type": "business_intelligence",
+      "query": "sites ready for repowering",
+      "filters": {
+        "age_years": {
+          "$gt": 15
+        }
+      },
+      "intent": "identify_opportunities"
+    },
+    {
+      "query_type": "comparative",
+      "query": "compare solar vs wind capacity in Scotland",
+      "filters": {
+        "country": "Scotland"
+      },
+      "intent": "technology_comparison"
+    },
+    {
+      "query_type": "analytical",
+      "query": "highest FIT rate sites expiring next year",
+      "filters": {
+        "remaining_fit_years": {
+          "$lte": 1
+        }
+      },
+      "sort": "tariff_p_kwh",
+      "intent": "urgent_opportunities"
+    }
+  ]
+}

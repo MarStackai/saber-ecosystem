@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saber Renewable Energy - Wind Repowering Intelligence Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Leaflet MarkerCluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    
+    <!-- Leaflet Heat Map -->
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Saber brand colors */
+        :root {
+            --saber-primary: #1B4F72;
+            --saber-secondary: #2E86AB;
+            --saber-accent: #A0C4E1;
+            --saber-success: #27AE60;
+            --saber-warning: #F39C12;
+            --saber-danger: #E74C3C;
+            --saber-dark: #1A1A2E;
+            --saber-light: #F8F9FA;
+        }
+        
+        /* Custom styles */
+        .saber-gradient {
+            background: linear-gradient(135deg, var(--saber-primary) 0%, var(--saber-secondary) 100%);
+        }
+        
+        .saber-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        
+        .saber-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
+        }
+        
+        #map {
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .leaflet-popup-content {
+            margin: 13px 19px;
+            min-width: 250px;
+        }
+        
+        /* Custom marker colors */
+        .marker-urgent {
+            background-color: var(--saber-danger);
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: block;
+            left: -10px;
+            top: -10px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .marker-optimal {
+            background-color: var(--saber-warning);
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: block;
+            left: -10px;
+            top: -10px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .marker-early {
+            background-color: var(--saber-success);
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: block;
+            left: -10px;
+            top: -10px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .marker-late {
+            background-color: #6B7280;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: block;
+            left: -10px;
+            top: -10px;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        /* Loading animation */
+        .loader {
+            border: 3px solid var(--saber-accent);
+            border-top: 3px solid var(--saber-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Priority badges */
+        .priority-critical { background-color: var(--saber-danger); }
+        .priority-high { background-color: var(--saber-warning); }
+        .priority-medium { background-color: var(--saber-secondary); }
+        .priority-low { background-color: var(--saber-success); }
+        .priority-monitor { background-color: var(--saber-accent); }
+        
+        /* Window badges */
+        .window-urgent { background-color: var(--saber-danger); }
+        .window-optimal { background-color: var(--saber-warning); }
+        .window-too-early { background-color: var(--saber-success); }
+        .window-too-late { background-color: #6B7280; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--saber-light);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--saber-secondary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--saber-primary);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="saber-gradient text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-wind text-3xl mr-3"></i>
+                        <div>
+                            <h1 class="text-2xl font-bold">Saber Renewable Energy</h1>
+                            <p class="text-sm opacity-90">Wind Repowering Intelligence Platform</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm opacity-90">7,448 Active FIT Sites</span>
+                    <button onclick="location.reload()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Dashboard -->
+    <div class="container mx-auto px-4 py-6">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Active FIT Sites</p>
+                        <p class="text-2xl font-bold text-gray-800">7,172</p>
+                    </div>
+                    <i class="fas fa-chart-line text-3xl" style="color: var(--saber-secondary)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Capacity</p>
+                        <p class="text-2xl font-bold text-gray-800">770 MW</p>
+                    </div>
+                    <i class="fas fa-bolt text-3xl" style="color: var(--saber-success)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Urgent (2-5yr)</p>
+                        <p class="text-2xl font-bold" style="color: var(--saber-danger)">801</p>
+                    </div>
+                    <i class="fas fa-exclamation-triangle text-3xl" style="color: var(--saber-danger)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Optimal (5-10yr)</p>
+                        <p class="text-2xl font-bold" style="color: var(--saber-warning)">5,582</p>
+                    </div>
+                    <i class="fas fa-bullseye text-3xl" style="color: var(--saber-warning)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Avg FIT Left</p>
+                        <p class="text-2xl font-bold text-gray-800">7.0 yr</p>
+                    </div>
+                    <i class="fas fa-clock text-3xl" style="color: var(--saber-secondary)"></i>
+                </div>
+            </div>
+            
+            <div class="saber-card p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Potential MW</p>
+                        <p class="text-2xl font-bold" style="color: var(--saber-success)">492</p>
+                    </div>
+                    <i class="fas fa-seedling text-3xl" style="color: var(--saber-success)"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Map Section (2/3 width) -->
+            <div class="lg:col-span-2">
+                <div class="saber-card p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-map-marked-alt mr-2" style="color: var(--saber-primary)"></i>
+                            UK Wind Turbine Map
+                        </h2>
+                        <div class="flex space-x-2">
+                            <button onclick="resetMap()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition">
+                                <i class="fas fa-home mr-1"></i>Reset
+                            </button>
+                            <button onclick="toggleClustering()" id="clusterBtn" class="px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded-lg text-sm transition">
+                                <i class="fas fa-layer-group mr-1"></i>Clustering ON
+                            </button>
+                            <button onclick="toggleHeatmap()" id="heatmapBtn" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition">
+                                <i class="fas fa-fire mr-1"></i>Heatmap
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Buttons -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="text-sm text-gray-600 self-center">Filter:</span>
+                        <button onclick="filterByWindow('all')" class="filter-btn px-3 py-1 bg-gray-700 text-white rounded-lg text-sm transition">All Sites</button>
+                        <button onclick="filterByWindow('URGENT')" class="filter-btn px-3 py-1 window-urgent text-white rounded-lg text-sm transition opacity-60">Urgent (801)</button>
+                        <button onclick="filterByWindow('OPTIMAL')" class="filter-btn px-3 py-1 window-optimal text-white rounded-lg text-sm transition opacity-60">Optimal (5,582)</button>
+                        <button onclick="filterByWindow('TOO_EARLY')" class="filter-btn px-3 py-1 window-too-early text-white rounded-lg text-sm transition opacity-60">Too Early (1)</button>
+                        <button onclick="filterByWindow('TOO_LATE')" class="filter-btn px-3 py-1 window-too-late text-white rounded-lg text-sm transition opacity-60">Too Late (276)</button>
+                    </div>
+                    
+                    <!-- Map Container -->
+                    <div id="map" class="h-96 lg:h-[600px] relative">
+                        <div id="mapLoader" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10 rounded-lg">
+                            <div class="text-center">
+                                <div class="loader mb-4"></div>
+                                <p class="text-gray-600">Loading map data...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Map Legend -->
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Legend:</p>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2" style="background-color: var(--saber-danger)"></span>
+                                <span>Urgent (2-5 yr FIT)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2" style="background-color: var(--saber-warning)"></span>
+                                <span>Optimal (5-10 yr FIT)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2" style="background-color: var(--saber-success)"></span>
+                                <span>Too Early (>15 yr FIT)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="w-3 h-3 rounded-full mr-2 bg-gray-500"></span>
+                                <span>Too Late (<2 yr FIT)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Side Panel (1/3 width) -->
+            <div class="space-y-6">
+                <!-- Controls Panel -->
+                <div class="saber-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-sliders-h mr-2" style="color: var(--saber-primary)"></i>
+                        Map Controls
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm text-gray-600">Capacity Filter (MW)</label>
+                            <input type="range" id="capacitySlider" min="0" max="5" step="0.1" value="5" class="w-full" 
+                                   oninput="updateCapacityFilter(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>0 MW</span>
+                                <span id="capacityValue">Max: 5.0 MW</span>
+                                <span>5 MW</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">FIT Years Remaining</label>
+                            <input type="range" id="fitSlider" min="0" max="20" step="1" value="20" class="w-full" 
+                                   oninput="updateFitFilter(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>0 yr</span>
+                                <span id="fitValue">Max: 20.0 yr</span>
+                                <span>20 yr</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Regional Summary -->
+                <div class="saber-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-chart-bar mr-2" style="color: var(--saber-primary)"></i>
+                        Top Regions
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Orkney Islands</span>
+                            <span class="text-sm font-bold">770 sites</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 100%; background-color: var(--saber-secondary)"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Aberdeenshire</span>
+                            <span class="text-sm font-bold">524 sites</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 68%; background-color: var(--saber-secondary)"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Cornwall</span>
+                            <span class="text-sm font-bold">409 sites</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 53%; background-color: var(--saber-secondary)"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Highland</span>
+                            <span class="text-sm font-bold">208 sites</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 27%; background-color: var(--saber-secondary)"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Chart -->
+                <div class="saber-card p-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-chart-pie mr-2" style="color: var(--saber-primary)"></i>
+                        Priority Distribution
+                    </h3>
+                    <div style="height: 200px; position: relative;">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Selected Site Info -->
+                <div id="siteInfo" class="saber-card p-4 hidden">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-info-circle mr-2" style="color: var(--saber-primary)"></i>
+                        Selected Site
+                    </h3>
+                    <div id="siteDetails" class="space-y-2 text-sm">
+                        <!-- Site details populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="saber-gradient text-white mt-12 py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm opacity-90">© 2025 Saber Renewable Energy. Wind Repowering Intelligence Platform.</p>
+            <p class="text-xs opacity-75 mt-2">Powered by advanced analytics and machine learning</p>
+        </div>
+    </footer>
+    
+    <!-- Load turbine data -->
+    <script src="turbine_data.js"></script>
+    
+    <!-- Main application script -->
+    <script>
+        let map;
+        let markers = [];
+        let markerCluster;
+        let heatmapLayer;
+        let currentFilter = 'all';
+        let clusteringEnabled = true;
+        let heatmapEnabled = false;
+        let filteredData = turbineData;
+        
+        // Initialize map
+        function initMap() {
+            // Create map centered on UK
+            map = L.map('map', {
+                center: [54.5, -3.5],
+                zoom: 6,
+                maxZoom: 18,
+                minZoom: 5
+            });
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+            
+            // Alternative tile providers (uncomment to use)
+            // CartoDB Positron (lighter, cleaner look)
+            // L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            //     attribution: '© OpenStreetMap contributors © CARTO',
+            //     maxZoom: 18
+            // }).addTo(map);
+            
+            // Create marker cluster group with less aggressive clustering
+            markerCluster = L.markerClusterGroup({
+                maxClusterRadius: 30,  // Reduced from 50 for less aggressive clustering
+                disableClusteringAtZoom: 12,  // Stop clustering at zoom level 12
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false,
+                zoomToBoundsOnClick: true,
+                spiderfyDistanceMultiplier: 2,  // Spread out spiderfied markers more
+                iconCreateFunction: function(cluster) {
+                    const count = cluster.getChildCount();
+                    let size = 'small';
+                    let color = '#A0C4E1';
+                    
+                    if (count > 100) {
+                        size = 'large';
+                        color = '#1A1A2E';
+                    } else if (count > 50) {
+                        size = 'medium';
+                        color = '#1B4F72';
+                    } else if (count > 10) {
+                        size = 'small';
+                        color = '#2E86AB';
+                    }
+                    
+                    return L.divIcon({
+                        html: `<div style="background-color: ${color}; color: white; border-radius: 50%; 
+                               width: 40px; height: 40px; display: flex; align-items: center; 
+                               justify-content: center; font-weight: bold; border: 3px solid white;
+                               box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${count}</div>`,
+                        className: 'custom-cluster-icon',
+                        iconSize: L.point(40, 40)
+                    });
+                }
+            });
+            
+            // Load markers
+            loadMarkers();
+            
+            // Hide loader
+            document.getElementById('mapLoader').style.display = 'none';
+        }
+        
+        // Load markers from data
+        function loadMarkers() {
+            // Clear existing markers
+            markerCluster.clearLayers();
+            markers = [];
+            
+            // Add markers for each turbine
+            turbineData.features.forEach(feature => {
+                const props = feature.properties;
+                const coords = feature.geometry.coordinates;
+                
+                // Determine marker color based on window
+                let markerClass = 'marker-late';
+                if (props.repowering_window === 'URGENT') markerClass = 'marker-urgent';
+                else if (props.repowering_window === 'OPTIMAL') markerClass = 'marker-optimal';
+                else if (props.repowering_window === 'TOO_EARLY') markerClass = 'marker-early';
+                
+                // Create custom icon
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<span class="${markerClass}"></span>`,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
+                
+                // Create marker
+                const marker = L.marker([coords[1], coords[0]], { icon: icon });
+                
+                // Add popup
+                marker.bindPopup(createPopupContent(props));
+                
+                // Add click handler
+                marker.on('click', function() {
+                    showSiteInfo(props);
+                });
+                
+                // Store marker
+                markers.push(marker);
+                
+                // Add to cluster group
+                markerCluster.addLayer(marker);
+            });
+            
+            // Add cluster group to map
+            if (clusteringEnabled) {
+                map.addLayer(markerCluster);
+            }
+        }
+        
+        // Create popup content
+        function createPopupContent(props) {
+            const windowClass = `window-${props.repowering_window.toLowerCase().replace('_', '-')}`;
+            const priorityClass = `priority-${props.priority.toLowerCase()}`;
+            
+            return `
+                <div class="space-y-2">
+                    <div class="font-bold text-lg" style="color: var(--saber-primary)">
+                        FIT ID: ${props.id}
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <div><strong>Location:</strong> ${props.location}</div>
+                        <div><strong>Postcode:</strong> ${props.postcode}</div>
+                        <div><strong>Capacity:</strong> ${props.capacity_mw} MW</div>
+                        <div><strong>Age:</strong> ${props.age_years} years</div>
+                        <div><strong>FIT Remaining:</strong> ${props.remaining_fit_years} years</div>
+                        <div><strong>Score:</strong> ${props.score.toFixed(3)}</div>
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <span class="px-2 py-1 text-xs text-white rounded ${windowClass}">
+                            ${props.repowering_window}
+                        </span>
+                        <span class="px-2 py-1 text-xs text-white rounded ${priorityClass}">
+                            ${props.priority}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Show site info
+        function showSiteInfo(props) {
+            const siteInfo = document.getElementById('siteInfo');
+            const siteDetails = document.getElementById('siteDetails');
+            
+            siteInfo.classList.remove('hidden');
+            siteDetails.innerHTML = `
+                <div class="space-y-2">
+                    <div class="border-b pb-2">
+                        <strong>FIT ID:</strong> ${props.id}
+                    </div>
+                    <div><strong>Location:</strong> ${props.location}</div>
+                    <div><strong>Postcode:</strong> ${props.postcode}</div>
+                    <div><strong>Capacity:</strong> ${props.capacity_mw} MW</div>
+                    <div><strong>Age:</strong> ${props.age_years} years</div>
+                    <div><strong>FIT Remaining:</strong> ${props.remaining_fit_years} years</div>
+                    <div><strong>Score:</strong> ${props.score.toFixed(3)}</div>
+                    <div><strong>Priority:</strong> 
+                        <span class="priority-${props.priority.toLowerCase()} text-white px-2 py-1 rounded text-xs">
+                            ${props.priority}
+                        </span>
+                    </div>
+                    <div><strong>Window:</strong> 
+                        <span class="window-${props.repowering_window.toLowerCase().replace('_', '-')} text-white px-2 py-1 rounded text-xs">
+                            ${props.repowering_window}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Filter by window
+        function filterByWindow(window) {
+            currentFilter = window;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.add('opacity-60');
+            });
+            event.target.classList.remove('opacity-60');
+            
+            // Clear current markers
+            markerCluster.clearLayers();
+            
+            // Filter and add markers
+            markers = [];
+            turbineData.features.forEach(feature => {
+                const props = feature.properties;
+                
+                if (window === 'all' || props.repowering_window === window) {
+                    const coords = feature.geometry.coordinates;
+                    
+                    let markerClass = 'marker-late';
+                    if (props.repowering_window === 'URGENT') markerClass = 'marker-urgent';
+                    else if (props.repowering_window === 'OPTIMAL') markerClass = 'marker-optimal';
+                    else if (props.repowering_window === 'TOO_EARLY') markerClass = 'marker-early';
+                    
+                    const icon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<span class="${markerClass}"></span>`,
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    });
+                    
+                    const marker = L.marker([coords[1], coords[0]], { icon: icon });
+                    marker.bindPopup(createPopupContent(props));
+                    marker.on('click', function() {
+                        showSiteInfo(props);
+                    });
+                    
+                    markers.push(marker);
+                    markerCluster.addLayer(marker);
+                }
+            });
+        }
+        
+        // Toggle clustering
+        function toggleClustering() {
+            clusteringEnabled = !clusteringEnabled;
+            const btn = document.getElementById('clusterBtn');
+            
+            if (clusteringEnabled) {
+                map.addLayer(markerCluster);
+                btn.innerHTML = '<i class="fas fa-layer-group mr-1"></i>Clustering ON';
+                btn.className = 'px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded-lg text-sm transition';
+            } else {
+                map.removeLayer(markerCluster);
+                // Add individual markers
+                markers.forEach(marker => {
+                    marker.addTo(map);
+                });
+                btn.innerHTML = '<i class="fas fa-layer-group mr-1"></i>Clustering OFF';
+                btn.className = 'px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition';
+            }
+        }
+        
+        // Toggle heatmap
+        function toggleHeatmap() {
+            heatmapEnabled = !heatmapEnabled;
+            const btn = document.getElementById('heatmapBtn');
+            
+            if (heatmapEnabled) {
+                // Create heat map data
+                const heatData = turbineData.features.map(f => [
+                    f.geometry.coordinates[1],
+                    f.geometry.coordinates[0],
+                    f.properties.score * 100
+                ]);
+                
+                heatmapLayer = L.heatLayer(heatData, {
+                    radius: 25,
+                    blur: 15,
+                    maxZoom: 10,
+                    gradient: {
+                        0.0: 'green',
+                        0.5: 'yellow',
+                        0.7: 'orange',
+                        1.0: 'red'
+                    }
+                }).addTo(map);
+                
+                btn.innerHTML = '<i class="fas fa-fire mr-1"></i>Heatmap ON';
+                btn.className = 'px-3 py-1 bg-red-100 hover:bg-red-200 rounded-lg text-sm transition';
+            } else {
+                if (heatmapLayer) {
+                    map.removeLayer(heatmapLayer);
+                }
+                btn.innerHTML = '<i class="fas fa-fire mr-1"></i>Heatmap OFF';
+                btn.className = 'px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition';
+            }
+        }
+        
+        // Update capacity filter
+        function updateCapacityFilter(value) {
+            document.getElementById('capacityValue').textContent = `Max: ${value} MW`;
+            // Implementation would filter markers based on capacity
+        }
+        
+        // Update FIT filter
+        function updateFitFilter(value) {
+            document.getElementById('fitValue').textContent = `Max: ${value} yr`;
+            // Implementation would filter markers based on FIT years
+        }
+        
+        // Reset map
+        function resetMap() {
+            map.setView([54.5, -3.5], 6);
+            filterByWindow('all');
+        }
+        
+        // Initialize priority chart
+        function initPriorityChart() {
+            const ctx = document.getElementById('priorityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Urgent (2-5yr)', 'Optimal (5-10yr)', 'Too Early (>15yr)', 'Too Late (<2yr)'],
+                    datasets: [{
+                        data: [801, 5582, 1, 276],
+                        backgroundColor: [
+                            '#E74C3C',
+                            '#F39C12',
+                            '#27AE60',
+                            '#6B7280'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            initPriorityChart();
+        });
+    </script>
+</body>
+</html>

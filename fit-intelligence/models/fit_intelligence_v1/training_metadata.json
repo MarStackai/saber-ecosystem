@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-08-21T15:14:32.742310",
+  "config": {
+    "base_model": "all-MiniLM-L6-v2",
+    "output_dir": "models/fit_intelligence_v1",
+    "batch_size": 16,
+    "epochs": 4,
+    "warmup_steps": 100,
+    "learning_rate": 2e-05,
+    "max_seq_length": 256,
+    "gpu_memory_gb": 24
+  },
+  "training_samples": 2000,
+  "training_pairs": 10001,
+  "evaluation_results": {
+    "average_error": 

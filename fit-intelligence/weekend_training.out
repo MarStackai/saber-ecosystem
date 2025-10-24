@@ -1,0 +1,298 @@
+
+🚀 WEEKEND TRAINING PIPELINE
+
+This will run for up to 48 hours
+Training will be automatic with checkpointing
+You can safely leave this running over the weekend
+
+Auto-starting training...
+[2025-08-22 17:56:28] Weekend Training Pipeline Started at 2025-08-22 17:56:28.175959
+[2025-08-22 17:56:28] Training data: ./weekend_training_data
+[2025-08-22 17:56:28] Checkpoints: ./weekend_checkpoints
+[2025-08-22 17:56:28] Loading training data...
+[2025-08-22 17:56:28] Loaded 4507 total examples
+[2025-08-22 17:56:28] 
+============================================================
+[2025-08-22 17:56:28] Training Iteration 1: fit-weekend-1
+[2025-08-22 17:56:28] Focus: Complex Multi-condition
+[2025-08-22 17:56:28] ============================================================
+[2025-08-22 17:56:28] Creating model with temperature=0.09000000000000001, top_p=0.9299999999999999
+[2025-08-22 17:56:28] ✅ Model created: fit-weekend-1
+[2025-08-22 17:56:28] 
+Testing fit-weekend-1...
+[2025-08-22 18:09:16] Results: 38/50 success (76.0%)
+[2025-08-22 18:09:16] Perfect: 27/50 (54.0%)
+[2025-08-22 18:09:16] 🏆 New best model: fit-weekend-1 (76.0%)
+[2025-08-22 18:09:16] Saved checkpoint: ./weekend_checkpoints/checkpoint_1.json
+[2025-08-22 18:09:16] Cooling down for 5 minutes...
+[2025-08-22 18:14:16] 
+============================================================
+[2025-08-22 18:14:16] Training Iteration 2: fit-weekend-2
+[2025-08-22 18:14:16] Focus: Financial Analysis
+[2025-08-22 18:14:16] ============================================================
+[2025-08-22 18:14:16] Creating model with temperature=0.08, top_p=0.9099999999999999
+[2025-08-22 18:14:16] ✅ Model created: fit-weekend-2
+[2025-08-22 18:14:16] 
+Testing fit-weekend-2...
+[2025-08-22 18:26:12] Results: 44/50 success (88.0%)
+[2025-08-22 18:26:12] Perfect: 36/50 (72.0%)
+[2025-08-22 18:26:12] 🏆 New best model: fit-weekend-2 (88.0%)
+[2025-08-22 18:26:12] Saved checkpoint: ./weekend_checkpoints/checkpoint_2.json
+[2025-08-22 18:26:12] Cooling down for 5 minutes...
+[2025-08-22 18:31:12] 
+============================================================
+[2025-08-22 18:31:12] Training Iteration 3: fit-weekend-3
+[2025-08-22 18:31:12] Focus: Geographic Queries
+[2025-08-22 18:31:12] ============================================================
+[2025-08-22 18:31:12] Creating model with temperature=0.07, top_p=0.8899999999999999
+[2025-08-22 18:31:12] ✅ Model created: fit-weekend-3
+[2025-08-22 18:31:12] 
+Testing fit-weekend-3...
+[2025-08-22 18:43:18] Results: 47/50 success (94.0%)
+[2025-08-22 18:43:18] Perfect: 38/50 (76.0%)
+[2025-08-22 18:43:18] 🏆 New best model: fit-weekend-3 (94.0%)
+[2025-08-22 18:43:18] Saved checkpoint: ./weekend_checkpoints/checkpoint_3.json
+[2025-08-22 18:43:18] Cooling down for 5 minutes...
+[2025-08-22 18:48:18] 
+============================================================
+[2025-08-22 18:48:18] Training Iteration 4: fit-weekend-4
+[2025-08-22 18:48:18] Focus: Aggregations
+[2025-08-22 18:48:18] ============================================================
+[2025-08-22 18:48:18] Creating model with temperature=0.060000000000000005, top_p=0.87
+[2025-08-22 18:48:18] ✅ Model created: fit-weekend-4
+[2025-08-22 18:48:18] 
+Testing fit-weekend-4...
+[2025-08-22 19:01:03] Results: 41/50 success (82.0%)
+[2025-08-22 19:01:03] Perfect: 30/50 (60.0%)
+[2025-08-22 19:01:03] Saved checkpoint: ./weekend_checkpoints/checkpoint_4.json
+[2025-08-22 19:01:03] Cooling down for 5 minutes...
+[2025-08-22 19:06:03] 
+============================================================
+[2025-08-22 19:06:03] Training Iteration 5: fit-weekend-5
+[2025-08-22 19:06:03] Focus: Business Intelligence
+[2025-08-22 19:06:03] ============================================================
+[2025-08-22 19:06:03] Creating model with temperature=0.05, top_p=0.85
+[2025-08-22 19:06:04] ✅ Model created: fit-weekend-5
+[2025-08-22 19:06:04] 
+Testing fit-weekend-5...
+[2025-08-22 19:18:35] Results: 40/50 success (80.0%)
+[2025-08-22 19:18:35] Perfect: 27/50 (54.0%)
+[2025-08-22 19:18:35] Saved checkpoint: ./weekend_checkpoints/checkpoint_5.json
+[2025-08-22 19:18:35] Cooling down for 5 minutes...
+[2025-08-22 19:23:35] 
+============================================================
+[2025-08-22 19:23:35] Training Iteration 6: fit-weekend-6
+[2025-08-22 19:23:35] Focus: Edge Cases
+[2025-08-22 19:23:35] ============================================================
+[2025-08-22 19:23:35] Creating model with temperature=0.04000000000000001, top_p=0.83
+[2025-08-22 19:23:36] ✅ Model created: fit-weekend-6
+[2025-08-22 19:23:36] 
+Testing fit-weekend-6...
+[2025-08-22 19:37:31] Results: 31/50 success (62.0%)
+[2025-08-22 19:37:31] Perfect: 4/50 (8.0%)
+[2025-08-22 19:37:31] Saved checkpoint: ./weekend_checkpoints/checkpoint_6.json
+[2025-08-22 19:37:31] Cooling down for 5 minutes...
+[2025-08-22 19:42:32] Removed old model: fit-weekend-1
+[2025-08-22 19:42:32] 
+============================================================
+[2025-08-22 19:42:32] Training Iteration 7: fit-weekend-7
+[2025-08-22 19:42:32] Focus: General
+[2025-08-22 19:42:32] ============================================================
+[2025-08-22 19:42:32] Creating model with temperature=0.03, top_p=0.8099999999999999
+[2025-08-22 19:42:32] ✅ Model created: fit-weekend-7
+[2025-08-22 19:42:32] 
+Testing fit-weekend-7...
+[2025-08-22 19:56:43] Results: 26/50 success (52.0%)
+[2025-08-22 19:56:43] Perfect: 5/50 (10.0%)
+[2025-08-22 19:56:43] Saved checkpoint: ./weekend_checkpoints/checkpoint_7.json
+[2025-08-22 19:56:43] Cooling down for 5 minutes...
+[2025-08-22 20:01:43] Removed old model: fit-weekend-2
+[2025-08-22 20:01:43] 
+============================================================
+[2025-08-22 20:01:43] Training Iteration 8: fit-weekend-8
+[2025-08-22 20:01:43] Focus: Complex Multi-condition
+[2025-08-22 20:01:43] ============================================================
+[2025-08-22 20:01:43] Creating model with temperature=0.020000000000000004, top_p=0.8
+[2025-08-22 20:01:44] ✅ Model created: fit-weekend-8
+[2025-08-22 20:01:44] 
+Testing fit-weekend-8...
+[2025-08-22 20:15:57] Results: 24/50 success (48.0%)
+[2025-08-22 20:15:57] Perfect: 6/50 (12.0%)
+[2025-08-22 20:15:57] Saved checkpoint: ./weekend_checkpoints/checkpoint_8.json
+[2025-08-22 20:15:57] Cooling down for 5 minutes...
+[2025-08-22 20:20:57] 
+============================================================
+[2025-08-22 20:20:57] Training Iteration 9: fit-weekend-9
+[2025-08-22 20:20:57] Focus: Financial Analysis
+[2025-08-22 20:20:57] ============================================================
+[2025-08-22 20:20:57] Creating model with temperature=0.010000000000000009, top_p=0.8
+[2025-08-22 20:20:57] ✅ Model created: fit-weekend-9
+[2025-08-22 20:20:57] 
+Testing fit-weekend-9...
+[2025-08-22 20:35:20] Results: 30/50 success (60.0%)
+[2025-08-22 20:35:20] Perfect: 6/50 (12.0%)
+[2025-08-22 20:35:20] Saved checkpoint: ./weekend_checkpoints/checkpoint_9.json
+[2025-08-22 20:35:20] Cooling down for 5 minutes...
+[2025-08-22 20:40:20] 
+============================================================
+[2025-08-22 20:40:20] Training Iteration 10: fit-weekend-10
+[2025-08-22 20:40:20] Focus: Geographic Queries
+[2025-08-22 20:40:20] ============================================================
+[2025-08-22 20:40:20] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 20:40:21] ✅ Model created: fit-weekend-10
+[2025-08-22 20:40:21] 
+Testing fit-weekend-10...
+[2025-08-22 20:54:33] Results: 26/50 success (52.0%)
+[2025-08-22 20:54:33] Perfect: 5/50 (10.0%)
+[2025-08-22 20:54:33] Saved checkpoint: ./weekend_checkpoints/checkpoint_10.json
+[2025-08-22 20:54:33] Cooling down for 5 minutes...
+[2025-08-22 20:59:33] 
+============================================================
+[2025-08-22 20:59:33] Training Iteration 11: fit-weekend-11
+[2025-08-22 20:59:33] Focus: Aggregations
+[2025-08-22 20:59:33] ============================================================
+[2025-08-22 20:59:33] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 20:59:34] ✅ Model created: fit-weekend-11
+[2025-08-22 20:59:34] 
+Testing fit-weekend-11...
+[2025-08-22 21:13:57] Results: 21/50 success (42.0%)
+[2025-08-22 21:13:57] Perfect: 5/50 (10.0%)
+[2025-08-22 21:13:57] Saved checkpoint: ./weekend_checkpoints/checkpoint_11.json
+[2025-08-22 21:13:57] Cooling down for 5 minutes...
+[2025-08-22 21:18:57] 
+============================================================
+[2025-08-22 21:18:57] Training Iteration 12: fit-weekend-12
+[2025-08-22 21:18:57] Focus: Business Intelligence
+[2025-08-22 21:18:57] ============================================================
+[2025-08-22 21:18:57] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 21:18:57] ✅ Model created: fit-weekend-12
+[2025-08-22 21:18:57] 
+Testing fit-weekend-12...
+[2025-08-22 21:33:13] Results: 30/50 success (60.0%)
+[2025-08-22 21:33:13] Perfect: 5/50 (10.0%)
+[2025-08-22 21:33:13] Saved checkpoint: ./weekend_checkpoints/checkpoint_12.json
+[2025-08-22 21:33:13] Cooling down for 5 minutes...
+[2025-08-22 21:38:13] 
+============================================================
+[2025-08-22 21:38:13] Training Iteration 13: fit-weekend-13
+[2025-08-22 21:38:13] Focus: Edge Cases
+[2025-08-22 21:38:13] ============================================================
+[2025-08-22 21:38:13] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 21:38:13] ✅ Model created: fit-weekend-13
+[2025-08-22 21:38:13] 
+Testing fit-weekend-13...
+[2025-08-22 21:52:35] Results: 25/50 success (50.0%)
+[2025-08-22 21:52:35] Perfect: 3/50 (6.0%)
+[2025-08-22 21:52:35] Saved checkpoint: ./weekend_checkpoints/checkpoint_13.json
+[2025-08-22 21:52:35] Cooling down for 5 minutes...
+[2025-08-22 21:57:35] 
+============================================================
+[2025-08-22 21:57:35] Training Iteration 14: fit-weekend-14
+[2025-08-22 21:57:35] Focus: General
+[2025-08-22 21:57:35] ============================================================
+[2025-08-22 21:57:35] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 21:57:36] ✅ Model created: fit-weekend-14
+[2025-08-22 21:57:36] 
+Testing fit-weekend-14...
+[2025-08-22 22:11:37] Results: 28/50 success (56.0%)
+[2025-08-22 22:11:37] Perfect: 2/50 (4.0%)
+[2025-08-22 22:11:37] Saved checkpoint: ./weekend_checkpoints/checkpoint_14.json
+[2025-08-22 22:11:37] Cooling down for 5 minutes...
+[2025-08-22 22:16:37] 
+============================================================
+[2025-08-22 22:16:37] Training Iteration 15: fit-weekend-15
+[2025-08-22 22:16:37] Focus: Complex Multi-condition
+[2025-08-22 22:16:37] ============================================================
+[2025-08-22 22:16:37] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 22:16:38] ✅ Model created: fit-weekend-15
+[2025-08-22 22:16:38] 
+Testing fit-weekend-15...
+[2025-08-22 22:30:50] Results: 29/50 success (58.0%)
+[2025-08-22 22:30:50] Perfect: 10/50 (20.0%)
+[2025-08-22 22:30:50] Saved checkpoint: ./weekend_checkpoints/checkpoint_15.json
+[2025-08-22 22:30:50] Cooling down for 5 minutes...
+[2025-08-22 22:35:50] 
+============================================================
+[2025-08-22 22:35:50] Training Iteration 16: fit-weekend-16
+[2025-08-22 22:35:50] Focus: Financial Analysis
+[2025-08-22 22:35:50] ============================================================
+[2025-08-22 22:35:50] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 22:35:51] ✅ Model created: fit-weekend-16
+[2025-08-22 22:35:51] 
+Testing fit-weekend-16...
+[2025-08-22 22:49:45] Results: 32/50 success (64.0%)
+[2025-08-22 22:49:45] Perfect: 3/50 (6.0%)
+[2025-08-22 22:49:45] Saved checkpoint: ./weekend_checkpoints/checkpoint_16.json
+[2025-08-22 22:49:45] Cooling down for 5 minutes...
+[2025-08-22 22:54:45] 
+============================================================
+[2025-08-22 22:54:45] Training Iteration 17: fit-weekend-17
+[2025-08-22 22:54:45] Focus: Geographic Queries
+[2025-08-22 22:54:45] ============================================================
+[2025-08-22 22:54:45] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 22:54:46] ✅ Model created: fit-weekend-17
+[2025-08-22 22:54:46] 
+Testing fit-weekend-17...
+[2025-08-22 23:08:58] Results: 27/50 success (54.0%)
+[2025-08-22 23:08:58] Perfect: 7/50 (14.0%)
+[2025-08-22 23:08:58] Saved checkpoint: ./weekend_checkpoints/checkpoint_17.json
+[2025-08-22 23:08:58] Cooling down for 5 minutes...
+[2025-08-22 23:13:58] 
+============================================================
+[2025-08-22 23:13:58] Training Iteration 18: fit-weekend-18
+[2025-08-22 23:13:58] Focus: Aggregations
+[2025-08-22 23:13:58] ============================================================
+[2025-08-22 23:13:58] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 23:13:59] ✅ Model created: fit-weekend-18
+[2025-08-22 23:13:59] 
+Testing fit-weekend-18...
+[2025-08-22 23:28:17] Results: 31/50 success (62.0%)
+[2025-08-22 23:28:17] Perfect: 10/50 (20.0%)
+[2025-08-22 23:28:17] Saved checkpoint: ./weekend_checkpoints/checkpoint_18.json
+[2025-08-22 23:28:17] Cooling down for 5 minutes...
+[2025-08-22 23:33:17] 
+============================================================
+[2025-08-22 23:33:17] Training Iteration 19: fit-weekend-19
+[2025-08-22 23:33:17] Focus: Business Intelligence
+[2025-08-22 23:33:17] ============================================================
+[2025-08-22 23:33:17] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 23:33:17] ✅ Model created: fit-weekend-19
+[2025-08-22 23:33:17] 
+Testing fit-weekend-19...
+[2025-08-22 23:47:30] Results: 28/50 success (56.0%)
+[2025-08-22 23:47:30] Perfect: 6/50 (12.0%)
+[2025-08-22 23:47:30] Saved checkpoint: ./weekend_checkpoints/checkpoint_19.json
+[2025-08-22 23:47:30] Cooling down for 5 minutes...
+[2025-08-22 23:52:30] 
+============================================================
+[2025-08-22 23:52:30] Training Iteration 20: fit-weekend-20
+[2025-08-22 23:52:30] Focus: Edge Cases
+[2025-08-22 23:52:30] ============================================================
+[2025-08-22 23:52:30] Creating model with temperature=0.01, top_p=0.8
+[2025-08-22 23:52:30] ✅ Model created: fit-weekend-20
+[2025-08-22 23:52:30] 
+Testing fit-weekend-20...
+[2025-08-23 00:06:55] Results: 23/50 success (46.0%)
+[2025-08-23 00:06:55] Perfect: 4/50 (8.0%)
+[2025-08-23 00:06:55] Saved checkpoint: ./weekend_checkpoints/checkpoint_20.json
+[2025-08-23 00:06:55] Cooling down for 5 minutes...
+[2025-08-23 00:11:55] 
+============================================================
+[2025-08-23 00:11:55] Training Complete!
+[2025-08-23 00:11:55] ============================================================
+[2025-08-23 00:11:55] Total training time: 6:15:27.745130
+[2025-08-23 00:11:55] Models trained: 18
+[2025-08-23 00:11:55] Best model: fit-weekend-3 (94.0%)
+[2025-08-23 00:11:55] 
+Creating production model...
+[2025-08-23 00:11:56] ✅ Created production model: fit-intelligence-weekend
+[2025-08-23 00:11:56] 
+To deploy:
+[2025-08-23 00:11:56] 1. Update ollama_query_parser.py to use 'fit-intelligence-weekend'
+[2025-08-23 00:11:56] 2. Restart the server
+[2025-08-23 00:11:56] 3. Enjoy >95% accuracy on complex queries!
+[2025-08-23 00:11:56] 
+📊 Report saved to: weekend_training_report_20250822.md
+
+✅ Weekend training complete!
+Check the report for details

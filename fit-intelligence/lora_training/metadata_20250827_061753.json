@@ -1,0 +1,19 @@
+{
+  "timestamp": "20250827_061753",
+  "total_examples": 710,
+  "train_examples": 639,
+  "val_examples": 71,
+  "categories": {
+    "capacity_range": 300,
+    "geographic": 170,
+    "technology_alias": 38,
+    "repowering_window": 24,
+    "complex_query": 105
+  },
+  "critical_tests": [
+    "Manchester \u2192 M only",
+    "Yorkshire \u2192 full set",
+    "50kw to max 350kw \u2192 exact range",
+    "Solar \u2192 photovoltaic"
+  ]
+}

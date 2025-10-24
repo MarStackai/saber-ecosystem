@@ -1,0 +1,13 @@
+INVOICE
+=====================================
+Invoice Number: INV-2024-001
+Date: 9/23/2025
+Project: Solar Farm Alpha
+
+Description: Milestone 1: Site Preparation Complete
+Amount: £500,000
+
+Payment Terms: Net 30 days
+=====================================
+
+This is a test invoice for SharePoint integration testing.

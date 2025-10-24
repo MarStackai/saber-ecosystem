@@ -1,0 +1,201 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "manual": {
+      "type": "Request",
+      "kind": "Http",
+      "inputs": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "invitationCode": {"type": "string"},
+            "companyName": {"type": "string"},
+            "registrationNumber": {"type": "string"},
+            "contactName": {"type": "string"},
+            "contactTitle": {"type": "string"},
+            "email": {"type": "string"},
+            "phone": {"type": "string"},
+            "address": {"type": "string"},
+            "services": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "yearsExperience": {"type": "number"},
+            "teamSize": {"type": "number"},
+            "coverage": {"type": "string"},
+            "certifications": {"type": "string"},
+            "timestamp": {"type": "string"},
+            "source": {"type": "string"}
+          },
+          "required": ["invitationCode", "companyName", "email"]
+        }
+      }
+    }
+  },
+  "actions": {
+    "Get_invitation_code": {
+      "runAfter": {},
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://saberrenewables.sharepoint.com/sites/SaberEPCPartners'))}/tables/@{encodeURIComponent(encodeURIComponent('EPC Invitations'))}/items",
+        "queries": {
+          "$filter": "Title eq '@{triggerBody()?['invitationCode']}' and Status eq 'Active'"
+        }
+      }
+    },
+    "Check_if_code_valid": {
+      "runAfter": {
+        "Get_invitation_code": ["Succeeded"]
+      },
+      "type": "If",
+      "expression": {
+        "and": [
+          {
+            "greater": [
+              "@length(body('Get_invitation_code')?['value'])",
+              0
+            ]
+          }
+        ]
+      },
+      "actions": {
+        "Create_onboarding_item": {
+          "runAfter": {},
+          "type": "ApiConnection",
+          "inputs": {
+            "host": {
+              "connection": {
+                "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+              }
+            },
+            "method": "post",
+            "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://saberrenewables.sharepoint.com/sites/SaberEPCPartners'))}/tables/@{encodeURIComponent(encodeURIComponent('EPC Onboarding'))}/items",
+            "body": {
+              "Title": "@{triggerBody()?['companyName']}",
+              "RegistrationNumber": "@{triggerBody()?['registrationNumber']}",
+              "ContactName": "@{triggerBody()?['contactName']}",
+              "ContactTitle": "@{triggerBody()?['contactTitle']}",
+              "Email": "@{triggerBody()?['email']}",
+              "Phone": "@{triggerBody()?['phone']}",
+              "Address": "@{triggerBody()?['address']}",
+              "Services": "@{join(triggerBody()?['services'], ', ')}",
+              "YearsExperience": "@{triggerBody()?['yearsExperience']}",
+              "TeamSize": "@{triggerBody()?['teamSize']}",
+              "Coverage": "@{triggerBody()?['coverage']}",
+              "Certifications": "@{triggerBody()?['certifications']}",
+              "InvitationCode": "@{triggerBody()?['invitationCode']}",
+              "SubmissionDate": "@{utcNow()}",
+              "Status": {"Value": "New"}
+            }
+          }
+        },
+        "Update_invitation_code": {
+          "runAfter": {
+            "Create_onboarding_item": ["Succeeded"]
+          },
+          "type": "ApiConnection",
+          "inputs": {
+            "host": {
+              "connection": {
+                "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+              }
+            },
+            "method": "patch",
+            "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://saberrenewables.sharepoint.com/sites/SaberEPCPartners'))}/tables/@{encodeURIComponent(encodeURIComponent('EPC Invitations'))}/items/@{first(body('Get_invitation_code')?['value'])?['ID']}",
+            "body": {
+              "Status": {"Value": "Used"},
+              "UsedDate": "@{utcNow()}"
+            }
+          }
+        },
+        "Send_confirmation_email": {
+          "runAfter": {
+            "Update_invitation_code": ["Succeeded"]
+          },
+          "type": "ApiConnection",
+          "inputs": {
+            "host": {
+              "connection": {
+                "name": "@parameters('$connections')['office365']['connectionId']"
+              }
+            },
+            "method": "post",
+            "path": "/v2/Mail",
+            "body": {
+              "To": "@{triggerBody()?['email']}",
+              "Subject": "EPC Partner Application Received - Saber Renewables",
+              "Body": "<p>Dear @{triggerBody()?['contactName']},</p><p>Thank you for submitting your EPC Partner application to Saber Renewables.</p><p><strong>Application Details:</strong></p><ul><li>Company: @{triggerBody()?['companyName']}</li><li>Submission Date: @{utcNow()}</li><li>Reference Code: @{triggerBody()?['invitationCode']}</li></ul><p>Our team will review your application within 2-3 business days.</p><p>Best regards,<br>Saber Renewables Partner Team</p>",
+              "IsHtml": true
+            }
+          }
+        },
+        "Send_team_notification": {
+          "runAfter": {
+            "Send_confirmation_email": ["Succeeded"]
+          },
+          "type": "ApiConnection",
+          "inputs": {
+            "host": {
+              "connection": {
+                "name": "@parameters('$connections')['office365']['connectionId']"
+              }
+            },
+            "method": "post",
+            "path": "/v2/Mail",
+            "body": {
+              "To": "partners@saberrenewables.com",
+              "Subject": "New EPC Partner Application: @{triggerBody()?['companyName']}",
+              "Body": "<p>New EPC Partner Application received</p><p><strong>Company:</strong> @{triggerBody()?['companyName']}</p><p><strong>Contact:</strong> @{triggerBody()?['contactName']}</p><p><strong>Email:</strong> @{triggerBody()?['email']}</p><p><strong>Phone:</strong> @{triggerBody()?['phone']}</p><p>Review in SharePoint: <a href='https://saberrenewables.sharepoint.com/sites/SaberEPCPartners/Lists/EPC%20Onboarding'>EPC Onboarding List</a></p>",
+              "IsHtml": true
+            }
+          }
+        },
+        "Response_Success": {
+          "runAfter": {
+            "Send_team_notification": ["Succeeded"]
+          },
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 200,
+            "body": {
+              "success": true,
+              "message": "Application submitted successfully",
+              "referenceNumber": "@{body('Create_onboarding_item')?['ID']}"
+            }
+          }
+        }
+      },
+      "else": {
+        "actions": {
+          "Response_Invalid": {
+            "runAfter": {},
+            "type": "Response",
+            "kind": "Http",
+            "inputs": {
+              "statusCode": 403,
+              "body": {
+                "success": false,
+                "message": "Invalid or expired invitation code"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {}
+}

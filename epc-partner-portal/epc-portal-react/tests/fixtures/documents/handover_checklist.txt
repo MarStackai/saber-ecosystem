@@ -1,0 +1,8 @@
+Project Handover Documentation
+
+✓ As-built drawings
+✓ O&M manuals
+✓ Warranty documentation
+✓ Commissioning certificates
+✓ Grid compliance certificates
+✓ Safety file

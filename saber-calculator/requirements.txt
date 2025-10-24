@@ -1,0 +1,22 @@
+# Core dependencies
+streamlit>=1.25.0
+pandas>=2.0.0
+numpy>=1.24.0
+numpy-financial>=1.0.0
+
+# Visualization
+plotly>=5.14.0
+altair>=5.0.0
+
+# AI/ML (optional - for agent functionality)
+langchain>=0.0.200
+langchain-openai>=0.0.5
+python-dotenv>=1.0.0
+
+# Orchestrator dependencies
+psutil>=5.9.0
+requests>=2.31.0
+
+# PyTorch for GPU testing (optional)
+# Uncomment if needed:
+# torch>=2.0.0

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting...</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #9ca3af;
+        }
+        a {
+            color: #86efac;
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        // Extract invitation code from URL
+        const pathParts = window.location.pathname.split('/');
+        const code = pathParts[pathParts.length - 1];
+        
+        if (code && code !== 'apply-redirect.html') {
+            // Redirect to /apply with the invitation code
+            window.location.replace('/apply?invitationCode=' + encodeURIComponent(code));
+        } else {
+            // If no code, redirect to /apply
+            window.location.replace('/apply');
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Validating Access Code...</h2>
+        <p>Redirecting to application form...</p>
+        <p>If you are not redirected, <a href="/apply">click here</a>.</p>
+    </div>
+</body>
+</html>

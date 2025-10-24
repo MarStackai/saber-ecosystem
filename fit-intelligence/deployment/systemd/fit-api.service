@@ -1,0 +1,19 @@
+[Unit]
+Description=FIT Intelligence API Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/marstack/fit_intelligence
+Environment=TRANSFORMERS_OFFLINE=1
+Environment=HF_HUB_OFFLINE=1
+ExecStart=/home/marstack/fit_intelligence/venv/bin/python -u fit_api_server.py
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+RestartSec=5
+StandardOutput=append:%h/fit_api_server.out
+StandardError=append:%h/fit_api_server.err
+
+[Install]
+WantedBy=default.target

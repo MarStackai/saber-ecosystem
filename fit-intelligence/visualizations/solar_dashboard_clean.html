@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saber Solar Intelligence | Commercial Solar Analytics</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Mapbox GL JS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --saber-blue: #044D73;
+            --saber-green: #7CC061;
+            --saber-light-blue: #0A5F8E;
+            --saber-light-green: #95D47E;
+        }
+        
+        .saber-gradient {
+            background: linear-gradient(135deg, var(--saber-blue) 0%, var(--saber-light-blue) 100%);
+        }
+        
+        .filter-pill {
+            background: #f3f4f6;
+            transition: all 0.2s;
+        }
+        
+        .filter-pill:hover {
+            background: #e5e7eb;
+        }
+        
+        .filter-pill.active {
+            background: var(--saber-green);
+            color: white;
+        }
+        
+        .mapboxgl-popup-content {
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="saber-gradient text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold">
+                        <i class="fas fa-solar-panel mr-2"></i>
+                        Commercial Solar Intelligence
+                    </h1>
+                    <p class="text-sm opacity-90">35,617 UK Commercial & Industrial Sites</p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="saber_mapbox_dashboard.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-wind mr-2"></i>Wind
+                    </a>
+                    <button class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-chart-line mr-2"></i>Analytics
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Stats Bar -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-6 py-3">
+            <div class="grid grid-cols-6 gap-4 text-center">
+                <div>
+                    <p class="text-2xl font-bold text-gray-800" id="totalSites">0</p>
+                    <p class="text-xs text-gray-600">Total Sites</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-800" id="totalCapacity">0 MW</p>
+                    <p class="text-xs text-gray-600">Total Capacity</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-green-600" id="optimalCount">0</p>
+                    <p class="text-xs text-gray-600">Optimal Window</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-orange-600" id="urgentCount">0</p>
+                    <p class="text-xs text-gray-600">Urgent</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-red-600" id="immediateCount">0</p>
+                    <p class="text-xs text-gray-600">Immediate</p>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-blue-600" id="avgCapacity">0 kW</p>
+                    <p class="text-xs text-gray-600">Avg Capacity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-6">
+        <div class="grid grid-cols-4 gap-6">
+            <!-- Map Section (3/4 width) -->
+            <div class="col-span-3">
+                <!-- Filters -->
+                <div class="bg-white rounded-lg shadow p-4 mb-4">
+                    <div class="flex gap-6 items-center">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-700">Repowering Window:</span>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="setWindowFilter('all')" class="filter-pill px-3 py-1 rounded text-xs active" data-window="all">All</button>
+                                <button onclick="setWindowFilter('IMMEDIATE')" class="filter-pill px-3 py-1 rounded text-xs" data-window="IMMEDIATE">Immediate</button>
+                                <button onclick="setWindowFilter('URGENT')" class="filter-pill px-3 py-1 rounded text-xs" data-window="URGENT">Urgent</button>
+                                <button onclick="setWindowFilter('OPTIMAL')" class="filter-pill px-3 py-1 rounded text-xs" data-window="OPTIMAL">Optimal</button>
+                                <button onclick="setWindowFilter('PLANNING')" class="filter-pill px-3 py-1 rounded text-xs" data-window="PLANNING">Planning</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <span class="text-sm font-semibold text-gray-700">Capacity:</span>
+                            <div class="flex gap-2 mt-1">
+                                <button onclick="toggleCapacity(0, 50, this)" class="filter-pill capacity-filter px-3 py-1 rounded text-xs" data-min="0" data-max="50">
+                                    <50kW
+                                </button>
+                                <button onclick="toggleCapacity(50, 250, this)" class="filter-pill capacity-filter px-3 py-1 rounded text-xs" data-min="50" data-max="250">
+                                    50-250kW
+                                </button>
+                                <button onclick="toggleCapacity(250, 500, this)" class="filter-pill capacity-filter px-3 py-1 rounded text-xs" data-min="250" data-max="500">
+                                    250-500kW
+                                </button>
+                                <button onclick="toggleCapacity(500, 750, this)" class="filter-pill capacity-filter px-3 py-1 rounded text-xs" data-min="500" data-max="750">
+                                    500-750kW
+                                </button>
+                                <button onclick="toggleCapacity(750, 1000, this)" class="filter-pill capacity-filter px-3 py-1 rounded text-xs" data-min="750" data-max="1000">
+                                    750kW-1MW
+                                </button>
+                                <button onclick="toggleCapacity(1000, null, this)" class="filter-pill capacity-filter px-3 py-1 rounded text-xs" data-min="1000" data-max="">
+                                    >1MW
+                                </button>
+                                <button onclick="toggleCapacity(null, null, this)" class="filter-pill capacity-filter px-3 py-1 rounded text-xs active" data-min="" data-max="">
+                                    All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div id="map" style="height: 600px;" class="rounded"></div>
+                    <div class="mt-2 text-xs text-gray-500 text-center">
+                        <span id="visibleSites">0</span> sites visible
+                    </div>
+                </div>
+                
+                <!-- Regional Stats -->
+                <div class="bg-white rounded-lg shadow p-4 mt-4">
+                    <h3 class="text-lg font-bold mb-3">
+                        <i class="fas fa-chart-bar mr-2 text-green-600"></i>
+                        Regional Statistics
+                    </h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-blue-50 p-3 rounded">
+                            <h4 class="font-semibold text-sm text-blue-900 mb-2">England & Wales</h4>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span>Sites:</span>
+                                    <span class="font-bold" id="ewSites">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Capacity:</span>
+                                    <span class="font-bold" id="ewCapacity">0 MW</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Immediate:</span>
+                                    <span class="font-bold text-red-600" id="ewImmediate">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Urgent:</span>
+                                    <span class="font-bold text-orange-600" id="ewUrgent">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-purple-50 p-3 rounded">
+                            <h4 class="font-semibold text-sm text-purple-900 mb-2">Scotland</h4>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span>Sites:</span>
+                                    <span class="font-bold" id="scotSites">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Capacity:</span>
+                                    <span class="font-bold" id="scotCapacity">0 MW</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Immediate:</span>
+                                    <span class="font-bold text-red-600" id="scotImmediate">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Urgent:</span>
+                                    <span class="font-bold text-orange-600" id="scotUrgent">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-3 rounded">
+                            <h4 class="font-semibold text-sm text-green-900 mb-2">Total Portfolio</h4>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span>Sites:</span>
+                                    <span class="font-bold" id="totalSitesRegional">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Capacity:</span>
+                                    <span class="font-bold" id="totalCapacityRegional">0 MW</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Avg Age:</span>
+                                    <span class="font-bold" id="avgAge">0 yr</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Avg FIT:</span>
+                                    <span class="font-bold" id="avgFit">0 yr</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Side Panel (1/4 width) -->
+            <div class="space-y-4">
+                <!-- AI Chat -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h3 class="text-lg font-bold mb-3">
+                        <i class="fas fa-robot mr-2 text-green-600"></i>
+                        AI Assistant
+                        <button onclick="toggleApiConfig()" class="float-right text-xs text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </h3>
+                    
+                    <div id="apiConfig" class="hidden mb-3 p-2 bg-gray-50 rounded text-xs">
+                        <input type="password" id="apiKey" placeholder="OpenRouter API Key" class="w-full px-2 py-1 border rounded mb-2">
+                        <select id="aiModel" class="w-full px-2 py-1 border rounded mb-2">
+                            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+                            <option value="google/gemini-flash-1.5">Gemini Flash</option>
+                            <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+                        </select>
+                        <button onclick="saveApiConfig()" class="w-full bg-green-600 text-white py-1 rounded hover:bg-green-700">
+                            Save
+                        </button>
+                    </div>
+                    
+                    <div id="chatMessages" class="h-48 overflow-y-auto mb-2 p-2 bg-gray-50 rounded text-sm">
+                        <div class="text-gray-500 text-center text-xs">
+                            Ask about the solar data!
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <input type="text" id="chatInput" placeholder="Ask a question..." 
+                               class="flex-1 px-2 py-1 border rounded text-sm" 
+                               onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Site Details -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h3 class="text-lg font-bold mb-3">
+                        <i class="fas fa-info-circle mr-2 text-green-600"></i>
+                        Site Details
+                    </h3>
+                    <div id="siteDetails" class="text-sm text-gray-500">
+                        Click a site on the map for details
+                    </div>
+                </div>
+                
+                <!-- Priority Chart -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h3 class="text-lg font-bold mb-3">
+                        <i class="fas fa-chart-pie mr-2 text-green-600"></i>
+                        Repowering Windows
+                    </h3>
+                    <canvas id="priorityChart" style="max-height: 200px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let map;
+        let solarData = null;
+        let filteredData = null;
+        let currentFilters = {
+            window: 'all',
+            capacityRanges: new Set(['all'])
+        };
+        
+        // Initialize map
+        function initMap() {
+            // DEMO MODE: Hardcoded token for reliability in internal demo.
+            mapboxgl.accessToken = 'pk.eyJ1IjoibWFyc3RhY2siLCJhIjoiY21ldmt0cHptMGhlYjJpc2Rvb3EzM3QxOSJ9.REl1LiSuYGu6zVXC27RzRQ';
+            
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/light-v11',
+                center: [-2, 53],
+                zoom: 5.5
+            });
+            
+            map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+            
+            map.on('load', () => {
+                loadSolarData();
+            });
+        }
+        
+        // Load data from API
+        async function loadSolarData() {
+            console.log('Loading solar data from API...');
+            try {
+                const response = await fetch('http://localhost:5001/api/geojson');
+                console.log('API response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Loaded features:', data.features ? data.features.length : 0);
+                
+                if (!data.features || data.features.length === 0) {
+                    throw new Error('No features in response');
+                }
+                
+                solarData = data;
+                filteredData = data;
+                
+                setupMapLayers();
+                updateStats();
+                updateRegionalStats();
+                initPriorityChart();
+                
+            } catch (error) {
+                console.error('Error loading solar data:', error);
+                console.log('Using fallback data...');
+                // Fallback to embedded data if API fails
+                loadFallbackData();
+            }
+        }
+        
+        // Setup map layers
+        function setupMapLayers() {
+            // Add source
+            map.addSource('solar-sites', {
+                type: 'geojson',
+                data: filteredData,
+                cluster: true,
+                clusterMaxZoom: 14,
+                clusterRadius: 50,
+                clusterProperties: {
+                    'total_capacity': ['+', ['get', 'capacity_mw']],
+                    'immediate_count': ['+', ['case', ['==', ['get', 'repowering_window'], 'IMMEDIATE'], 1, 0]],
+                    'urgent_count': ['+', ['case', ['==', ['get', 'repowering_window'], 'URGENT'], 1, 0]],
+                    'optimal_count': ['+', ['case', ['==', ['get', 'repowering_window'], 'OPTIMAL'], 1, 0]]
+                }
+            });
+            
+            // Cluster layer
+            map.addLayer({
+                id: 'clusters',
+                type: 'circle',
+                source: 'solar-sites',
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': [
+                        'step',
+                        ['get', 'point_count'],
+                        '#95D47E',
+                        10, '#7CC061',
+                        50, '#0A5F8E',
+                        100, '#044D73'
+                    ],
+                    'circle-radius': [
+                        'step',
+                        ['get', 'point_count'],
+                        15,
+                        10, 20,
+                        50, 25,
+                        100, 30
+                    ]
+                }
+            });
+            
+            // Cluster count
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'solar-sites',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12
+                },
+                paint: {
+                    'text-color': '#ffffff'
+                }
+            });
+            
+            // Individual points
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'solar-sites',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': ['get', 'color'],
+                    'circle-radius': 6,
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#fff'
+                }
+            });
+            
+            // Click handlers
+            map.on('click', 'clusters', (e) => {
+                const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+                const clusterId = features[0].properties.cluster_id;
+                map.getSource('solar-sites').getClusterExpansionZoom(clusterId, (err, zoom) => {
+                    if (err) return;
+                    map.easeTo({
+                        center: features[0].geometry.coordinates,
+                        zoom: zoom
+                    });
+                });
+            });
+            
+            map.on('click', 'unclustered-point', (e) => {
+                const props = e.features[0].properties;
+                showSiteDetails(props);
+                
+                new mapboxgl.Popup()
+                    .setLngLat(e.features[0].geometry.coordinates)
+                    .setHTML(`
+                        <div>
+                            <h4 class="font-bold mb-1">${props.postcode}</h4>
+                            <p><strong>Capacity:</strong> ${props.capacity_kw} kW</p>
+                            <p><strong>Age:</strong> ${Math.round(props.age_years)} years</p>
+                            <p><strong>FIT Remaining:</strong> ${Math.round(props.remaining_fit_years)} years</p>
+                            <p><strong>Window:</strong> <span class="font-bold">${props.repowering_window}</span></p>
+                        </div>
+                    `)
+                    .addTo(map);
+            });
+            
+            // Hover effects
+            map.on('mouseenter', 'clusters', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'clusters', () => {
+                map.getCanvas().style.cursor = '';
+            });
+            map.on('mouseenter', 'unclustered-point', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            map.on('mouseleave', 'unclustered-point', () => {
+                map.getCanvas().style.cursor = '';
+            });
+        }
+        
+        // Filter functions
+        function setWindowFilter(window) {
+            currentFilters.window = window;
+            document.querySelectorAll('[data-window]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.window === window);
+            });
+            applyFilters();
+        }
+        
+        function toggleCapacity(min, max, button) {
+            if (min === null) {
+                // All button
+                currentFilters.capacityRanges.clear();
+                currentFilters.capacityRanges.add('all');
+                document.querySelectorAll('.capacity-filter').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+            } else {
+                // Specific range
+                const rangeKey = `${min}-${max || 'Infinity'}`;
+                
+                if (currentFilters.capacityRanges.has('all')) {
+                    currentFilters.capacityRanges.clear();
+                    document.querySelector('[data-min=""][data-max=""]').classList.remove('active');
+                }
+                
+                if (currentFilters.capacityRanges.has(rangeKey)) {
+                    currentFilters.capacityRanges.delete(rangeKey);
+                    button.classList.remove('active');
+                } else {
+                    currentFilters.capacityRanges.add(rangeKey);
+                    button.classList.add('active');
+                }
+                
+                if (currentFilters.capacityRanges.size === 0) {
+                    currentFilters.capacityRanges.add('all');
+                    document.querySelector('[data-min=""][data-max=""]').classList.add('active');
+                }
+            }
+            applyFilters();
+        }
+        
+        function applyFilters() {
+            if (!solarData) return;
+            
+            filteredData = {
+                type: "FeatureCollection",
+                features: solarData.features.filter(f => {
+                    const props = f.properties;
+                    
+                    // Window filter
+                    if (currentFilters.window !== 'all' && props.repowering_window !== currentFilters.window) {
+                        return false;
+                    }
+                    
+                    // Capacity filter
+                    if (!currentFilters.capacityRanges.has('all')) {
+                        let inRange = false;
+                        for (let range of currentFilters.capacityRanges) {
+                            const [minStr, maxStr] = range.split('-');
+                            const min = parseFloat(minStr);
+                            const max = maxStr === 'Infinity' ? Infinity : parseFloat(maxStr);
+                            if (props.capacity_kw >= min && props.capacity_kw < max) {
+                                inRange = true;
+                                break;
+                            }
+                        }
+                        if (!inRange) return false;
+                    }
+                    
+                    return true;
+                })
+            };
+            
+            // Update map
+            if (map.getSource('solar-sites')) {
+                map.getSource('solar-sites').setData(filteredData);
+            }
+            
+            updateStats();
+            updateRegionalStats();
+            document.getElementById('visibleSites').textContent = filteredData.features.length.toLocaleString();
+        }
+        
+        // Update statistics
+        function updateStats() {
+            if (!filteredData || !filteredData.features) {
+                console.log('No data to update stats');
+                return;
+            }
+            const features = filteredData.features;
+            const stats = {
+                total: features.length,
+                capacity: features.reduce((sum, f) => sum + f.properties.capacity_mw, 0),
+                immediate: features.filter(f => f.properties.repowering_window === 'IMMEDIATE').length,
+                urgent: features.filter(f => f.properties.repowering_window === 'URGENT').length,
+                optimal: features.filter(f => f.properties.repowering_window === 'OPTIMAL').length,
+                avgCapacity: features.length > 0 ? 
+                    features.reduce((sum, f) => sum + f.properties.capacity_kw, 0) / features.length : 0
+            };
+            
+            document.getElementById('totalSites').textContent = stats.total.toLocaleString();
+            document.getElementById('totalCapacity').textContent = stats.capacity.toFixed(1) + ' MW';
+            document.getElementById('immediateCount').textContent = stats.immediate.toLocaleString();
+            document.getElementById('urgentCount').textContent = stats.urgent.toLocaleString();
+            document.getElementById('optimalCount').textContent = stats.optimal.toLocaleString();
+            document.getElementById('avgCapacity').textContent = Math.round(stats.avgCapacity) + ' kW';
+        }
+        
+        // Update regional statistics
+        function updateRegionalStats() {
+            if (!filteredData || !filteredData.features) {
+                console.log('No data to update regional stats');
+                return;
+            }
+            const scotlandRegions = ['Scotland', 'Highland', 'Aberdeenshire', 'Orkney', 'Shetland'];
+            const features = filteredData.features;
+            
+            let ewStats = { sites: 0, capacity: 0, immediate: 0, urgent: 0 };
+            let scotStats = { sites: 0, capacity: 0, immediate: 0, urgent: 0 };
+            let totalAge = 0, totalFit = 0;
+            
+            features.forEach(f => {
+                const props = f.properties;
+                const isScotland = scotlandRegions.some(term => props.region.includes(term));
+                
+                if (isScotland) {
+                    scotStats.sites++;
+                    scotStats.capacity += props.capacity_mw;
+                    if (props.repowering_window === 'IMMEDIATE') scotStats.immediate++;
+                    if (props.repowering_window === 'URGENT') scotStats.urgent++;
+                } else {
+                    ewStats.sites++;
+                    ewStats.capacity += props.capacity_mw;
+                    if (props.repowering_window === 'IMMEDIATE') ewStats.immediate++;
+                    if (props.repowering_window === 'URGENT') ewStats.urgent++;
+                }
+                
+                totalAge += props.age_years;
+                totalFit += props.remaining_fit_years;
+            });
+            
+            // Update display
+            document.getElementById('ewSites').textContent = ewStats.sites.toLocaleString();
+            document.getElementById('ewCapacity').textContent = ewStats.capacity.toFixed(1) + ' MW';
+            document.getElementById('ewImmediate').textContent = ewStats.immediate;
+            document.getElementById('ewUrgent').textContent = ewStats.urgent;
+            
+            document.getElementById('scotSites').textContent = scotStats.sites.toLocaleString();
+            document.getElementById('scotCapacity').textContent = scotStats.capacity.toFixed(1) + ' MW';
+            document.getElementById('scotImmediate').textContent = scotStats.immediate;
+            document.getElementById('scotUrgent').textContent = scotStats.urgent;
+            
+            document.getElementById('totalSitesRegional').textContent = features.length.toLocaleString();
+            document.getElementById('totalCapacityRegional').textContent = (ewStats.capacity + scotStats.capacity).toFixed(1) + ' MW';
+            document.getElementById('avgAge').textContent = features.length > 0 ? 
+                (totalAge / features.length).toFixed(1) + ' yr' : '0 yr';
+            document.getElementById('avgFit').textContent = features.length > 0 ? 
+                (totalFit / features.length).toFixed(1) + ' yr' : '0 yr';
+        }
+        
+        // Show site details
+        function showSiteDetails(props) {
+            const details = `
+                <div class="space-y-2">
+                    <p><strong>Postcode:</strong> ${props.postcode}</p>
+                    <p><strong>Region:</strong> ${props.region}</p>
+                    <p><strong>Capacity:</strong> ${props.capacity_kw} kW</p>
+                    <p><strong>Age:</strong> ${Math.round(props.age_years)} years</p>
+                    <p><strong>FIT Remaining:</strong> ${Math.round(props.remaining_fit_years)} years</p>
+                    <p><strong>Annual Gen:</strong> ${Math.round(props.annual_generation_mwh)} MWh</p>
+                    <p><strong>Window:</strong> <span class="font-bold">${props.repowering_window}</span></p>
+                </div>
+            `;
+            document.getElementById('siteDetails').innerHTML = details;
+        }
+        
+        // Initialize priority chart
+        function initPriorityChart() {
+            if (!filteredData || !filteredData.features) {
+                console.error('No data for priority chart');
+                return;
+            }
+            
+            const ctx = document.getElementById('priorityChart').getContext('2d');
+            const windows = ['IMMEDIATE', 'URGENT', 'OPTIMAL', 'PLANNING', 'FUTURE'];
+            const counts = windows.map(w => 
+                filteredData.features.filter(f => f.properties.repowering_window === w).length
+            );
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: windows,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: ['#E74C3C', '#F39C12', '#7CC061', '#0A5F8E', '#95D47E']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Chat functions
+        let chatConfig = {
+            apiKey: localStorage.getItem('openrouter_api_key') || '',
+            model: localStorage.getItem('openrouter_model') || 'openai/gpt-3.5-turbo'
+        };
+        
+        function toggleApiConfig() {
+            document.getElementById('apiConfig').classList.toggle('hidden');
+        }
+        
+        function saveApiConfig() {
+            chatConfig.apiKey = document.getElementById('apiKey').value;
+            chatConfig.model = document.getElementById('aiModel').value;
+            localStorage.setItem('openrouter_api_key', chatConfig.apiKey);
+            localStorage.setItem('openrouter_model', chatConfig.model);
+            document.getElementById('apiConfig').classList.add('hidden');
+            addChatMessage('system', 'Configuration saved!');
+        }
+        
+        function addChatMessage(role, content) {
+            const messages = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = role === 'user' ? 'text-right mb-2' : 'mb-2';
+            
+            const bubble = document.createElement('div');
+            bubble.className = role === 'user' 
+                ? 'inline-block bg-blue-600 text-white px-3 py-2 rounded-lg text-xs max-w-xs'
+                : role === 'system'
+                ? 'inline-block bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-xs max-w-xs'
+                : 'inline-block bg-gray-100 text-gray-800 px-3 py-2 rounded-lg text-xs max-w-xs';
+            bubble.textContent = content;
+            
+            div.appendChild(bubble);
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addChatMessage('user', message);
+            input.value = '';
+            
+            // Query our API first
+            try {
+                const apiResponse = await fetch('http://localhost:5001/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: message })
+                });
+                
+                if (apiResponse.ok) {
+                    const result = await apiResponse.json();
+                    if (result.data && result.data.summary) {
+                        addChatMessage('assistant', result.data.summary);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.log('Using OpenRouter fallback');
+            }
+            
+            // Fallback to OpenRouter if configured
+            if (chatConfig.apiKey) {
+                try {
+                    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${chatConfig.apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: chatConfig.model,
+                            messages: [
+                                { role: 'system', content: 'You are analyzing UK commercial solar data.' },
+                                { role: 'user', content: message }
+                            ],
+                            temperature: 0.7,
+                            max_tokens: 200
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    addChatMessage('assistant', data.choices[0].message.content);
+                } catch (error) {
+                    addChatMessage('system', 'Error: ' + error.message);
+                }
+            } else {
+                addChatMessage('system', 'Please configure API key (click gear icon)');
+            }
+        }
+        
+        // Load saved config
+        window.addEventListener('load', () => {
+            if (chatConfig.apiKey) {
+                document.getElementById('apiKey').value = chatConfig.apiKey;
+            }
+            if (chatConfig.model) {
+                document.getElementById('aiModel').value = chatConfig.model;
+            }
+        });
+        
+        // Fallback data loader (in case API fails)
+        function loadFallbackData() {
+            // Create minimal test data
+            const testFeatures = [];
+            for (let i = 0; i < 100; i++) {
+                testFeatures.push({
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [-2 + Math.random() * 4, 51 + Math.random() * 4]
+                    },
+                    properties: {
+                        postcode: "TEST" + i,
+                        capacity_kw: 50 + Math.random() * 500,
+                        capacity_mw: (50 + Math.random() * 500) / 1000,
+                        age_years: 5 + Math.random() * 10,
+                        remaining_fit_years: 5 + Math.random() * 10,
+                        region: Math.random() > 0.5 ? "South West" : "Scotland",
+                        repowering_window: ["IMMEDIATE", "URGENT", "OPTIMAL", "PLANNING"][Math.floor(Math.random() * 4)],
+                        annual_generation_mwh: 50 + Math.random() * 200,
+                        color: "#7CC061"
+                    }
+                });
+            }
+            
+            solarData = {
+                type: "FeatureCollection",
+                features: testFeatures
+            };
+            filteredData = solarData;
+            
+            setupMapLayers();
+            updateStats();
+            updateRegionalStats();
+            initPriorityChart();
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+        });
+    </script>
+</body>
+</html>

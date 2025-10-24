@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(az account:*)",
+      "Bash(node --version:*)",
+      "Bash(npm --version:*)",
+      "Bash(wrangler:*)",
+      "Bash(npx wrangler --version)",
+      "Bash(op item create:*)",
+      "Bash(op read:*)",
+      "Bash(op account:*)",
+      "Read(//home/marstack/mcp-servers/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

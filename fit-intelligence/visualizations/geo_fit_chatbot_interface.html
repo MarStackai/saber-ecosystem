@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geographic Enhanced FIT Intelligence Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .message {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message-bubble {
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 5px 20px;
+        }
+        .bot-message {
+            background: #f8f9fa;
+            color: #2c3e50;
+            border-radius: 20px 20px 20px 5px;
+            border-left: 4px solid #667eea;
+        }
+        .typing-indicator {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin: 10px 0;
+        }
+        .typing-dots {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        .typing-dots:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots:nth-child(2) { animation-delay: -0.16s; margin: 0 4px; }
+        .typing-dots:nth-child(3) { animation-delay: 0s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .input-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .input-container:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .capability-tag {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            margin: 2px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-bold text-white mb-2">
+                <i class="fas fa-globe-europe mr-3"></i>
+                Geographic Enhanced FIT Intelligence
+            </h1>
+            <p class="text-white/80 text-lg">
+                Advanced UK Renewable Energy Intelligence with Geographic Analysis
+            </p>
+            
+            <!-- System Status -->
+            <div class="mt-4 p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+                <div class="flex items-center justify-center text-white">
+                    <span class="status-indicator bg-green-500" id="systemStatus"></span>
+                    <span id="statusText">Connecting to Geographic Intelligence...</span>
+                </div>
+            </div>
+
+            <!-- Enhanced Capabilities -->
+            <div class="mt-4">
+                <h3 class="text-white/90 text-sm mb-2">Enhanced Geographic Capabilities:</h3>
+                <div class="flex flex-wrap justify-center">
+                    <span class="capability-tag">UK Postcode Intelligence</span>
+                    <span class="capability-tag">Geographic Site Search</span>
+                    <span class="capability-tag">Distance Calculations</span>
+                    <span class="capability-tag">Regional Analysis</span>
+                    <span class="capability-tag">Site Clustering</span>
+                    <span class="capability-tag">Market Intelligence</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container p-6 max-w-4xl mx-auto">
+            <!-- Welcome Message -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-l-4 border-indigo-500">
+                <h2 class="text-lg font-semibold text-indigo-800 mb-2">
+                    <i class="fas fa-rocket mr-2"></i>Welcome to Geographic Enhanced FIT Intelligence
+                </h2>
+                <p class="text-indigo-700 text-sm mb-3">
+                    Your advanced assistant for UK renewable energy intelligence with comprehensive geographic capabilities.
+                </p>
+                
+                <!-- Example Queries -->
+                <div class="text-sm">
+                    <strong class="text-indigo-800">Try these enhanced geographic queries:</strong>
+                    <ul class="mt-2 text-indigo-600 space-y-1">
+                        <li>🎯 <button onclick="sendExampleMessage('wind sites near beverly between 250 and 500kw')" class="hover:underline cursor-pointer">"wind sites near beverly between 250 and 500kw"</button></li>
+                        <li>🏛️ <button onclick="sendExampleMessage('regional analysis for YO17 9AS')" class="hover:underline cursor-pointer">"regional analysis for YO17 9AS"</button></li>
+                        <li>📏 <button onclick="sendExampleMessage('distance between YO17 9AS and YO25 9AA')" class="hover:underline cursor-pointer">"distance between YO17 9AS and YO25 9AA"</button></li>
+                        <li>🗂️ <button onclick="sendExampleMessage('show me wind farm clusters in yorkshire')" class="hover:underline cursor-pointer">"show me wind farm clusters in yorkshire"</button></li>
+                        <li>💰 <button onclick="sendExampleMessage('give the fit price for fit id 1585')" class="hover:underline cursor-pointer">"give the fit price for fit id 1585"</button></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chatMessages" class="space-y-4 mb-6 max-h-96 overflow-y-auto">
+                <!-- Messages will be dynamically added here -->
+            </div>
+
+            <!-- Typing Indicator -->
+            <div id="typingIndicator" class="typing-indicator hidden">
+                <div class="flex items-center">
+                    <span class="text-gray-600 mr-3">Geographic Intelligence is analyzing</span>
+                    <div class="typing-dots"></div>
+                    <div class="typing-dots"></div>
+                    <div class="typing-dots"></div>
+                </div>
+            </div>
+
+            <!-- Input Container -->
+            <div class="input-container flex items-center p-2">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Ask about renewable sites, geographic analysis, distances, clusters..." 
+                    class="flex-1 px-4 py-3 bg-transparent border-none outline-none text-gray-700 placeholder-gray-500"
+                    onkeypress="if(event.key==='Enter') sendMessage()"
+                >
+                <button 
+                    onclick="sendMessage()" 
+                    class="send-button text-white px-6 py-3 rounded-full hover:shadow-lg transition-all duration-300"
+                    id="sendButton"
+                >
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Enhanced Features Notice -->
+            <div class="mt-4 text-center text-sm text-gray-600">
+                <i class="fas fa-shield-alt mr-1"></i>
+                Enhanced with UK Postcodes.io API • Real-time geographic intelligence • Advanced clustering analysis
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CHAT_API_BASE = 'http://localhost:5003';
+        
+        // System status check
+        async function checkSystemStatus() {
+            const systemStatus = document.getElementById('systemStatus');
+            const statusText = document.getElementById('statusText');
+            
+            try {
+                const response = await fetch(`${CHAT_API_BASE}/api/geo-chat/health`);
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    systemStatus.className = 'status-indicator bg-green-500';
+                    statusText.textContent = 'Geographic Enhanced FIT Intelligence Active';
+                } else {
+                    throw new Error('System offline');
+                }
+            } catch (error) {
+                systemStatus.className = 'status-indicator bg-red-500';
+                statusText.textContent = 'System Offline - Geographic features unavailable';
+                console.error('System status check failed:', error);
+            }
+        }
+
+        // Send message function
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            
+            // Clear input and show typing indicator
+            input.value = '';
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch(`${CHAT_API_BASE}/api/geo-chat/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                hideTypingIndicator();
+                
+                if (data.status === 'success') {
+                    addMessage(data.response, 'bot');
+                } else {
+                    addMessage(`Error: ${data.error}`, 'bot', true);
+                }
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('Connection error. Please ensure the Geographic Enhanced FIT Intelligence service is running on port 5003.', 'bot', true);
+                console.error('Chat error:', error);
+            }
+        }
+
+        // Add message to chat
+        function addMessage(content, sender, isError = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubbleClass = sender === 'user' 
+                ? 'user-message' 
+                : `bot-message ${isError ? 'border-l-red-500 bg-red-50' : ''}`;
+            
+            // Convert markdown-like formatting to HTML
+            const formattedContent = formatMessage(content);
+            
+            messageDiv.innerHTML = `
+                <div class="message-bubble ${bubbleClass} p-4 rounded-lg">
+                    ${sender === 'bot' ? '<i class="fas fa-robot mr-2 text-indigo-600"></i>' : ''}
+                    <div class="message-content">${formattedContent}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Format message with basic markdown support
+        function formatMessage(content) {
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
+                .replace(/\n/g, '<br>')
+                .replace(/• /g, '&bull; ')
+                .replace(/📍/g, '<span class="text-blue-600">📍</span>')
+                .replace(/⚡/g, '<span class="text-yellow-500">⚡</span>')
+                .replace(/🌍/g, '<span class="text-green-600">🌍</span>')
+                .replace(/🏛️/g, '<span class="text-purple-600">🏛️</span>')
+                .replace(/📏/g, '<span class="text-indigo-600">📏</span>')
+                .replace(/🗂️/g, '<span class="text-gray-600">🗂️</span>')
+                .replace(/🎯/g, '<span class="text-red-500">🎯</span>')
+                .replace(/📊/g, '<span class="text-blue-500">📊</span>')
+                .replace(/🚗/g, '<span class="text-gray-700">🚗</span>')
+                .replace(/🏗️/g, '<span class="text-orange-600">🏗️</span>');
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('hidden');
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('hidden');
+        }
+
+        // Send example message
+        function sendExampleMessage(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemStatus();
+            
+            // Auto-focus input
+            document.getElementById('messageInput').focus();
+        });
+
+        // Auto-resize chat area based on content
+        function adjustChatHeight() {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageCount = chatMessages.children.length;
+            
+            if (messageCount > 8) {
+                chatMessages.style.maxHeight = '500px';
+            } else if (messageCount > 4) {
+                chatMessages.style.maxHeight = '400px';
+            }
+        }
+
+        // Call adjust height after adding messages
+        const originalAddMessage = addMessage;
+        addMessage = function(...args) {
+            originalAddMessage.apply(this, args);
+            adjustChatHeight();
+        };
+    </script>
+</body>
+</html>

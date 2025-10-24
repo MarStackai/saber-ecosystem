@@ -1,0 +1,86 @@
+[
+  {
+    "filename": "design_spec.pdf",
+    "folder": "01. Design",
+    "type": "application/pdf",
+    "size": 507
+  },
+  {
+    "filename": "g99_application.pdf",
+    "folder": "02. Grid/G99 Application",
+    "type": "application/pdf",
+    "size": 401
+  },
+  {
+    "filename": "g99_offer.pdf",
+    "folder": "02. Grid/G99 Offer",
+    "type": "application/pdf",
+    "size": 377
+  },
+  {
+    "filename": "planning_application.pdf",
+    "folder": "03. Planning/Planning Application",
+    "type": "application/pdf",
+    "size": 431
+  },
+  {
+    "filename": "planning_decision.pdf",
+    "folder": "03. Planning/Planning Decision",
+    "type": "application/pdf",
+    "size": 375
+  },
+  {
+    "filename": "epc_contract.docx",
+    "folder": "04. Project Delivery/01. EPC Contract",
+    "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 424
+  },
+  {
+    "filename": "om_contract.docx",
+    "folder": "04. Project Delivery/02. O&M Contract",
+    "type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 397
+  },
+  {
+    "filename": "final_design.pdf",
+    "folder": "04. Project Delivery/03. Final Design",
+    "type": "application/pdf",
+    "size": 363
+  },
+  {
+    "filename": "precon_pack.txt",
+    "folder": "04. Project Delivery/04. Pre-construction Pack",
+    "type": "text/plain",
+    "size": 165
+  },
+  {
+    "filename": "invoice_001.txt",
+    "folder": "04. Project Delivery/05. EPC Invoices",
+    "type": "text/plain",
+    "size": 313
+  },
+  {
+    "filename": "handover_checklist.txt",
+    "folder": "04. Project Delivery/06. Handover Pack",
+    "type": "text/plain",
+    "size": 176
+  },
+  {
+    "filename": "site_survey.pdf",
+    "folder": "05. Survey/Site Survey",
+    "type": "application/pdf",
+    "size": 427
+  },
+  {
+    "filename": "site_photo.jpg",
+    "folder": "05. Survey/Media",
+    "type": "image/jpeg",
+    "size": 629
+  },
+  {
+    "filename": "test_spreadsheet.csv",
+    "folder": "04. Project Delivery/05. EPC Invoices",
+    "type": "text/csv",
+    "size": 170
+  }
+]

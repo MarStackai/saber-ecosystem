@@ -1,0 +1,49 @@
+{
+  "model_name": "llama2:13b",
+  "lora_config": {
+    "r": 16,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "target_modules": ["q_proj", "v_proj"],
+    "task_type": "CAUSAL_LM"
+  },
+  "training_args": {
+    "learning_rate": 2e-5,
+    "num_train_epochs": 2,
+    "per_device_train_batch_size": 4,
+    "per_device_eval_batch_size": 4,
+    "gradient_accumulation_steps": 4,
+    "warmup_steps": 100,
+    "logging_steps": 10,
+    "save_steps": 500,
+    "eval_steps": 100,
+    "save_total_limit": 3,
+    "load_best_model_at_end": true,
+    "metric_for_best_model": "eval_loss",
+    "greater_is_better": false,
+    "fp16": true,
+    "gradient_checkpointing": true,
+    "optim": "adamw_torch",
+    "seed": 42,
+    "max_seq_length": 2048,
+    "temperature": 0.1
+  },
+  "data_config": {
+    "train_file": "train_20250827_001256.jsonl",
+    "val_file": "val_20250827_001256.jsonl",
+    "max_samples": null,
+    "validation_split": 0.1
+  },
+  "output_dir": "./lora_checkpoints",
+  "critical_tests": {
+    "manchester_m_only": true,
+    "yorkshire_full_set": true,
+    "capacity_exact_ranges": true,
+    "technology_normalization": true
+  },
+  "deployment": {
+    "model_alias": "fit-llama2-lora",
+    "merge_adapter": true,
+    "quantization": "Q4_K_M"
+  }
+}

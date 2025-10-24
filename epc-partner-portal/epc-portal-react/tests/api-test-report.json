@@ -1,0 +1,19 @@
+{
+  "testRun": {
+    "date": "2025-09-23T09:40:52.006Z",
+    "tenderId": "TEST-TENDER-1758620451874",
+    "partnerName": "Green Energy Partners Ltd"
+  },
+  "results": {
+    "documentsGenerated": 14,
+    "foldersExpected": 18,
+    "testsRun": 5,
+    "status": "COMPLETED"
+  },
+  "sharePointIntegration": {
+    "folderStructure": "Created",
+    "documentUpload": "Working",
+    "synchronization": "Verified",
+    "versioning": "Tested"
+  }
+}

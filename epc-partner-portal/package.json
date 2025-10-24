@@ -1,0 +1,38 @@
+{
+  "name": "saber-epc-portal",
+  "version": "1.0.0",
+  "description": "Saber EPC Portal - Partner Management System",
+  "private": true,
+  "scripts": {
+    "dev": "./scripts/deploy-dev.sh",
+    "deploy:staging": "./scripts/deploy-staging.sh",
+    "deploy:production": "./scripts/deploy-production.sh",
+    "test": "playwright test",
+    "test:staging": "TEST_ENV=staging playwright test",
+    "test:production": "TEST_ENV=production playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:quick": "./scripts/test-staging.sh",
+    "worker:dev": "npx wrangler dev --local --port 8787",
+    "worker:staging": "npx wrangler dev --env staging --port 8788",
+    "worker:deploy:staging": "npx wrangler deploy --env staging",
+    "worker:deploy:production": "npx wrangler deploy --env production",
+    "frontend:dev": "cd epc-portal-react && npm run dev",
+    "frontend:build": "cd epc-portal-react && npm run build",
+    "frontend:deploy:staging": "cd epc-portal-react && npm run build && npx wrangler pages deploy .vercel/output/static --project-name=saber-epc-portal --branch=staging",
+    "frontend:deploy:production": "cd epc-portal-react && npm run build && npx wrangler pages deploy .vercel/output/static --project-name=saber-epc-portal --branch=main"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0",
+    "wrangler": "^4.38.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarStackai/saber-epc-portal.git"
+  }
+}

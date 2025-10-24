@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPC Partner Onboarding | Saber Renewables</title>
+    
+    <!-- TailwindCSS with TailwindPlus Elements -->
+    <link rel="stylesheet" href="../styles/output.css">
+    
+    <!-- TailwindPlus Elements JavaScript -->
+    <script type="module" src="../node_modules/@tailwindplus/elements/dist/index.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --font-inter: 'Inter', system-ui, sans-serif;
+            --font-lexend: 'Lexend', system-ui, sans-serif;
+        }
+        
+        .dark-gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .premium-glow {
+            box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.1), 0 1px 3px rgba(0, 0, 0, 0.3), 0 10px 40px rgba(6, 182, 212, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .animated-border {
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .animated-border::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(90deg, transparent, #06b6d4, transparent);
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .animated-border:focus-within::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="h-full bg-slate-900 text-white font-sans">
+    <!-- Animated background gradient -->
+    <div class="fixed inset-0 dark-gradient-bg"></div>
+    
+    <!-- Blur effects -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+    <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
+    
+    <!-- Progress bar at top -->
+    <div class="fixed top-0 left-0 right-0 h-1 bg-slate-800/50 z-50">
+        <div id="progress-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-500" style="width: 25%"></div>
+    </div>
+    
+    <div class="relative min-h-screen">
+        <!-- Header -->
+        <header class="relative z-10 border-b border-white/10">
+            <div class="max-w-6xl mx-auto px-6 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <!-- Premium logo with glow effect -->
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center premium-glow">
+                                <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2L3.09 8.26L4 21H20L20.91 8.26L12 2ZM12 4.44L18.18 9H5.82L12 4.44ZM6 19V11H18V19H6Z"/>
+                                </svg>
+                            </div>
+                            <!-- Subtle glow -->
+                            <div class="absolute inset-0 w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400/30 to-blue-500/30 blur-lg"></div>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-semibold text-white font-display">Saber Renewables</h1>
+                            <p class="text-sm text-slate-400">EPC Partner Onboarding Portal</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Status indicator -->
+                    <div class="hidden md:flex items-center space-x-6">
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-slate-300">Secure Application</p>
+                            <p class="text-xs text-slate-500">End-to-end encrypted</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            <span class="text-xs text-slate-400">Online</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content -->
+        <main class="relative z-10 max-w-5xl mx-auto px-6 py-12">
+            <!-- Header section -->
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold font-display gradient-text mb-4">
+                    EPC Partner Application
+                </h2>
+                <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+                    Complete your professional contractor registration and join the renewable energy revolution
+                </p>
+                
+                <!-- Time and step indicator -->
+                <div class="mt-8 flex items-center justify-center space-x-8 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-clock text-cyan-400"></i>
+                        <span class="text-slate-400">Estimated time: <span class="text-white font-medium">8 minutes</span></span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-layer-group text-cyan-400"></i>
+                        <span class="text-slate-400">Step <span id="current-step" class="text-white font-medium">1</span> of 4</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium progress indicator -->
+            <div class="mb-16">
+                <div class="flex justify-between items-center max-w-4xl mx-auto">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center group cursor-pointer" data-step="1">
+                        <div class="relative">
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-semibold text-lg premium-glow transition-all duration-300 group-hover:scale-105">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <!-- Connecting line -->
+                            <div class="absolute top-8 left-full w-24 h-px bg-gradient-to-r from-cyan-400/50 to-transparent hidden lg:block"></div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-sm font-semibold text-cyan-400">Company</p>
+                            <p class="text-xs text-slate-500">Basic details</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center group cursor-pointer" data-step="2">
+                        <div class="relative">
+                            <div class="w-16 h-16 rounded-full bg-slate-800/50 border-2 border-slate-700 flex items-center justify-center text-slate-400 font-semibold text-lg transition-all duration-300 group-hover:scale-105 group-hover:border-slate-600">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <div class="absolute top-8 left-full w-24 h-px bg-slate-700 hidden lg:block"></div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-sm font-medium text-slate-400 group-hover:text-slate-300">Services</p>
+                            <p class="text-xs text-slate-500">Capabilities</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center group cursor-pointer" data-step="3">
+                        <div class="relative">
+                            <div class="w-16 h-16 rounded-full bg-slate-800/50 border-2 border-slate-700 flex items-center justify-center text-slate-400 font-semibold text-lg transition-all duration-300 group-hover:scale-105 group-hover:border-slate-600">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="absolute top-8 left-full w-24 h-px bg-slate-700 hidden lg:block"></div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-sm font-medium text-slate-400 group-hover:text-slate-300">Compliance</p>
+                            <p class="text-xs text-slate-500">Certifications</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4 -->
+                    <div class="flex flex-col items-center group cursor-pointer" data-step="4">
+                        <div class="w-16 h-16 rounded-full bg-slate-800/50 border-2 border-slate-700 flex items-center justify-center text-slate-400 font-semibold text-lg transition-all duration-300 group-hover:scale-105 group-hover:border-slate-600">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-sm font-medium text-slate-400 group-hover:text-slate-300">Review</p>
+                            <p class="text-xs text-slate-500">Submit</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form container with glass effect -->
+            <div class="glass-effect rounded-2xl overflow-hidden">
+                <!-- Form header with gradient border -->
+                <div class="relative border-b border-white/10">
+                    <!-- Top gradient border -->
+                    <div class="absolute top-0 left-20 right-11 h-px bg-gradient-to-r from-transparent via-cyan-400/70 to-transparent"></div>
+                    <!-- Bottom gradient border -->
+                    <div class="absolute bottom-0 left-11 right-20 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent"></div>
+                    
+                    <div class="px-8 py-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-2xl font-semibold text-white font-display mb-2">Company Information</h3>
+                                <p class="text-slate-400">Provide your organization's essential business details to begin the partnership process</p>
+                            </div>
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-400/20 to-blue-500/20 flex items-center justify-center border border-cyan-400/30">
+                                <i class="fas fa-building text-2xl text-cyan-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form content -->
+                <form id="epcOnboardingForm" class="p-8" novalidate>
+                    <div id="step-1" class="step-content space-y-8">
+                        <!-- Company details grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Company Name -->
+                            <div class="form-group">
+                                <label for="companyName" class="block text-sm font-medium text-slate-300 mb-3">
+                                    Company Name *
+                                </label>
+                                <div class="relative animated-border rounded-xl">
+                                    <input 
+                                        type="text" 
+                                        id="companyName" 
+                                        name="companyName" 
+                                        class="w-full px-4 py-4 bg-slate-800/50 border-0 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-0 transition-all duration-200"
+                                        required
+                                        placeholder="Enter your registered company name"
+                                        data-validation="required"
+                                    >
+                                </div>
+                                <div class="form-error hidden mt-2 text-red-400 text-sm flex items-center gap-2">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Company name is required</span>
+                                </div>
+                            </div>
+
+                            <!-- Trading Name -->
+                            <div class="form-group">
+                                <label for="tradingName" class="block text-sm font-medium text-slate-300 mb-3">
+                                    Trading Name
+                                </label>
+                                <div class="relative animated-border rounded-xl">
+                                    <input 
+                                        type="text" 
+                                        id="tradingName" 
+                                        name="tradingName" 
+                                        class="w-full px-4 py-4 bg-slate-800/50 border-0 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-0"
+                                        placeholder="If different from company name"
+                                    >
+                                </div>
+                                <p class="mt-2 text-slate-500 text-sm">Leave blank if same as company name</p>
+                            </div>
+                        </div>
+
+                        <!-- Registration details -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Company Registration Number -->
+                            <div class="form-group">
+                                <label for="companyRegNo" class="block text-sm font-medium text-slate-300 mb-3">
+                                    Company Registration Number *
+                                </label>
+                                <div class="relative animated-border rounded-xl">
+                                    <input 
+                                        type="text" 
+                                        id="companyRegNo" 
+                                        name="companyRegNo" 
+                                        class="w-full px-4 py-4 bg-slate-800/50 border-0 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-0"
+                                        required
+                                        placeholder="e.g., 12345678"
+                                        data-validation="required"
+                                    >
+                                </div>
+                                <div class="form-error hidden mt-2 text-red-400 text-sm flex items-center gap-2">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Registration number is required</span>
+                                </div>
+                            </div>
+
+                            <!-- VAT Number -->
+                            <div class="form-group">
+                                <label for="vatNo" class="block text-sm font-medium text-slate-300 mb-3">
+                                    VAT Number
+                                </label>
+                                <div class="relative animated-border rounded-xl">
+                                    <input 
+                                        type="text" 
+                                        id="vatNo" 
+                                        name="vatNo" 
+                                        class="w-full px-4 py-4 bg-slate-800/50 border-0 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-0"
+                                        placeholder="GB123456789"
+                                    >
+                                </div>
+                                <p class="mt-2 text-slate-500 text-sm">Include country code if applicable</p>
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="form-group">
+                            <label for="registeredOffice" class="block text-sm font-medium text-slate-300 mb-3">
+                                Registered Office Address *
+                            </label>
+                            <div class="relative animated-border rounded-xl">
+                                <textarea 
+                                    id="registeredOffice" 
+                                    name="registeredOffice" 
+                                    rows="4"
+                                    class="w-full px-4 py-4 bg-slate-800/50 border-0 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-0 resize-none"
+                                    required
+                                    placeholder="Enter your complete registered office address including postcode"
+                                    data-validation="required"
+                                ></textarea>
+                            </div>
+                            <div class="form-error hidden mt-2 text-red-400 text-sm flex items-center gap-2">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Registered office address is required</span>
+                            </div>
+                        </div>
+
+                        <!-- Contact section -->
+                        <div class="border-t border-white/10 pt-8">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400/20 to-blue-500/20 flex items-center justify-center border border-cyan-400/30">
+                                    <i class="fas fa-user-tie text-cyan-400"></i>
+                                </div>
+                                <h4 class="text-xl font-semibold text-white font-display">Primary Contact</h4>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Full Name -->
+                                <div class="form-group">
+                                    <label for="primaryContactName" class="block text-sm font-medium text-slate-300 mb-3">
+                                        Full Name *
+                                    </label>
+                                    <div class="relative animated-border rounded-xl">
+                                        <input 
+                                            type="text" 
+                                            id="primaryContactName" 
+                                            name="primaryContactName" 
+                                            class="w-full px-4 py-4 bg-slate-800/50 border-0 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-0"
+                                            required
+                                            placeholder="John Smith"
+                                            data-validation="required"
+                                        >
+                                    </div>
+                                    <div class="form-error hidden mt-2 text-red-400 text-sm flex items-center gap-2">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span>Contact name is required</span>
+                                    </div>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="form-group">
+                                    <label for="primaryContactEmail" class="block text-sm font-medium text-slate-300 mb-3">
+                                        Email Address *
+                                    </label>
+                                    <div class="relative animated-border rounded-xl">
+                                        <input 
+                                            type="email" 
+                                            id="primaryContactEmail" 
+                                            name="primaryContactEmail" 
+                                            class="w-full px-4 py-4 bg-slate-800/50 border-0 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-0"
+                                            required
+                                            placeholder="john.smith@company.com"
+                                            data-validation="required,email"
+                                        >
+                                    </div>
+                                    <div class="form-error hidden mt-2 text-red-400 text-sm flex items-center gap-2">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span>Valid email address is required</span>
+                                    </div>
+                                </div>
+
+                                <!-- Phone -->
+                                <div class="form-group">
+                                    <label for="primaryContactPhone" class="block text-sm font-medium text-slate-300 mb-3">
+                                        Phone Number *
+                                    </label>
+                                    <div class="relative animated-border rounded-xl">
+                                        <input 
+                                            type="tel" 
+                                            id="primaryContactPhone" 
+                                            name="primaryContactPhone" 
+                                            class="w-full px-4 py-4 bg-slate-800/50 border-0 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-0"
+                                            required
+                                            placeholder="+44 123 456 7890"
+                                            data-validation="required"
+                                        >
+                                    </div>
+                                    <div class="form-error hidden mt-2 text-red-400 text-sm flex items-center gap-2">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span>Contact phone is required</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form navigation -->
+                        <div class="border-t border-white/10 pt-8">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2 text-sm text-slate-400">
+                                    <i class="fas fa-info-circle text-cyan-400"></i>
+                                    <span>All required fields must be completed</span>
+                                </div>
+                                
+                                <button 
+                                    type="button" 
+                                    id="nextStep1"
+                                    class="group inline-flex items-center gap-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-8 py-4 rounded-full font-semibold text-sm transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 premium-glow"
+                                >
+                                    <span>Continue to Services</span>
+                                    <i class="fas fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Help section -->
+            <div class="mt-12 glass-effect rounded-2xl p-8">
+                <div class="flex items-start gap-6">
+                    <div class="w-12 h-12 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-xl flex items-center justify-center border border-cyan-400/30 flex-shrink-0">
+                        <i class="fas fa-headset text-xl text-cyan-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-lg font-semibold text-white font-display mb-3">Need assistance?</h4>
+                        <p class="text-slate-400 mb-4">Our partner onboarding team is here to help you complete your application successfully.</p>
+                        <div class="flex flex-wrap gap-6">
+                            <a href="mailto:partners@saberrenewables.com" class="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors">
+                                <i class="fas fa-envelope"></i>
+                                <span class="font-medium">partners@saberrenewables.com</span>
+                            </a>
+                            <a href="tel:+441234567890" class="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors">
+                                <i class="fas fa-phone"></i>
+                                <span class="font-medium">+44 (0) 123 456 7890</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="relative z-10 border-t border-white/10 mt-16">
+            <div class="max-w-6xl mx-auto px-6 py-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L3.09 8.26L4 21H20L20.91 8.26L12 2ZM12 4.44L18.18 9H5.82L12 4.44ZM6 19V11H18V19H6Z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold">Saber Renewables</p>
+                            <p class="text-slate-400 text-sm">Infinite Power In Partnership</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-6 text-sm">
+                        <a href="#" class="text-slate-400 hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="#" class="text-slate-400 hover:text-white transition-colors">Terms of Service</a>
+                        <p class="text-slate-500">&copy; 2025 Saber Renewables Ltd.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="glass-effect rounded-2xl p-8 max-w-sm mx-4 text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div class="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+            </div>
+            <h3 class="text-xl font-semibold text-white font-display mb-3">Processing Application</h3>
+            <p class="text-slate-400">Please wait while we submit your information securely...</p>
+        </div>
+    </div>
+
+    <!-- Success modal -->
+    <dialog id="success-modal" class="backdrop:bg-slate-900/80 backdrop:backdrop-blur-sm">
+        <div class="glass-effect rounded-2xl max-w-md w-full p-8 text-center border border-white/20">
+            <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 premium-glow">
+                <i class="fas fa-check text-3xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white font-display mb-4">Application Submitted!</h2>
+            <p class="text-slate-400 mb-8 leading-relaxed">
+                Thank you for your interest in partnering with Saber Renewables. Our team will review your application and contact you within 2-3 business days.
+            </p>
+            <button id="close-modal" class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-6 py-3 rounded-full font-semibold transition-all duration-200 premium-glow">
+                <i class="fas fa-home mr-2"></i>
+                Return to Dashboard
+            </button>
+        </div>
+    </dialog>
+
+    <!-- Enhanced JavaScript -->
+    <script src="form-premium.js"></script>
+</body>
+</html>

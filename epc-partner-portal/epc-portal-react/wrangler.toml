@@ -1,0 +1,24 @@
+name = "saber-epc-portal-frontend"
+compatibility_date = "2024-09-11"
+pages_build_output_dir = ".vercel/output/static"
+
+# Enable Node.js compatibility for Edge runtime
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database binding for Pages Functions
+[[d1_databases]]
+binding = "epc_form_data"
+database_name = "epc-form-data" 
+database_id = "97a6cecc-1dec-46ad-b865-8495fa90a7bf"
+
+# R2 Storage binding for Pages Functions  
+[[r2_buckets]]
+binding = "EPC_PARTNER_FILES"
+bucket_name = "epc-partner-files"
+
+[vars]
+ENVIRONMENT = "production"
+NEXT_PUBLIC_API_URL = "https://epc.saberrenewable.energy"
+SHAREPOINT_CLIENT_ID = "bbbfe394-7cff-4ac9-9e01-33cbf116b930"
+SHAREPOINT_CLIENT_SECRET = ""
+SHAREPOINT_TENANT = "saberrenewables.onmicrosoft.com"

@@ -1,0 +1,25 @@
+============================================================
+COMPREHENSIVE FIT DATA ANALYSIS REPORT
+============================================================
+Analysis Date: 2025-08-21 15:44:39
+
+📊 DATABASE STATISTICS
+----------------------------------------
+  total_sites: 80388
+  unique_technologies: 5
+  total_capacity_gw: 7.069151956000001
+  chroma_collections: 3
+  chroma_documents: 75194
+
+🔍 KEY PATTERNS DISCOVERED
+----------------------------------------
+  Total unique patterns: 5
+
+💡 BUSINESS INSIGHTS
+----------------------------------------
+  • repowering_opportunity: 1746 sites
+
+🎯 TRAINING OPPORTUNITIES
+----------------------------------------
+  Generated scenarios: 8
+  Query types covered: 4

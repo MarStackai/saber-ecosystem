@@ -1,0 +1,14 @@
+# Exclude local Next.js build cache artifacts from Cloudflare Pages upload
+.next/cache
+**/*.pack
+
+# Node modules and logs (defensive)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vercel/Next output folders not needed for direct upload
+.vercel
+out
+dist

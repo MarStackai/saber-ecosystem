@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PPA Calculator (Spreadsheet-Accurate)</title>
+  <style>
+    body { font-family: Arial,sans-serif; background: #f6f8fa; padding: 2em; }
+    .container { max-width: 600px; margin: auto; background: #fff;
+                 padding: 2em; border-radius: 8px; box-shadow: 0 2px 12px #eaeaea; }
+    label { display: block; margin-top: 1em; }
+    input { width: 100%; padding: .5em; margin-top: .2em;
+            border-radius: 4px; border: 1px solid #bbb; font-size: 1em; }
+    .section { margin-top: 2em; color: #003366; font-weight: bold; }
+    .output { margin-top: 2em; text-align: center; background: #ffff88;
+              border: 2px solid #ffe800; border-radius: 6px;
+              padding: 1em; font-size: 1.4em; font-weight: bold; }
+    .internal { display: none; background: #f2f2f2; padding: 1em;
+                border: 1px solid #ccc; border-radius: 6px; margin-top: 1em; }
+    .btn { display: block; margin: 1em auto 0; padding: .5em 1em;
+           background: #e6e6e6; border: 1px solid #aaa; border-radius: 4px;
+           cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>PPA Price Calculator</h2>
+
+    <div class="section">PROJECT DATA</div>
+    <label>
+      EPC cost (£/kWp):
+      <input type="number" id="epcPerKw" value="750" min="0" step="any">
+    </label>
+    <label>
+      Project size (kWp):
+      <input type="number" id="size" value="48" min="0" step="any">
+    </label>
+    <label>
+      Annual yield (kWh):
+      <input type="number" id="yield" value="48000" min="0" step="any">
+    </label>
+    <label>
+      Contract length (yrs):
+      <input type="number" id="yrs" value="25" min="1" max="40">
+    </label>
+
+    <button class="btn" id="toggleInt">Show Internal Inputs</button>
+
+    <div class="internal" id="internal">
+      <div class="section">INTERNAL ASSUMPTIONS</div>
+
+      <label>
+        Target IRR (%):
+        <input type="number" id="irr" value="11" min="0" max="50" step="0.01">
+      </label>
+      <label>
+        Commission (% of install):
+        <input type="number" id="commPct" value="6" min="0" max="100" step="0.01">
+      </label>
+      <label>
+        Billing cost Years 1–3 (£/yr):
+        <input type="number" id="billingY1" value="400" min="0" step="any">
+      </label>
+      <label>
+        Billing cost Years 4+ (£/yr):
+        <input type="number" id="billingY4" value="100" min="0" step="any">
+      </label>
+      <label>
+        Tax rate (%):
+        <input type="number" id="taxRate" value="25" min="0" max="100" step="0.01">
+      </label>
+      <label>
+        O&amp;M (£/kWp/yr):
+        <input type="number" id="omRate" value="10" min="0" step="any">
+      </label>
+      <label>
+        Insurance (£/kWp/yr):
+        <input type="number" id="insRate" value="3.75" min="0" step="any">
+      </label>
+      <label>
+        Business rates (£/kWp/yr):
+        <input type="number" id="brRate" value="1.22" min="0" step="any">
+      </label>
+      <label>
+        Other (£/kWh/yr):
+        <input type="number" id="otherKwh" value="0" min="0" step="any">
+      </label>
+    </div>
+
+    <div class="output">
+      PPA Price (p/kWh): <span id="ppa">–</span>
+    </div>
+  </div>
+
+  <script>
+    /* grab elements */
+    const epcPerKwEl = document.getElementById('epcPerKw');
+    const sizeEl     = document.getElementById('size');
+    const yieldEl    = document.getElementById('yield');
+    const yrsEl      = document.getElementById('yrs');
+    const irrEl      = document.getElementById('irr');
+    const commEl     = document.getElementById('commPct');
+    const billEl     = document.getElementById('billing');
+    const omEl       = document.getElementById('omRate');
+    const insEl      = document.getElementById('insRate');
+    const brEl       = document.getElementById('brRate');
+    const otherEl    = document.getElementById('otherKwh');
+    const ppaEl      = document.getElementById('ppa');
+    const intPanel   = document.getElementById('internal');
+    const toggleBtn  = document.getElementById('toggleInt');
+
+    const billingY1El = document.getElementById('billingY1');
+    const billingY4El = document.getElementById('billingY4');
+    const taxRateEl   = document.getElementById('taxRate');
+
+    function IRR(values, guess = 0.1) {
+      const maxIter = 1000, tol = 1e-8;
+      let rate = guess;
+      for (let i = 0; i < maxIter; i++) {
+        let npv = 0, d_npv = 0;
+        for (let t = 0; t < values.length; t++) {
+          npv += values[t] / Math.pow(1 + rate, t);
+          if (t > 0) d_npv -= t * values[t] / Math.pow(1 + rate, t + 1);
+        }
+        const newRate = rate - npv / d_npv;
+        if (Math.abs(newRate - rate) < tol) return newRate;
+        rate = newRate;
+      }
+      return NaN;
+    }
+
+    function findPPA(params) {
+      const {
+        installCost, commission, yieldY, years, size,
+        billingY1, billingY4, omRt, insRt, brRt,
+        otherKwh, taxRate, targetIRR
+      } = params;
+      let min = 0, max = 1, ppa = 0;
+      for (let i = 0; i < 50; i++) {
+        ppa = (min + max) / 2;
+        const cashFlows = [];
+        cashFlows.push(-installCost - commission);
+        const life = 12.5;
+        for (let t = 1; t <= years; t++) {
+          const revenue = yieldY * ppa;
+          const bill = t <= 3 ? billingY1 : billingY4;
+          const expense = bill + size * (omRt + insRt + brRt) + otherKwh * yieldY;
+          let dep = 0;
+          if (t === 1 || t === Math.ceil(life) + 1) {
+            dep = installCost / (2 * life);
+          } else if (t > 1 && t <= Math.floor(life) + 1) {
+            dep = installCost / life;
+          }
+          const taxable = revenue - expense - dep;
+          const tax = taxRate * Math.max(taxable, 0);
+          cashFlows.push(revenue - expense - tax);
+        }
+        const irr = IRR(cashFlows, targetIRR);
+        if (isNaN(irr) || irr > targetIRR) {
+          max = ppa;
+        } else {
+          min = ppa;
+        }
+      }
+      return ppa;
+    }
+
+    /* toggle internal */
+    toggleBtn.onclick = () => {
+      const show = intPanel.style.display==='none';
+      intPanel.style.display = show? 'block':'none';
+      toggleBtn.textContent = show? 'Hide Internal Inputs':'Show Internal Inputs';
+      recalc();
+    };
+
+    /* attach listeners */
+    [
+      epcPerKwEl, sizeEl, yieldEl, yrsEl,
+      irrEl, commEl, omEl, insEl, brEl, otherEl,
+      billingY1El, billingY4El, taxRateEl
+    ].forEach(el=> el.addEventListener('input', recalc));
+
+    /* core calculation */
+    function recalc() {
+      const epc    = parseFloat(epcPerKwEl.value)||0;
+      const size   = parseFloat(sizeEl.value)||0;
+      const yieldY = parseFloat(yieldEl.value)||0;
+      const years  = parseInt(yrsEl.value)||0;
+      const targetIRR = (parseFloat(irrEl.value)||0)/100;
+      const commPct   = (parseFloat(commEl.value)||0)/100;
+      const omRt   = parseFloat(omEl.value)||0;
+      const insRt  = parseFloat(insEl.value)||0;
+      const brRt   = parseFloat(brEl.value)||0;
+      const otherK = parseFloat(otherEl.value)||0;
+      const billingY1 = parseFloat(billingY1El.value)||0;
+      const billingY4 = parseFloat(billingY4El.value)||0;
+      const taxRate   = (parseFloat(taxRateEl.value)||0)/100;
+
+      if (!(epc>0 && size>0 && yieldY>0 && years>0 && targetIRR>0)) {
+        ppaEl.textContent = '–';
+        return;
+      }
+
+      const installCost = epc * size;
+      const commission  = installCost * commPct;
+
+      const ppa = findPPA({
+        installCost, commission, yieldY, years, size,
+        billingY1, billingY4, omRt, insRt, brRt,
+        otherKwh: otherK, taxRate, targetIRR
+      });
+
+      ppaEl.textContent = (ppa * 100).toFixed(2);
+    }
+
+    // initial
+    intPanel.style.display='none';
+    recalc();
+  </script>
+</body>
+</html>

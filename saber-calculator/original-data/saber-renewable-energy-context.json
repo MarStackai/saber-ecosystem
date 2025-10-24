@@ -1,0 +1,198 @@
+{
+  "company": {
+    "name": "Saber Renewable Energy",
+    "website": "https://saberrenewables.com",
+    "description": "Saber Renewable Energy is a specialist developer of complex, high-performance renewable energy solutions for UK businesses and public sector organisations. Saber delivers fully-funded, turnkey systems that enable clients to decarbonise, reduce costs, and achieve ESG goals with zero upfront investment.",
+    "brand_tone": "Expert, clear, engaging, strategic, and warmly professional. Uses plain English and focuses on outcomes, not jargon or over-selling.",
+    "differentiators": [
+      "Bespoke, consultative approach\u2014not one-size-fits-all.",
+      "Blended Power Purchase Agreements (PPAs) combining multiple technologies.",
+      "End-to-end delivery, from feasibility to operation and maintenance.",
+      "Strong partner network with leading technology, EPC, and finance specialists.",
+      "Commitment to ESG and B Corp principles\u2014on the path to certification."
+    ]
+  },
+  "energy_market": {
+    "trends": [
+      "Rising demand for decarbonisation and net-zero strategies from UK businesses.",
+      "Volatile energy prices and increasing grid constraints highlight need for on-site generation.",
+      "Public and investor pressure for credible ESG performance.",
+      "Government incentives for renewable deployment (e.g. CfDs, business rates relief)."
+    ],
+    "challenges": [
+      "Complex grid connection and regulatory processes.",
+      "Upfront capex often a blocker\u2014especially for large systems.",
+      "Technology risk and maintenance concerns for end users."
+    ],
+    "opportunities": [
+      "Power Purchase Agreements (PPAs): Funded solutions allow clients to benefit with no upfront cost.",
+      "Energy cost stability: Fixed, predictable pricing over long terms.",
+      "Grid services: Battery and flexibility solutions can generate additional revenue.",
+      "Sustainable brand value: Demonstrating leadership in ESG and B Corp adoption.",
+      "Site upgrades: Over-cladding, building improvements, electrical system upgrades often included."
+    ]
+  },
+  "target_sectors": [
+    {
+      "name": "Commercial & Industrial",
+      "examples": [
+        "Manufacturing",
+        "Distribution centres",
+        "Food & beverage",
+        "Cold storage",
+        "Retail"
+      ],
+      "drivers": [
+        "High and predictable energy demand",
+        "Pressure to decarbonise supply chain",
+        "Large roof or land areas suitable for solar and battery systems"
+      ]
+    },
+    {
+      "name": "Agriculture",
+      "examples": [
+        "Large farms",
+        "Food processors",
+        "Glasshouses",
+        "Dairy & poultry"
+      ],
+      "drivers": [
+        "High energy usage (lighting, refrigeration, process heat)",
+        "Net-zero ambitions and market differentiation",
+        "Energy cost volatility"
+      ]
+    },
+    {
+      "name": "Leisure & Hospitality",
+      "examples": [
+        "Spas",
+        "Hotels",
+        "Sports & leisure facilities",
+        "Theme parks"
+      ],
+      "drivers": [
+        "24/7 operations needing reliable, low-carbon power",
+        "Customer and corporate sustainability expectations"
+      ]
+    },
+    {
+      "name": "Public Sector",
+      "examples": [
+        "Local authorities",
+        "Schools & universities",
+        "NHS & healthcare sites"
+      ],
+      "drivers": [
+        "Government net-zero targets",
+        "Cost savings for public budgets",
+        "Positive social impact"
+      ]
+    }
+  ],
+  "technologies": [
+    {
+      "name": "Solar PV",
+      "description": "Roof or ground-mounted photovoltaic panels generating clean electricity on-site.",
+      "benefits": [
+        "Reduces grid electricity usage and costs",
+        "Delivers long-term, predictable savings",
+        "Zero carbon emissions from generation"
+      ]
+    },
+    {
+      "name": "Battery Storage",
+      "description": "Commercial-scale lithium-ion batteries or other storage systems to store excess solar or low-cost energy for later use.",
+      "benefits": [
+        "Enables load-shifting and peak shaving",
+        "Provides backup power and resilience",
+        "Can generate revenue from grid services"
+      ]
+    },
+    {
+      "name": "Combined Heat & Power (CHP)",
+      "description": "Highly efficient engines that generate electricity and useful heat together, typically fuelled by natural gas (hydrogen-ready systems available).",
+      "benefits": [
+        "Provides reliable baseload energy and heat",
+        "Improves overall system efficiency",
+        "Reduces total site carbon footprint"
+      ]
+    },
+    {
+      "name": "Wind",
+      "description": "On-site or nearby wind turbines for generating renewable electricity.",
+      "benefits": [
+        "Complementary to solar (generates when solar isn\u2019t)",
+        "Reduces reliance on the grid"
+      ]
+    },
+    {
+      "name": "Building Fabric Upgrades",
+      "description": "Includes over-cladding, roof upgrades, insulation, and electrical modernisation to maximise the impact of renewable systems.",
+      "benefits": [
+        "Reduces energy wastage",
+        "Extends asset lifespan",
+        "Improves safety and compliance"
+      ]
+    }
+  ],
+  "service_offering": [
+    "Feasibility studies and energy audits",
+    "System design and financial modelling",
+    "Planning and grid applications",
+    "Turnkey delivery: project management, installation, commissioning",
+    "Fully-funded PPAs\u2014no upfront cost",
+    "Operations & maintenance for long-term performance",
+    "Energy monitoring and optimisation",
+    "End-of-term asset transfer to the client"
+  ],
+  "partners": [
+    {
+      "name": "NFU Energy",
+      "role": "Agricultural sector expertise and energy consultancy"
+    },
+    {
+      "name": "Kingspan",
+      "role": "Building envelope and insulation specialist"
+    },
+    {
+      "name": "M J Quinn",
+      "role": "EPC contractor and nationwide installer"
+    },
+    {
+      "name": "Solen Energy",
+      "role": "Technical design and solar supply"
+    }
+  ],
+  "esg_and_bcorp": {
+    "commitment": "Saber is committed to Environmental, Social, and Governance (ESG) best practice, embedding sustainability in every project. Saber is on the path to B Corp certification, reflecting leadership in ethical, transparent business for long-term positive impact.",
+    "customer_benefits": [
+      "Align your energy strategy with leading ESG standards",
+      "Attract and retain customers, investors, and talent",
+      "Demonstrate measurable impact for reporting and compliance"
+    ]
+  },
+  "faqs": [
+    {
+      "question": "What is a Power Purchase Agreement (PPA)?",
+      "answer": "A PPA is a long-term agreement to buy renewable energy generated on your site at a fixed, competitive price, with zero capital outlay. The funder owns, operates, and maintains the system for the term; ownership can transfer at the end."
+    },
+    {
+      "question": "Who is responsible for system maintenance?",
+      "answer": "Saber and its partners manage all operations and maintenance, including monitoring, servicing, and warranty support, ensuring ongoing system performance."
+    },
+    {
+      "question": "What sites are suitable?",
+      "answer": "Sites with high energy use, stable operations, and roof or land space are ideal. Saber can assess suitability as part of a free feasibility review."
+    },
+    {
+      "question": "How are projects funded?",
+      "answer": "Through private capital partners and specialist infrastructure funds\u2014no need for client capex or debt."
+    }
+  ],
+  "key_messages": [
+    "Saber helps organisations decarbonise and reduce costs with funded renewable energy\u2014no capex, no complexity.",
+    "Our blended approach combines multiple technologies for the best commercial and environmental results.",
+    "We partner for the long-term, ensuring ongoing performance and strategic alignment with ESG and net-zero goals.",
+    "Saber is not just a provider\u2014we are your partner in building a more resilient, sustainable future."
+  ]
+}

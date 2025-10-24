@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImportExportXml version="9.2.24103.179" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SolutionManifest>
+    <UniqueName>SaberEPCPortalIntegration</UniqueName>
+    <LocalizedNames>
+      <LocalizedName description="Saber EPC Portal Integration" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions>
+      <Description description="Power Automate flow for EPC Partner Portal form submissions" languagecode="1033" />
+    </Descriptions>
+    <Version>1.0.0.0</Version>
+    <Managed>0</Managed>
+    <Publisher>
+      <UniqueName>SaberRenewables</UniqueName>
+      <LocalizedNames>
+        <LocalizedName description="Saber Renewables" languagecode="1033" />
+      </LocalizedNames>
+      <Descriptions>
+        <Description description="Saber Renewables Business Operations" languagecode="1033" />
+      </Descriptions>
+      <EMailAddress>tech@saberrenewables.com</EMailAddress>
+      <SupportingWebsiteUrl>https://saberrenewables.com</SupportingWebsiteUrl>
+      <Addresses>
+        <Address>
+          <AddressNumber>1</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+        </Address>
+      </Addresses>
+    </Publisher>
+    <RootComponents>
+      <RootComponent type="29" schemaName="EPCPortalSubmissionHandler" />
+    </RootComponents>
+  </SolutionManifest>
+</ImportExportXml>

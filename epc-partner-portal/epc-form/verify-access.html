@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Access | Saber EPC Partner Portal</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .verify-container {
+            max-width: 500px;
+            width: 100%;
+            margin: 2rem;
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .verify-container .saber-logo {
+            height: 60px;
+            margin-bottom: 2rem;
+        }
+        
+        .verify-container h2 {
+            color: var(--saber-blue);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .intro-text {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .verify-form {
+            margin-top: 2rem;
+        }
+        
+        .verify-form .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        .code-input-group {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+        
+        .code-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-transform: uppercase;
+        }
+        
+        .code-input:focus {
+            border-color: var(--saber-green);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--shadow-green);
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .success-message {
+            color: var(--saber-green);
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(124, 192, 97, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .help-text {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .help-text a {
+            color: var(--saber-blue);
+            text-decoration: none;
+        }
+        
+        .help-text a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin: 1rem auto;
+        }
+        
+        .loading-spinner.show {
+            display: block;
+        }
+        
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .security-badge i {
+            color: var(--saber-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container saber-card">
+        <img src="saber-logo.svg" alt="Saber Renewables" class="saber-logo">
+        
+        <h2>EPC Partner Portal</h2>
+        
+        <p class="intro-text">
+            Welcome to Saber's exclusive EPC Partner onboarding portal. 
+            Please enter your email address and the invitation code you received.
+        </p>
+        
+        <form id="verifyForm" class="verify-form">
+            <div class="form-group">
+                <div class="floating-label">
+                    <input type="email" id="email" placeholder=" " required>
+                    <label for="email">Email Address</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--saber-blue); font-weight: 600;">
+                    Invitation Code
+                </label>
+                <div class="code-input-group">
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <span style="padding: 0 0.25rem; line-height: 50px;">-</span>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[A-Za-z0-9]" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="saber-btn" style="width: 100%;">
+                <i class="fas fa-shield-alt"></i> Verify Access
+            </button>
+            
+            <div class="security-badge">
+                <i class="fas fa-lock"></i>
+                <span>Secure verification process</span>
+            </div>
+        </form>
+        
+        <div id="loadingSpinner" class="loading-spinner">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--saber-green);"></i>
+        </div>
+        
+        <div id="errorMsg" class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText">Invalid email or invitation code. Please check and try again.</span>
+        </div>
+        
+        <div id="successMsg" class="success-message">
+            <i class="fas fa-check-circle"></i>
+            <span>Access verified! Redirecting to application form...</span>
+        </div>
+        
+        <div class="help-text">
+            Don't have an invitation code? 
+            <a href="mailto:partners@saberrenewables.com">Contact our partner team</a>
+            <br><br>
+            For technical support: 
+            <a href="mailto:support@saberrenewables.com">support@saberrenewables.com</a>
+        </div>
+    </div>
+    
+    <script>
+        // Code input handling
+        const codeInputs = document.querySelectorAll('.code-input');
+        
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1) {
+                    // Move to next input
+                    if (index < codeInputs.length - 1) {
+                        codeInputs[index + 1].focus();
+                    }
+                }
+            });
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '') {
+                    // Move to previous input
+                    if (index > 0) {
+                        codeInputs[index - 1].focus();
+                    }
+                }
+            });
+            
+            // Convert to uppercase
+            input.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        });
+        
+        // Form submission
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get values
+            const email = document.getElementById('email').value;
+            const code = Array.from(codeInputs).map(input => input.value).join('');
+            
+            // Hide messages
+            document.getElementById('errorMsg').classList.remove('show');
+            document.getElementById('successMsg').classList.remove('show');
+            
+            // Show loading
+            document.getElementById('loadingSpinner').classList.add('show');
+            document.querySelector('.saber-btn').disabled = true;
+            
+            try {
+                // Simulate verification (replace with actual API call)
+                const isValid = await verifyInvitation(email, code);
+                
+                if (isValid) {
+                    // Show success
+                    document.getElementById('successMsg').classList.add('show');
+                    
+                    // Store authentication
+                    sessionStorage.setItem('epcAuth', JSON.stringify({
+                        email: email,
+                        code: code,
+                        timestamp: Date.now(),
+                        verified: true
+                    }));
+                    
+                    // Redirect after delay - USE ABSOLUTE URL
+                    setTimeout(() => {
+                        // Use absolute SharePoint URL
+                        window.location.href = 'https://saberrenewables.sharepoint.com/sites/SaberEPCPartners/SiteAssets/EPCForm/index.html';
+                    }, 2000);
+                } else {
+                    // Show error
+                    document.getElementById('errorMsg').classList.add('show');
+                    
+                    // Clear code inputs
+                    codeInputs.forEach(input => input.value = '');
+                    codeInputs[0].focus();
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                document.getElementById('errorText').textContent = 'An error occurred. Please try again.';
+                document.getElementById('errorMsg').classList.add('show');
+            } finally {
+                document.getElementById('loadingSpinner').classList.remove('show');
+                document.querySelector('.saber-btn').disabled = false;
+            }
+        });
+        
+        async function verifyInvitation(email, code) {
+            // No hardcoded test codes - all validation through production API
+            
+            // For production: Call Power Automate HTTP endpoint
+            try {
+                const response = await fetch('https://prod-xx.westeurope.logic.azure.com/workflows/YOUR_FLOW_ID/triggers/manual/paths/invoke', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        code: code
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.isValid;
+                }
+            } catch (error) {
+                console.error('API call failed:', error);
+            }
+            
+            // Fallback
+            return false;
+        }
+        
+        // Check URL parameters for pre-filled code
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlCode = urlParams.get('code');
+        
+        if (urlCode && urlCode.length === 8) {
+            // Pre-fill code inputs
+            urlCode.split('').forEach((char, index) => {
+                if (codeInputs[index]) {
+                    codeInputs[index].value = char.toUpperCase();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

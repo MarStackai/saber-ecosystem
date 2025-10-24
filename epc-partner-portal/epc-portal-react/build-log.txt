@@ -1,0 +1,17 @@
+
+> saber-epc-portal@1.0.0 build
+> cross-env NEXT_FORCE_WASM_BINARY=1 XDG_CACHE_HOME=.cache next build
+
+ ⚠ Specified "rewrites" will not automatically work with "output: export". See more info here: https://nextjs.org/docs/messages/export-no-custom-routes
+ ⚠ Warning: Found multiple lockfiles. Selecting /data/projects/package-lock.json.
+   Consider removing the lockfiles at:
+   * /data/projects/Business/saber_business_ops/epc-portal-react/package-lock.json
+   * /data/projects/Business/saber_business_ops/package-lock.json
+
+ ⚠ Specified "rewrites" will not automatically work with "output: export". See more info here: https://nextjs.org/docs/messages/export-no-custom-routes
+   ▲ Next.js 15.4.4
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ✓ useWasmBinary
+
+   Creating an optimized production build ...

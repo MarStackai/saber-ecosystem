@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solar Dashboard Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-4">Solar Dashboard Test</h1>
+        
+        <!-- Test Map -->
+        <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h2 class="text-xl font-semibold mb-2">Map Test</h2>
+            <div id="map" style="height: 400px;"></div>
+        </div>
+        
+        <!-- Test API -->
+        <div class="bg-white rounded-lg shadow p-4 mb-4">
+            <h2 class="text-xl font-semibold mb-2">API Test</h2>
+            <button onclick="testAPI()" class="bg-blue-500 text-white px-4 py-2 rounded">Test API Connection</button>
+            <div id="apiResult" class="mt-2 p-2 bg-gray-100 rounded"></div>
+        </div>
+        
+        <!-- Test Chat -->
+        <div class="bg-white rounded-lg shadow p-4">
+            <h2 class="text-xl font-semibold mb-2">Chat Test</h2>
+            <input type="text" id="chatInput" placeholder="Ask a question..." class="border rounded px-3 py-2 w-full mb-2">
+            <button onclick="testChat()" class="bg-green-500 text-white px-4 py-2 rounded">Send</button>
+            <div id="chatResult" class="mt-2 p-2 bg-gray-100 rounded"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize map
+        // DEMO MODE: Hardcoded token for reliability in internal demo.
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFyc3RhY2siLCJhIjoiY21ldmt0cHptMGhlYjJpc2Rvb3EzM3QxOSJ9.REl1LiSuYGu6zVXC27RzRQ';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v11',
+            center: [-2, 53],
+            zoom: 5
+        });
+        
+        map.on('load', () => {
+            document.getElementById('apiResult').innerHTML = '✅ Map loaded successfully!';
+        });
+        
+        // Test API
+        async function testAPI() {
+            try {
+                const response = await fetch('http://localhost:5001/api/health');
+                const data = await response.json();
+                document.getElementById('apiResult').innerHTML = '✅ API Connected: ' + JSON.stringify(data);
+            } catch (error) {
+                document.getElementById('apiResult').innerHTML = '❌ API Error: ' + error.message;
+            }
+        }
+        
+        // Test Chat
+        async function testChat() {
+            const query = document.getElementById('chatInput').value;
+            document.getElementById('chatResult').innerHTML = 'Sending query...';
+            
+            try {
+                const response = await fetch('http://localhost:5001/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                const data = await response.json();
+                document.getElementById('chatResult').innerHTML = '✅ Response: ' + (data.data?.summary || JSON.stringify(data));
+            } catch (error) {
+                document.getElementById('chatResult').innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

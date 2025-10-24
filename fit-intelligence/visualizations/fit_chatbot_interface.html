@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT Intelligence Chatbot | Saber Renewable Energy</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --saber-blue: #044D73;
+            --saber-green: #7CC061;
+            --saber-light-blue: #0A5F8E;
+        }
+        
+        .saber-gradient {
+            background: linear-gradient(135deg, var(--saber-blue) 0%, var(--saber-light-blue) 100%);
+        }
+        
+        .chat-message {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #94A3B8;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .suggestion-pill {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .suggestion-pill:hover {
+            background-color: var(--saber-green);
+            color: white;
+        }
+        
+        .chat-container {
+            height: calc(100vh - 200px);
+        }
+        
+        .message-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="saber-gradient text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4" style="margin-right: 25px;">
+                    <!-- Saber Logo -->
+                    <img src="Saber-logo-wob-green.svg" alt="Saber Renewable Energy" class="h-12 w-auto">
+                    <div>
+                        <h1 class="text-2xl font-bold">
+                            FIT Intelligence Assistant
+                        </h1>
+                        <p class="text-sm opacity-90">Ask questions about 40,194 commercial renewable energy sites</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <a href="solar_dashboard_clean.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-solar-panel mr-2"></i>Solar
+                    </a>
+                    <a href="saber_mapbox_dashboard.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-wind mr-2"></i>Wind
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-6 max-w-4xl">
+        <!-- Status Bar -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <div id="systemStatus" class="w-3 h-3 rounded-full bg-gray-400"></div>
+                        <span id="statusText">Connecting...</span>
+                    </div>
+                    <div class="text-gray-600">
+                        <i class="fas fa-database mr-1"></i>
+                        <span id="dataCount">40,194 sites</span>
+                    </div>
+                </div>
+                <button onclick="clearChat()" class="text-red-600 hover:text-red-800">
+                    <i class="fas fa-trash mr-1"></i>Clear Chat
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="bg-white rounded-lg shadow-lg chat-container flex flex-col">
+            <!-- Messages -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Welcome Message -->
+                <div class="chat-message">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full saber-gradient flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-gray-100 rounded-lg p-4">
+                                <p class="font-medium text-gray-800 mb-2">Welcome to FIT Intelligence!</p>
+                                <p class="text-gray-600 text-sm mb-3">
+                                    I can help you analyze 40,194 commercial renewable energy installations across the UK. 
+                                    Ask me about PPA opportunities, geographic clusters, technology insights, or specific sites.
+                                </p>
+                                <div class="text-xs text-gray-500">
+                                    <i class="fas fa-lightbulb mr-1"></i>
+                                    Try asking: "What wind farms in Scotland need urgent PPA attention?"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Input -->
+            <div class="p-6 border-t">
+                <div class="flex gap-3">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Ask about renewable energy sites, PPA opportunities, or clusters..."
+                        class="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onkeypress="handleKeyPress(event)"
+                    >
+                    <button 
+                        onclick="sendMessage()" 
+                        id="sendButton"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="mt-2 text-xs text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Powered by Chroma vector search and OpenRouter AI
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4 mt-8">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <img src="Saber-logo-wob-green.svg" alt="Saber" class="h-5 w-auto">
+                </div>
+                <div class="text-sm text-gray-400">
+                    © 2025 Saber Renewable Energy. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-mx">
+            <h3 class="text-lg font-semibold mb-4">Rate this response</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Overall rating</label>
+                    <div class="flex gap-1" id="overallStars">
+                        <button class="star text-2xl text-gray-300 hover:text-yellow-400" data-rating="1">★</button>
+                        <button class="star text-2xl text-gray-300 hover:text-yellow-400" data-rating="2">★</button>
+                        <button class="star text-2xl text-gray-300 hover:text-yellow-400" data-rating="3">★</button>
+                        <button class="star text-2xl text-gray-300 hover:text-yellow-400" data-rating="4">★</button>
+                        <button class="star text-2xl text-gray-300 hover:text-yellow-400" data-rating="5">★</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Data accuracy</label>
+                    <div class="flex gap-1" id="accuracyStars">
+                        <button class="star text-2xl text-gray-300 hover:text-blue-400" data-rating="1">★</button>
+                        <button class="star text-2xl text-gray-300 hover:text-blue-400" data-rating="2">★</button>
+                        <button class="star text-2xl text-gray-300 hover:text-blue-400" data-rating="3">★</button>
+                        <button class="star text-2xl text-gray-300 hover:text-blue-400" data-rating="4">★</button>
+                        <button class="star text-2xl text-gray-300 hover:text-blue-400" data-rating="5">★</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="feedbackText" class="block text-sm font-medium mb-2">Comments (optional)</label>
+                    <textarea id="feedbackText" rows="3" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" 
+                              placeholder="What worked well? What could be improved?"></textarea>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeFeedbackModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button onclick="submitFeedback()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Submit Feedback
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CHAT_API_BASE = '';
+        const SESSION_ID = 'web_session_' + Date.now();
+
+        // DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const systemStatus = document.getElementById('systemStatus');
+        const statusText = document.getElementById('statusText');
+        const suggestionsList = document.getElementById('suggestionsList');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemHealth();
+            loadSuggestions();
+            messageInput.focus();
+        });
+
+        // System health check
+        async function checkSystemHealth() {
+            try {
+                const response = await fetch(`${CHAT_API_BASE}/api/health`);
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    systemStatus.className = 'w-3 h-3 rounded-full bg-green-500';
+                    statusText.textContent = `System Online • Enhanced FIT Intelligence Active`;
+                } else {
+                    throw new Error('System offline');
+                }
+            } catch (error) {
+                systemStatus.className = 'w-3 h-3 rounded-full bg-red-500';
+                statusText.textContent = 'System Offline - Check Chatbot API';
+                console.error('Health check failed:', error);
+            }
+        }
+
+        // Load suggestions (disabled)
+        async function loadSuggestions() {
+            // Suggestions removed for cleaner interface
+            return;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Disable input
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Show typing indicator
+            const typingId = showTypingIndicator();
+            
+            try {
+                const response = await fetch(`${CHAT_API_BASE}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: SESSION_ID
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                removeTypingIndicator(typingId);
+                
+                if (data.status === 'success' && data.response) {
+                    addMessage(data.response, 'assistant', {
+                        intent: data.intent,
+                        dataPoints: data.data_points,
+                        conversationId: data.conversation_id,
+                        sessionId: data.session_id
+                    });
+                } else {
+                    addMessage(`Sorry, I encountered an error: ${data.error || 'Unknown error'}`, 'assistant', {error: true});
+                }
+                
+            } catch (error) {
+                removeTypingIndicator(typingId);
+                addMessage('Sorry, I cannot connect to the intelligence system. Please check that the chatbot API is running on port 8001.', 'assistant', {error: true});
+                console.error('Chat error:', error);
+            } finally {
+                // Re-enable input
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // Add message to chat
+        function addMessage(content, sender, metadata = {}) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            
+            const isUser = sender === 'user';
+            const isError = metadata.error;
+            
+            messageDiv.innerHTML = `
+                <div class="flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}">
+                    <div class="w-8 h-8 rounded-full ${isUser ? 'bg-blue-600' : (isError ? 'bg-red-500' : 'saber-gradient')} flex items-center justify-center">
+                        <i class="fas ${isUser ? 'fa-user' : (isError ? 'fa-exclamation-triangle' : 'fa-robot')} text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1 max-w-3xl">
+                        <div class="bg-${isUser ? 'blue-600 text-white' : (isError ? 'red-100 text-red-800' : 'gray-100 text-gray-800')} rounded-lg p-4">
+                            <div class="message-content">${content}</div>
+                            ${metadata.dataPoints !== undefined ? `
+                                <div class="mt-2 pt-2 border-t border-gray-300 text-xs opacity-75">
+                                    <i class="fas fa-chart-bar mr-1"></i>
+                                    Based on ${metadata.dataPoints} data points
+                                    ${metadata.intent ? `• Focus: ${metadata.intent.primary_focus}` : ''}
+                                </div>
+                            ` : ''}
+                            ${!isUser && !isError && metadata.conversationId ? `
+                                <div class="mt-3 flex gap-2">
+                                    <button onclick="showFeedbackModal('${metadata.conversationId}')" 
+                                            class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        Rate this response
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message';
+            typingDiv.id = 'typing-indicator';
+            
+            typingDiv.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full saber-gradient flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-gray-100 rounded-lg typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return 'typing-indicator';
+        }
+
+        // Remove typing indicator
+        function removeTypingIndicator(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.remove();
+            }
+        }
+
+        // Handle key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Clear chat
+        async function clearChat() {
+            if (confirm('Clear chat history?')) {
+                try {
+                    await fetch(`${CHAT_API_BASE}/api/chat/clear/${SESSION_ID}`, {
+                        method: 'POST'
+                    });
+                } catch (error) {
+                    console.error('Failed to clear server-side history:', error);
+                }
+                
+                // Clear client-side
+                const welcomeMessage = chatMessages.children[0];
+                chatMessages.innerHTML = '';
+                chatMessages.appendChild(welcomeMessage);
+                
+                messageInput.focus();
+            }
+        }
+
+        // Feedback system
+        let currentConversationId = null;
+        let overallRating = 0;
+        let accuracyRating = 0;
+
+        function showFeedbackModal(conversationId) {
+            currentConversationId = conversationId;
+            document.getElementById('feedbackModal').classList.remove('hidden');
+            
+            // Reset ratings
+            overallRating = 0;
+            accuracyRating = 0;
+            document.getElementById('feedbackText').value = '';
+            
+            // Reset star displays
+            updateStarDisplay('overallStars', 0);
+            updateStarDisplay('accuracyStars', 0);
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedbackModal').classList.add('hidden');
+            currentConversationId = null;
+        }
+
+        function updateStarDisplay(containerId, rating) {
+            const container = document.getElementById(containerId);
+            const stars = container.querySelectorAll('.star');
+            
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-gray-300');
+                } else {
+                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-yellow-400');
+                }
+            });
+        }
+
+        // Star rating handlers
+        document.getElementById('overallStars').addEventListener('click', function(e) {
+            if (e.target.classList.contains('star')) {
+                overallRating = parseInt(e.target.dataset.rating);
+                updateStarDisplay('overallStars', overallRating);
+            }
+        });
+
+        document.getElementById('accuracyStars').addEventListener('click', function(e) {
+            if (e.target.classList.contains('star')) {
+                accuracyRating = parseInt(e.target.dataset.rating);
+                updateStarDisplay('accuracyStars', accuracyRating);
+            }
+        });
+
+        async function submitFeedback() {
+            if (!currentConversationId) return;
+            
+            const feedbackText = document.getElementById('feedbackText').value;
+            
+            try {
+                const response = await fetch(`${CHAT_API_BASE}/api/chat/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        conversation_id: currentConversationId,
+                        rating: overallRating || null,
+                        accuracy_rating: accuracyRating || null,
+                        feedback_text: feedbackText || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeFeedbackModal();
+                    // Show success message
+                    addMessage('Thank you for your feedback! It helps us improve the system.', 'assistant', {
+                        feedback: true
+                    });
+                } else {
+                    alert('Failed to submit feedback. Please try again.');
+                }
+                
+            } catch (error) {
+                console.error('Feedback submission error:', error);
+                alert('Failed to submit feedback. Please try again.');
+            }
+        }
+
+        // Periodic health checks
+        setInterval(checkSystemHealth, 30000); // Every 30 seconds
+    </script>
+</body>
+</html>

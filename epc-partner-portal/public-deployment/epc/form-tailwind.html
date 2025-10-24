@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPC Partner Onboarding | Saber Renewables</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'saber-blue': '#044D73',
+                        'saber-green': '#7CC061',
+                        'saber-dark-blue': '#091922',
+                        'saber-dark-green': '#0A2515',
+                        'saber-gradient-dark': '#0d1138',
+                        'ops-surface': '#F8FAFB',
+                        'ops-border': '#E1E8ED',
+                        'status-success': '#10B981',
+                        'status-warning': '#F59E0B',
+                        'status-error': '#EF4444',
+                        'status-info': '#3B82F6',
+                        'text-primary': '#091922',
+                        'text-secondary': '#4B5563',
+                        'text-tertiary': '#9CA3AF',
+                    },
+                    fontFamily: {
+                        'heading': ['Montserrat', 'system-ui', 'sans-serif'],
+                        'body': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    fontSize: {
+                        'h1': ['2.5rem', { lineHeight: '2.875rem', fontWeight: '800' }],
+                        'h2': ['2rem', { lineHeight: '2.375rem', fontWeight: '700' }],
+                        'h3': ['1.75rem', { lineHeight: '2.125rem', fontWeight: '600' }],
+                        'h4': ['1.5rem', { lineHeight: '1.875rem', fontWeight: '600' }],
+                        'body-lg': ['1.125rem', { lineHeight: '1.75rem' }],
+                        'body': ['1rem', { lineHeight: '1.5rem' }],
+                        'body-sm': ['0.875rem', { lineHeight: '1.25rem' }],
+                        'caption': ['0.75rem', { lineHeight: '1rem' }],
+                    },
+                    width: {
+                        'logo-md': '180px',
+                    },
+                    height: {
+                        'logo-md': '51px',
+                    },
+                    backgroundImage: {
+                        'gradient-brand': 'linear-gradient(135deg, #044D73 0%, #7CC061 100%)',
+                        'gradient-dark': 'linear-gradient(135deg, #091922 0%, #0d1138 100%)',
+                    },
+                    boxShadow: {
+                        'brand': '0 4px 14px 0 rgba(4, 77, 115, 0.15)',
+                        'energy': '0 4px 14px 0 rgba(124, 192, 97, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles for components not covered by Tailwind -->
+    <style>
+        /* Floating label styles */
+        .floating-label {
+            position: relative;
+        }
+        
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label,
+        .floating-label textarea:focus + label,
+        .floating-label textarea:not(:placeholder-shown) + label {
+            transform: translateY(-50%) scale(0.85);
+            top: 0;
+            color: #044D73;
+            font-weight: 600;
+        }
+        
+        .floating-label label {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9CA3AF;
+            font-size: 1rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: white;
+            padding: 0 0.25rem;
+        }
+        
+        /* File upload area */
+        .file-upload-area.drag-over {
+            border-color: #7CC061;
+            background-color: rgba(124, 192, 97, 0.05);
+        }
+        
+        /* Loading animation */
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #044D73;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error toast animation */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .error-toast {
+            animation: slideInRight 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-dark min-h-screen font-body">
+    <!-- Header -->
+    <header class="bg-saber-blue shadow-brand">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between py-4">
+                <div class="flex items-center space-x-6">
+                    <img src="../images/Saber-logo-wob-green.svg" alt="Saber Renewables" class="w-logo-md h-logo-md object-contain">
+                    <div class="hidden lg:flex items-center space-x-2">
+                        <div class="h-8 w-px bg-white/30"></div>
+                        <div class="flex flex-col">
+                            <span class="text-caption font-semibold text-white uppercase tracking-wider">
+                                Business Operations
+                            </span>
+                            <span class="text-body-sm text-white/80">
+                                Infinite Power In Partnership
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-brand py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="font-heading text-h1 text-white mb-4">EPC Partner Onboarding</h1>
+            <p class="font-body text-body-lg text-white/90 max-w-2xl mx-auto">
+                Join Saber's network of certified Energy Performance Certificate partners
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Form -->
+    <main class="py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-xl shadow-brand overflow-hidden">
+                <!-- Progress Bar -->
+                <div class="bg-ops-surface px-8 py-6 border-b border-ops-border">
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-col items-center flex-1" data-step="1">
+                            <div class="w-8 h-8 rounded-full border-2 border-saber-blue bg-saber-blue text-white flex items-center justify-center text-body-sm font-semibold mb-2 transition-all duration-200">
+                                1
+                            </div>
+                            <span class="text-caption text-saber-blue font-medium text-center">Company Details</span>
+                        </div>
+                        
+                        <div class="flex-1 flex items-center px-4">
+                            <div class="w-full h-px border-t-2 border-ops-border transition-colors duration-300"></div>
+                        </div>
+                        
+                        <div class="flex flex-col items-center flex-1" data-step="2">
+                            <div class="w-8 h-8 rounded-full border-2 border-ops-border bg-white text-text-tertiary flex items-center justify-center text-body-sm font-semibold mb-2 transition-all duration-200">
+                                2
+                            </div>
+                            <span class="text-caption text-text-tertiary text-center">Contact Information</span>
+                        </div>
+                        
+                        <div class="flex-1 flex items-center px-4">
+                            <div class="w-full h-px border-t-2 border-ops-border transition-colors duration-300"></div>
+                        </div>
+                        
+                        <div class="flex flex-col items-center flex-1" data-step="3">
+                            <div class="w-8 h-8 rounded-full border-2 border-ops-border bg-white text-text-tertiary flex items-center justify-center text-body-sm font-semibold mb-2 transition-all duration-200">
+                                3
+                            </div>
+                            <span class="text-caption text-text-tertiary text-center">Compliance & Accreditations</span>
+                        </div>
+                        
+                        <div class="flex-1 flex items-center px-4">
+                            <div class="w-full h-px border-t-2 border-ops-border transition-colors duration-300"></div>
+                        </div>
+                        
+                        <div class="flex flex-col items-center flex-1" data-step="4">
+                            <div class="w-8 h-8 rounded-full border-2 border-ops-border bg-white text-text-tertiary flex items-center justify-center text-body-sm font-semibold mb-2 transition-all duration-200">
+                                4
+                            </div>
+                            <span class="text-caption text-text-tertiary text-center">Documents & Terms</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="epcOnboardingForm" class="p-8" action="#" method="post" onsubmit="return false;">
+                    <!-- Step 1: Company Details -->
+                    <div class="form-step block" data-step="1">
+                        <h2 class="font-heading text-h3 text-text-primary mb-8">Company Information</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="floating-label">
+                                <input type="text" id="companyName" name="companyName" placeholder=" " required
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                <label for="companyName">Company Name *</label>
+                            </div>
+
+                            <div class="floating-label">
+                                <input type="text" id="tradingName" name="tradingName" placeholder=" "
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                <label for="tradingName">Trading Name</label>
+                            </div>
+
+                            <div class="md:col-span-2 floating-label">
+                                <textarea id="registeredOffice" name="registeredOffice" rows="3" placeholder=" " required
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body resize-none"></textarea>
+                                <label for="registeredOffice">Registered Office Address *</label>
+                            </div>
+
+                            <div class="floating-label">
+                                <input type="text" id="companyRegNo" name="companyRegNo" placeholder=" " required
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                <label for="companyRegNo">Company Registration Number *</label>
+                            </div>
+
+                            <div class="floating-label">
+                                <input type="text" id="vatNo" name="vatNo" placeholder=" "
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                <label for="vatNo">VAT Number</label>
+                            </div>
+
+                            <div class="floating-label">
+                                <input type="number" id="yearsTrading" name="yearsTrading" min="0" placeholder=" " required
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                <label for="yearsTrading">Years Trading *</label>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end mt-8">
+                            <button type="button" class="btn-primary inline-flex items-center gap-2 bg-saber-blue hover:bg-saber-blue/90 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-brand hover:shadow-brand focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-saber-blue next-step">
+                                Next Step <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Contact Information -->
+                    <div class="form-step hidden" data-step="2">
+                        <h2 class="font-heading text-h3 text-text-primary mb-8">Primary Contact</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="floating-label">
+                                <input type="text" id="primaryContactName" name="primaryContactName" placeholder=" " required
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                <label for="primaryContactName">Contact Name *</label>
+                            </div>
+
+                            <div class="floating-label">
+                                <input type="email" id="primaryContactEmail" name="primaryContactEmail" placeholder=" " required
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                <label for="primaryContactEmail">Email Address *</label>
+                            </div>
+
+                            <div class="floating-label">
+                                <input type="tel" id="primaryContactPhone" name="primaryContactPhone" placeholder=" " required
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                <label for="primaryContactPhone">Phone Number *</label>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block font-body text-body-sm font-medium text-text-secondary mb-4">Coverage Regions *</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="coverageRegion" value="North West" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">North West</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="coverageRegion" value="North East" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">North East</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="coverageRegion" value="Yorkshire" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">Yorkshire</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="coverageRegion" value="Midlands" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">Midlands</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="coverageRegion" value="South East" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">South East</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="coverageRegion" value="South West" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">South West</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="coverageRegion" value="Scotland" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">Scotland</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="coverageRegion" value="Wales" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">Wales</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-8">
+                            <button type="button" class="inline-flex items-center gap-2 border-2 border-saber-blue text-saber-blue hover:bg-saber-blue/10 px-6 py-3 rounded-lg font-medium transition-all duration-200 prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button type="button" class="inline-flex items-center gap-2 bg-saber-blue hover:bg-saber-blue/90 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-brand hover:shadow-brand next-step">
+                                Next Step <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Compliance & Accreditations -->
+                    <div class="form-step hidden" data-step="3">
+                        <h2 class="font-heading text-h3 text-text-primary mb-8">Compliance & Accreditations</h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <label class="block font-body text-body-sm font-medium text-text-secondary mb-4">ISO Standards</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="isoStandards" value="ISO 9001" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">ISO 9001 (Quality Management)</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="isoStandards" value="ISO 14001" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">ISO 14001 (Environmental)</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="isoStandards" value="ISO 45001" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">ISO 45001 (Health & Safety)</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                        <input type="checkbox" name="isoStandards" value="ISO 50001" class="rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                        <span class="font-body text-body text-text-primary select-none">ISO 50001 (Energy Management)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label class="block font-body text-body-sm font-medium text-text-secondary mb-4">Acts as Principal Contractor? *</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                            <input type="radio" name="actsAsPrincipalContractor" value="Yes" class="border-ops-border text-saber-blue focus:ring-saber-blue">
+                                            <span class="font-body text-body text-text-primary select-none">Yes</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                            <input type="radio" name="actsAsPrincipalContractor" value="No" checked class="border-ops-border text-saber-blue focus:ring-saber-blue">
+                                            <span class="font-body text-body text-text-primary select-none">No</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block font-body text-body-sm font-medium text-text-secondary mb-4">Acts as Principal Designer? *</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                            <input type="radio" name="actsAsPrincipalDesigner" value="Yes" class="border-ops-border text-saber-blue focus:ring-saber-blue">
+                                            <span class="font-body text-body text-text-primary select-none">Yes</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                            <input type="radio" name="actsAsPrincipalDesigner" value="No" checked class="border-ops-border text-saber-blue focus:ring-saber-blue">
+                                            <span class="font-body text-body text-text-primary select-none">No</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block font-body text-body-sm font-medium text-text-secondary mb-4">Has GDPR Policy? *</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                            <input type="radio" name="hasGDPRPolicy" value="Yes" class="border-ops-border text-saber-blue focus:ring-saber-blue">
+                                            <span class="font-body text-body text-text-primary select-none">Yes</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 p-3 rounded-lg hover:bg-ops-surface/50 transition-colors cursor-pointer">
+                                            <input type="radio" name="hasGDPRPolicy" value="No" checked class="border-ops-border text-saber-blue focus:ring-saber-blue">
+                                            <span class="font-body text-body text-text-primary select-none">No</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="floating-label">
+                                    <input type="number" id="hsqIncidents" name="hsqIncidents" min="0" placeholder=" " required
+                                        class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                    <label for="hsqIncidents">HSEQ Incidents (Last 5 Years) *</label>
+                                </div>
+
+                                <div class="floating-label">
+                                    <input type="number" id="riddor" name="riddor" min="0" placeholder=" " required
+                                        class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body">
+                                    <label for="riddor">RIDDOR Reportable (Last 3 Years) *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-8">
+                            <button type="button" class="inline-flex items-center gap-2 border-2 border-saber-blue text-saber-blue hover:bg-saber-blue/10 px-6 py-3 rounded-lg font-medium transition-all duration-200 prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button type="button" class="inline-flex items-center gap-2 bg-saber-blue hover:bg-saber-blue/90 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-brand hover:shadow-brand next-step">
+                                Next Step <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Documents & Terms -->
+                    <div class="form-step hidden" data-step="4">
+                        <h2 class="font-heading text-h3 text-text-primary mb-8">Documents & Agreement</h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <label class="block font-body text-body-sm font-medium text-text-secondary mb-4">Supporting Documents</label>
+                                <div class="file-upload-area border-2 border-dashed border-ops-border rounded-xl p-8 text-center hover:border-saber-green transition-colors cursor-pointer" id="fileUploadArea">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-text-tertiary mb-4"></i>
+                                    <p class="font-body text-body text-text-secondary mb-2">Drag & drop files here or click to browse</p>
+                                    <p class="font-body text-body-sm text-text-tertiary">Accepted: PDF, DOC, DOCX, JPG, PNG (Max 10MB each)</p>
+                                    <input type="file" id="fileInput" name="documents" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="hidden">
+                                </div>
+                                <div id="fileList" class="mt-4 space-y-2"></div>
+                            </div>
+
+                            <div class="floating-label">
+                                <textarea id="notes" name="notes" rows="4" placeholder=" "
+                                    class="w-full px-4 py-3 border border-ops-border rounded-lg focus:ring-2 focus:ring-saber-blue focus:border-transparent transition-all duration-200 font-body text-body resize-none"></textarea>
+                                <label for="notes">Notes or Clarifications</label>
+                            </div>
+
+                            <div class="bg-ops-surface p-6 rounded-lg border border-ops-border">
+                                <label class="flex items-start gap-3 cursor-pointer">
+                                    <input type="checkbox" id="agreeToTerms" name="agreeToTerms" required class="mt-1 rounded border-ops-border text-saber-blue focus:ring-saber-blue">
+                                    <span class="font-body text-body text-text-primary">
+                                        I agree to Saber's <a href="#" target="_blank" class="text-saber-blue hover:text-saber-green underline">Terms and Conditions</a> *
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg">
+                                <div class="flex items-start gap-3">
+                                    <i class="fas fa-info-circle text-status-info mt-1"></i>
+                                    <p class="font-body text-body text-text-primary">
+                                        By submitting this form, you consent to Saber processing your data in accordance with our Privacy Policy and GDPR regulations.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-8">
+                            <button type="button" class="inline-flex items-center gap-2 border-2 border-saber-blue text-saber-blue hover:bg-saber-blue/10 px-6 py-3 rounded-lg font-medium transition-all duration-200 prev-step">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button type="submit" class="inline-flex items-center gap-2 bg-saber-green hover:bg-saber-green/90 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 shadow-energy hover:shadow-brand submit-btn">
+                                <i class="fas fa-paper-plane"></i> Submit Application
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-saber-dark-blue py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="font-body text-body text-white/80">&copy; 2025 Saber Renewables. Infinite Power In Partnership.</p>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8 text-center transform transition-all duration-300 scale-95 opacity-0">
+            <i class="fas fa-check-circle text-5xl text-status-success mb-6"></i>
+            <h2 class="font-heading text-h3 text-text-primary mb-4">Application Submitted Successfully!</h2>
+            <p class="font-body text-body text-text-secondary mb-6">Thank you for your interest in partnering with Saber Renewables. Our team will review your application and contact you within 2-3 business days.</p>
+            <button class="bg-saber-blue hover:bg-saber-blue/90 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Load component libraries -->
+    <script src="../components/ui/SaberLogo.js"></script>
+    <script src="../components/ui/Button.js"></script>
+    <script src="../components/ui/Progress.js"></script>
+    <script src="../components/forms/FormField.js"></script>
+    
+    <!-- Load the enhanced JavaScript -->
+    <script src="script-tailwind.js"></script>
+</body>
+</html>

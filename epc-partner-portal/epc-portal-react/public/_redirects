@@ -1,0 +1,2 @@
+# Redirect /apply/CODE to /apply?invitationCode=CODE
+/apply/:code /apply?invitationCode=:code 302

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT Intelligence Chat - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .new-chat-btn:hover {
+            background: #5a67d8;
+        }
+        
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .chat-history-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .chat-history-item:hover {
+            background: #f7f8fa;
+            border-color: #667eea;
+        }
+        
+        .chat-history-item.active {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+        
+        .chat-history-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #2d3748;
+        }
+        
+        .chat-history-date {
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        /* Main Chat Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: #f7f8fa;
+            border-color: #667eea;
+        }
+        
+        .save-btn {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+        
+        .save-btn:hover {
+            background: #38a169;
+        }
+        
+        /* Chat Messages */
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f7f8fa;
+        }
+        
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-msg {
+            justify-content: flex-end;
+        }
+        
+        .bot-msg {
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+        
+        .user-msg .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .bot-msg .message-content {
+            background: white;
+            color: #2d3748;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+        
+        /* Input Area */
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        #user-input:focus {
+            border-color: #667eea;
+        }
+        
+        #send-btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        #send-btn:hover:not(:disabled) {
+            background: #5a67d8;
+        }
+        
+        #send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            padding: 10px 20px;
+            background: #f7f8fa;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #48bb78;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(72, 187, 120, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
+        }
+        
+        .status-dot.offline {
+            background: #f56565;
+            animation: none;
+        }
+        
+        /* Session Info */
+        .session-info {
+            font-size: 10px;
+            color: #a0aec0;
+        }
+        
+        /* Examples */
+        .examples {
+            padding: 10px 20px;
+            background: #f0f4ff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .example-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .example-chip {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #667eea;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .example-chip:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* Loading animation */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #718096;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2 style="margin-bottom: 12px; color: #2d3748;">💡 FIT Intelligence</h2>
+            <button class="new-chat-btn" onclick="startNewChat()">
+                <span>➕</span>
+                <span>New Chat</span>
+            </button>
+        </div>
+        <div class="chat-history" id="chat-history">
+            <!-- Chat history items will be added here -->
+        </div>
+    </div>
+    
+    <!-- Main Chat Area -->
+    <div class="main-content">
+        <div class="chat-header">
+            <div class="chat-title" id="chat-title">New Conversation</div>
+            <div class="chat-actions">
+                <button class="action-btn save-btn" onclick="saveCurrentChat()">💾 Save Chat</button>
+                <button class="action-btn" onclick="clearCurrentChat()">🗑️ Clear</button>
+            </div>
+        </div>
+        
+        <div class="examples">
+            <div class="example-chips">
+                <div class="example-chip" onclick="sendExample('330kw in ryedale')">330kw in Ryedale</div>
+                <div class="example-chip" onclick="sendExample('wind sites over 100kw in berkshire')">Wind sites over 100kW in Berkshire</div>
+                <div class="example-chip" onclick="sendExample('solar farms in yorkshire')">Solar farms in Yorkshire</div>
+                <div class="example-chip" onclick="sendExample('what about 250kw?')">What about 250kW?</div>
+                <div class="example-chip" onclick="sendExample('or wind turbines?')">Or wind turbines?</div>
+            </div>
+        </div>
+        
+        <div class="chat-container" id="chat-container">
+            <!-- Messages will appear here -->
+        </div>
+        
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="user-input" placeholder="Ask about FIT installations... (e.g., '330kw in Yorkshire')" />
+                <button id="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Connected to ChromaDB</span>
+            </div>
+            <div class="session-info" id="session-info">Session: Loading...</div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:5555';
+        let sessionId = null;
+        let currentMessages = [];
+        let savedChats = [];
+        
+        // Initialize
+        function init() {
+            // Create or get session
+            sessionId = localStorage.getItem('currentSessionId');
+            if (!sessionId) {
+                startNewChat();
+            } else {
+                document.getElementById('session-info').textContent = `Session: ${sessionId.substring(0, 8)}...`;
+            }
+            
+            // Load saved chats
+            loadSavedChats();
+            
+            // Check status
+            checkStatus();
+            setInterval(checkStatus, 30000);
+            
+            // Setup enter key
+            document.getElementById('user-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !document.getElementById('send-btn').disabled) {
+                    sendMessage();
+                }
+            });
+        }
+        
+        async function checkStatus() {
+            try {
+                const response = await fetch(API_URL + '/api/health');
+                const data = await response.json();
+                
+                document.getElementById('status-dot').className = 'status-dot';
+                document.getElementById('status-text').textContent = 'Connected to ChromaDB';
+            } catch (error) {
+                document.getElementById('status-dot').className = 'status-dot offline';
+                document.getElementById('status-text').textContent = 'Offline - Check server';
+            }
+        }
+        
+        function startNewChat() {
+            // Generate new session ID
+            sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('currentSessionId', sessionId);
+            
+            // Clear messages
+            currentMessages = [];
+            document.getElementById('chat-container').innerHTML = '';
+            document.getElementById('chat-title').textContent = 'New Conversation';
+            document.getElementById('session-info').textContent = `Session: ${sessionId.substring(0, 8)}...`;
+            
+            // Add welcome message
+            addMessage("Hello! I'm your FIT Intelligence assistant. I can help you find renewable energy installations across the UK. Try asking about specific capacities, locations, or technologies!", 'bot');
+            
+            // Notify server
+            fetch(API_URL + '/api/chat/new', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId })
+            });
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            // Add user message
+            addMessage(text, 'user');
+            input.value = '';
+            
+            // Disable send button
+            document.getElementById('send-btn').disabled = true;
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch(API_URL + '/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        session_id: sessionId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                if (data.success) {
+                    // Add bot response
+                    addMessage(data.response, 'bot');
+                    
+                    // Update session if changed
+                    if (data.session_id && data.session_id !== sessionId) {
+                        sessionId = data.session_id;
+                        localStorage.setItem('currentSessionId', sessionId);
+                        document.getElementById('session-info').textContent = `Session: ${sessionId.substring(0, 8)}...`;
+                    }
+                } else {
+                    addMessage('Sorry, I encountered an error: ' + (data.error || 'Unknown error'), 'bot');
+                }
+                
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage('Connection error. Please make sure the server is running.', 'bot');
+            }
+            
+            // Re-enable send button
+            document.getElementById('send-btn').disabled = false;
+        }
+        
+        function addMessage(text, sender) {
+            const container = document.getElementById('chat-container');
+            const message = document.createElement('div');
+            message.className = `message ${sender === 'user' ? 'user-msg' : 'bot-msg'}`;
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = text;
+            
+            message.appendChild(content);
+            container.appendChild(message);
+            
+            // Store message
+            currentMessages.push({ text, sender, timestamp: new Date().toISOString() });
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function showTypingIndicator() {
+            const container = document.getElementById('chat-container');
+            const indicator = document.createElement('div');
+            indicator.className = 'message bot-msg';
+            indicator.id = 'typing-indicator';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            indicator.appendChild(content);
+            container.appendChild(indicator);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        async function saveCurrentChat() {
+            if (currentMessages.length === 0) {
+                alert('No messages to save');
+                return;
+            }
+            
+            const title = prompt('Enter a title for this chat:', 
+                `Chat ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`);
+            
+            if (!title) return;
+            
+            try {
+                const response = await fetch(API_URL + '/api/chat/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        messages: currentMessages,
+                        session_id: sessionId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Chat saved successfully!');
+                    loadSavedChats();
+                }
+            } catch (error) {
+                alert('Failed to save chat');
+            }
+        }
+        
+        async function loadSavedChats() {
+            try {
+                const response = await fetch(API_URL + '/api/saved-chats');
+                const data = await response.json();
+                
+                savedChats = data.chats || [];
+                displaySavedChats();
+            } catch (error) {
+                console.error('Failed to load saved chats:', error);
+            }
+        }
+        
+        function displaySavedChats() {
+            const container = document.getElementById('chat-history');
+            
+            if (savedChats.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; color: #718096;">No saved chats yet</div>';
+                return;
+            }
+            
+            container.innerHTML = savedChats.map(chat => `
+                <div class="chat-history-item" onclick="loadChat('${chat.id}')">
+                    <div class="chat-history-title">${chat.title}</div>
+                    <div class="chat-history-date">${new Date(chat.created_at).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        async function loadChat(chatId) {
+            try {
+                const response = await fetch(API_URL + `/api/chat/${chatId}`);
+                const chat = await response.json();
+                
+                // Clear current chat
+                document.getElementById('chat-container').innerHTML = '';
+                currentMessages = [];
+                
+                // Load messages
+                chat.messages.forEach(msg => {
+                    addMessage(msg.text, msg.sender);
+                });
+                
+                // Update title
+                document.getElementById('chat-title').textContent = chat.title;
+                
+                // Mark as active
+                document.querySelectorAll('.chat-history-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+                
+            } catch (error) {
+                alert('Failed to load chat');
+            }
+        }
+        
+        function clearCurrentChat() {
+            if (confirm('Clear all messages in current chat?')) {
+                currentMessages = [];
+                document.getElementById('chat-container').innerHTML = '';
+                addMessage("Chat cleared. How can I help you today?", 'bot');
+            }
+        }
+        
+        function sendExample(text) {
+            document.getElementById('user-input').value = text;
+            sendMessage();
+        }
+        
+        // Initialize on load
+        window.onload = init;
+    </script>
+</body>
+</html>

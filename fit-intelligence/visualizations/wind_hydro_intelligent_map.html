@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind & Hydro Intelligence Map | Saber Renewable Energy</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --saber-blue: #044D73;
+            --saber-green: #7CC061;
+            --saber-light-blue: #0A5F8E;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #044D73 0%, #0A5F8E 100%);
+            min-height: 100vh;
+        }
+        
+        .saber-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(124, 192, 97, 0.2);
+        }
+        
+        #map {
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--saber-blue);
+        }
+        
+        .mapboxgl-popup-content {
+            border-radius: 12px;
+            padding: 15px;
+            min-width: 250px;
+            max-width: 300px;
+            box-shadow: 0 8px 20px rgba(4, 77, 115, 0.3);
+        }
+        
+        .loading-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white/10 backdrop-blur-lg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <img src="Saber-logo-wob-green.svg" alt="Saber Renewable Energy" class="h-12 w-auto">
+                    <div>
+                        <h1 class="text-2xl font-bold">Wind & Hydro Intelligence Map</h1>
+                        <p class="text-sm opacity-90">Real-time mapping of <span id="totalSites">...</span> wind & hydro sites from Chroma database</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <a href="fit_chatbot_interface.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-robot mr-2"></i>Chatbot
+                    </a>
+                    <a href="analytics_dashboard.html" class="bg-white/20 px-4 py-2 rounded hover:bg-white/30 transition">
+                        <i class="fas fa-chart-bar mr-2"></i>Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Controls and Stats -->
+            <div class="lg:col-span-1 space-y-4">
+                <!-- Search Controls -->
+                <div class="saber-card p-4">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">AI Search</h3>
+                    <div class="space-y-3">
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="e.g., urgent wind farms in Scotland"
+                            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onkeypress="handleSearchKeyPress(event)"
+                        >
+                        <button 
+                            onclick="performSearch()" 
+                            class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+                            id="searchButton"
+                        >
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Filters -->
+                    <div class="mt-4 space-y-2">
+                        <button onclick="loadTechnology('Wind')" class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">
+                            <i class="fas fa-wind mr-2"></i>All Wind Sites
+                        </button>
+                        <button onclick="loadTechnology('Hydro')" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
+                            <i class="fas fa-tint mr-2"></i>All Hydro Sites
+                        </button>
+                        <button onclick="loadUrgentSites()" class="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Urgent Sites
+                        </button>
+                        <button onclick="resetView()" class="w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700 transition">
+                            <i class="fas fa-refresh mr-2"></i>Reset View
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="saber-card p-4">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">Current View</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Sites Shown:</span>
+                            <span class="font-bold text-gray-800" id="sitesShown">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Capacity:</span>
+                            <span class="font-bold text-gray-800" id="totalCapacity">0 MW</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Wind Sites:</span>
+                            <span class="font-bold text-green-600" id="windSites">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Hydro Sites:</span>
+                            <span class="font-bold text-blue-600" id="hydroSites">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Urgent Sites:</span>
+                            <span class="font-bold text-red-600" id="urgentSitesCount">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Loading Status -->
+                <div class="saber-card p-4">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">Data Status</h3>
+                    <div id="loadingStatus" class="space-y-2">
+                        <div class="loading-indicator text-blue-600">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            <span id="statusText">Connecting to Chroma database...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div class="lg:col-span-3">
+                <div class="saber-card p-4 h-[800px]">
+                    <div id="map" class="w-full h-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CHROMA_API_BASE = 'http://localhost:5003';
+        
+        // Mapbox configuration
+        // DEMO MODE: Hardcoded token for reliability in internal demo.
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFyc3RhY2siLCJhIjoiY21ldmt0cHptMGhlYjJpc2Rvb3EzM3QxOSJ9.REl1LiSuYGu6zVXC27RzRQ';
+        
+        let map;
+        let currentData = [];
+        let currentPopup = null;
+
+        // UK Postcode to approximate coordinates mapping
+        const POSTCODE_COORDS = {
+            // Scotland
+            'AB': [57.1497, -2.0943], 'DD': [56.4620, -2.9707], 'DG': [55.0184, -3.6264],
+            'EH': [55.9533, -3.1883], 'FK': [56.1165, -3.9369], 'G': [55.8642, -4.2518],
+            'HS': [57.7833, -7.1667], 'IV': [57.4778, -4.2247], 'KA': [55.5347, -4.6230],
+            'KW': [58.4370, -3.1750], 'KY': [56.2090, -3.1590], 'ML': [55.7750, -3.9680],
+            'PA': [55.8750, -5.1024], 'PH': [56.7963, -3.7320], 'TD': [55.5972, -2.7014],
+            'ZE': [60.2167, -1.1833],
+            
+            // England - North
+            'CA': [54.8951, -2.9375], 'DH': [54.8595, -1.5659], 'DL': [54.5253, -1.8470],
+            'HG': [54.1370, -1.6820], 'LA': [54.3781, -2.7849], 'LS': [53.8008, -1.5491],
+            'NE': [55.0184, -1.6131], 'TS': [54.5742, -1.2351], 'YO': [54.0000, -1.0833],
+            
+            // England - Central  
+            'B': [52.4862, -1.8904], 'CV': [52.4068, -1.5197], 'DE': [52.9225, -1.4746],
+            'DN': [53.5439, -0.7746], 'HD': [53.6458, -1.7850], 'HU': [53.7457, -0.3367],
+            'LE': [52.6369, -1.1398], 'LN': [53.2307, -0.5406], 'NG': [52.9540, -1.1581],
+            'NN': [52.2405, -0.9027], 'PE': [52.5755, -0.2405], 'S': [53.3811, -1.4701],
+            'SK': [53.2611, -1.9253], 'WF': [53.6776, -1.4151], 'WS': [52.5986, -2.0055],
+            
+            // England - South
+            'AL': [51.7500, -0.3333], 'BN': [50.8429, -0.1313], 'BR': [51.4063, 0.0177],
+            'CB': [52.2053, 0.1218], 'CM': [51.7356, 0.4685], 'CO': [51.8917, 0.9017],
+            'CR': [51.3762, -0.0982], 'CT': [51.2802, 1.0789], 'DA': [51.4427, 0.2089],
+            'E': [51.5074, -0.0278], 'EN': [51.6533, -0.0780], 'GU': [51.2362, -0.5704],
+            'HA': [51.5790, -0.3674], 'HP': [51.7305, -0.7552], 'IG': [51.5913, 0.0740],
+            'IP': [52.0587, 1.1555], 'KT': [51.3727, -0.3356], 'LU': [51.8787, -0.4200],
+            'ME': [51.3927, 0.5020], 'MK': [52.0406, -0.7594], 'N': [51.5074, -0.0278],
+            'NR': [52.6309, 1.2974], 'NW': [51.5074, -0.0278], 'OX': [51.7520, -1.2577],
+            'PO': [50.8166, -1.0833], 'RG': [51.4584, -0.9720], 'RH': [51.2362, -0.1718],
+            'RM': [51.5590, 0.2024], 'SE': [51.5074, -0.0278], 'SL': [51.5106, -0.6038],
+            'SM': [51.3762, -0.1982], 'SO': [50.9097, -1.4044], 'SP': [51.0814, -2.1090],
+            'SS': [51.5590, 0.7000], 'SW': [51.5074, -0.0278], 'TN': [51.1329, 0.2670],
+            'TW': [51.4700, -0.3300], 'UB': [51.5590, -0.4600], 'W': [51.5074, -0.0278],
+            'WC': [51.5074, -0.0278], 'WD': [51.6833, -0.4167],
+            
+            // Wales
+            'CF': [51.4816, -3.1791], 'CH': [53.2000, -2.9167], 'LD': [52.2405, -3.3952],
+            'LL': [53.2236, -4.1272], 'NP': [51.5877, -2.9984], 'SA': [51.6214, -3.9436],
+            'SY': [52.7081, -3.0453],
+            
+            // Southwest England
+            'BA': [51.3751, -2.3619], 'BS': [51.4545, -2.5879], 'DT': [50.7156, -2.4411],
+            'EX': [50.7184, -3.5339], 'GL': [51.8642, -2.2381], 'PL': [50.3755, -4.1427],
+            'TA': [51.0234, -3.1003], 'TQ': [50.4619, -3.5253], 'TR': [50.2660, -5.0527]
+        };
+
+        // Initialize map
+        function initMap() {
+            console.log('Initializing map with token:', mapboxgl.accessToken ? 'present' : 'missing');
+            
+            try {
+                map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/light-v11',
+                    center: [-3.5, 54.5], // Center on UK
+                    zoom: 5.5,
+                    attributionControl: false
+                });
+
+                map.on('load', function() {
+                    console.log('Map loaded successfully');
+                    updateStatus('Map loaded, fetching wind & hydro data...');
+                    loadInitialData();
+                });
+
+                map.on('error', function(e) {
+                    console.error('Map error:', e);
+                    updateStatus('Map failed to load - check MapBox token');
+                });
+
+                // Add navigation controls
+                map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+                
+                console.log('Map initialization completed');
+                
+            } catch (error) {
+                console.error('Failed to initialize map:', error);
+                updateStatus('Failed to initialize map');
+            }
+        }
+
+        // Load initial wind and hydro data
+        async function loadInitialData() {
+            try {
+                console.log('Starting data load...');
+                updateStatus('Loading wind farms...');
+                
+                const windData = await fetchTechnologyData('Wind', 1000);
+                console.log('Wind data loaded:', windData.length, 'sites');
+                
+                updateStatus('Loading hydro sites...');
+                const hydroData = await fetchTechnologyData('Hydro', 500);
+                console.log('Hydro data loaded:', hydroData.length, 'sites');
+                
+                // Combine data
+                currentData = [...windData, ...hydroData];
+                console.log('Total data combined:', currentData.length, 'sites');
+                
+                if (currentData.length === 0) {
+                    updateStatus('No data loaded - check API connection');
+                    return;
+                }
+                
+                updateStatus(`Loaded ${currentData.length} sites successfully`);
+                addDataToMap(currentData);
+                updateStats(currentData);
+                
+                setTimeout(() => {
+                    document.getElementById('loadingStatus').innerHTML = '<div class="text-green-600"><i class="fas fa-check mr-2"></i>Data loaded successfully</div>';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                updateStatus(`Failed to load data: ${error.message}`);
+            }
+        }
+
+        // Fetch technology-specific data from Chroma API
+        async function fetchTechnologyData(technology, maxResults = 500) {
+            console.log(`Fetching ${technology} data from ${CHROMA_API_BASE}/api/chroma/business_query`);
+            
+            const response = await fetch(`${CHROMA_API_BASE}/api/chroma/business_query`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: `${technology} renewable energy sites`,
+                    max_results: maxResults,
+                    filters: {
+                        technology: technology
+                    }
+                })
+            });
+
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ${technology} data: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log(`${technology} API response:`, data);
+            
+            if (!data.results) {
+                throw new Error(`No results field in ${technology} data`);
+            }
+            
+            // Convert to GeoJSON format with coordinates
+            const geoJsonFeatures = data.results.map(site => {
+                const coords = getPostcodeCoordinates(site.metadata.postcode);
+                console.log(`${technology} site ${site.metadata.fit_id}: postcode ${site.metadata.postcode} -> coords [${coords[0]}, ${coords[1]}]`);
+                return {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: coords
+                    },
+                    properties: {
+                        ...site.metadata,
+                        score: site.score,
+                        description: site.description
+                    }
+                };
+            }).filter(site => site.geometry.coordinates[0] !== 0); // Filter out invalid coordinates
+            
+            console.log(`${technology} converted to ${geoJsonFeatures.length} valid GeoJSON features`);
+            return geoJsonFeatures;
+        }
+
+        // Convert postcode to coordinates
+        function getPostcodeCoordinates(postcode) {
+            if (!postcode) return [0, 0];
+            
+            // Extract postcode area (first 1-2 letters)
+            const area = postcode.match(/^[A-Z]{1,2}/)?.[0];
+            
+            if (area && POSTCODE_COORDS[area]) {
+                // Add small random offset to prevent exact overlapping
+                const baseCoords = POSTCODE_COORDS[area];
+                const lat = baseCoords[0] + (Math.random() - 0.5) * 0.1;
+                const lng = baseCoords[1] + (Math.random() - 0.5) * 0.1;
+                return [lng, lat];
+            }
+            
+            // Fallback to UK center if postcode not found
+            return [-2.0, 54.5];
+        }
+
+        // Add data to map
+        function addDataToMap(data) {
+            console.log('Adding data to map:', data.length, 'features');
+            
+            // Remove existing source if it exists
+            if (map.getSource('renewable-sites')) {
+                console.log('Removing existing map layers');
+                map.removeLayer('unclustered-point');
+                map.removeLayer('clusters');
+                map.removeLayer('cluster-count');
+                map.removeSource('renewable-sites');
+            }
+
+            const geoJsonData = {
+                type: 'FeatureCollection',
+                features: data
+            };
+            
+            console.log('Created GeoJSON with', geoJsonData.features.length, 'features');
+            console.log('Sample feature:', geoJsonData.features[0]);
+
+            // Add source with clustering
+            try {
+                console.log('Adding map source...');
+                map.addSource('renewable-sites', {
+                    type: 'geojson',
+                    data: geoJsonData,
+                    cluster: true,
+                    clusterMaxZoom: 12, // Increased to show individual sites at higher zoom
+                    clusterRadius: 30   // Reduced radius for less aggressive clustering
+                });
+                console.log('Map source added successfully');
+            } catch (error) {
+                console.error('Error adding map source:', error);
+                return;
+            }
+
+            // Cluster circles
+            try {
+                console.log('Adding cluster layer...');
+                map.addLayer({
+                    id: 'clusters',
+                    type: 'circle',
+                    source: 'renewable-sites',
+                    filter: ['has', 'point_count'],
+                    paint: {
+                        'circle-color': [
+                            'step',
+                            ['get', 'point_count'],
+                            '#7CC061',  // Green for small clusters
+                            5, '#F59E0B',  // Orange for medium clusters  
+                            15, '#EF4444'   // Red for large clusters
+                        ],
+                        'circle-radius': [
+                            'step',
+                            ['get', 'point_count'],
+                            15,     // Small clusters
+                            5, 20,  // Medium clusters
+                            15, 25  // Large clusters
+                        ],
+                        'circle-stroke-width': 2,
+                        'circle-stroke-color': '#ffffff'
+                    }
+                });
+                console.log('Cluster layer added successfully');
+            } catch (error) {
+                console.error('Error adding cluster layer:', error);
+            }
+
+            // Cluster count labels
+            map.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'renewable-sites',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': '{point_count_abbreviated}',
+                    'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                    'text-size': 12
+                },
+                paint: {
+                    'text-color': '#ffffff'
+                }
+            });
+
+            // Individual points
+            map.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'renewable-sites',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': [
+                        'case',
+                        ['==', ['get', 'technology'], 'Wind'], '#22C55E',  // Green for wind
+                        ['==', ['get', 'technology'], 'Hydro'], '#3B82F6', // Blue for hydro
+                        '#6B7280'  // Gray fallback
+                    ],
+                    'circle-radius': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        5, 4,   // At zoom 5, radius 4
+                        10, 6,  // At zoom 10, radius 6
+                        15, 10  // At zoom 15, radius 10
+                    ],
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#ffffff',
+                    'circle-opacity': 0.8
+                }
+            });
+
+            // Click handlers
+            map.on('click', 'clusters', function(e) {
+                const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+                const clusterId = features[0].properties.cluster_id;
+                map.getSource('renewable-sites').getClusterExpansionZoom(clusterId, function(err, zoom) {
+                    if (err) return;
+                    map.easeTo({
+                        center: features[0].geometry.coordinates,
+                        zoom: zoom + 1
+                    });
+                });
+            });
+
+            map.on('click', 'unclustered-point', function(e) {
+                const props = e.features[0].properties;
+                
+                if (currentPopup) currentPopup.remove();
+                
+                currentPopup = new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(createPopupContent(props))
+                    .addTo(map);
+            });
+
+            // Cursor styling
+            map.on('mouseenter', 'clusters', () => map.getCanvas().style.cursor = 'pointer');
+            map.on('mouseleave', 'clusters', () => map.getCanvas().style.cursor = '');
+            map.on('mouseenter', 'unclustered-point', () => map.getCanvas().style.cursor = 'pointer');
+            map.on('mouseleave', 'unclustered-point', () => map.getCanvas().style.cursor = '');
+        }
+
+        // Create popup content
+        function createPopupContent(props) {
+            const urgencyColor = props.remaining_fit_years < 2 ? 'text-red-600' : 
+                                props.remaining_fit_years < 5 ? 'text-orange-600' : 'text-green-600';
+            
+            const techColor = props.technology === 'Wind' ? 'text-green-600' : 'text-blue-600';
+            const techIcon = props.technology === 'Wind' ? 'fa-wind' : 'fa-tint';
+            
+            return `
+                <div class="p-2">
+                    <h4 class="font-bold text-lg mb-2 ${techColor}">
+                        <i class="fas ${techIcon} mr-2"></i>${props.technology} Site
+                    </h4>
+                    <div class="space-y-1 text-sm">
+                        <p><strong>FIT ID:</strong> ${props.fit_id}</p>
+                        <p><strong>Capacity:</strong> ${props.capacity_kw} kW (${props.capacity_mw} MW)</p>
+                        <p><strong>Location:</strong> ${props.postcode}</p>
+                        <p><strong>Age:</strong> ${props.age_years} years</p>
+                        <p><strong>FIT Remaining:</strong> <span class="${urgencyColor} font-semibold">${props.remaining_fit_years} years</span></p>
+                        <p><strong>Repowering Window:</strong> ${props.repowering_window}</p>
+                        <p><strong>PPA Score:</strong> ${props.ppa_readiness_score}/100</p>
+                    </div>
+                    ${props.remaining_fit_years < 2 ? '<div class="mt-2 p-2 bg-red-100 border border-red-300 rounded text-red-800 text-xs"><i class="fas fa-exclamation-triangle mr-1"></i><strong>Urgent PPA Opportunity</strong></div>' : ''}
+                </div>
+            `;
+        }
+
+        // Search functionality
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            updateStatus('Searching...');
+            
+            try {
+                const response = await fetch(`${CHROMA_API_BASE}/api/chroma/business_query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        max_results: 200
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Convert to GeoJSON
+                const searchResults = data.results.map(site => {
+                    const coords = getPostcodeCoordinates(site.metadata.postcode);
+                    return {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: coords
+                        },
+                        properties: {
+                            ...site.metadata,
+                            score: site.score,
+                            description: site.description
+                        }
+                    };
+                }).filter(site => site.geometry.coordinates[0] !== 0);
+
+                currentData = searchResults;
+                addDataToMap(currentData);
+                updateStats(currentData);
+                updateStatus(`Found ${searchResults.length} matching sites`);
+                
+            } catch (error) {
+                console.error('Search failed:', error);
+                updateStatus('Search failed. Please try again.');
+            }
+        }
+
+        // Load technology-specific data
+        async function loadTechnology(technology) {
+            updateStatus(`Loading ${technology} sites...`);
+            
+            try {
+                const data = await fetchTechnologyData(technology, 1000);
+                currentData = data;
+                addDataToMap(currentData);
+                updateStats(currentData);
+                updateStatus(`Loaded ${data.length} ${technology} sites`);
+            } catch (error) {
+                updateStatus(`Failed to load ${technology} data`);
+            }
+        }
+
+        // Load urgent sites
+        async function loadUrgentSites() {
+            updateStatus('Loading urgent sites...');
+            
+            try {
+                const response = await fetch(`${CHROMA_API_BASE}/api/chroma/business_query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: 'urgent repowering opportunities PPA contracts expiring soon',
+                        max_results: 500,
+                        filters: {
+                            repowering_window: ['IMMEDIATE', 'URGENT']
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                
+                const urgentSites = data.results.map(site => {
+                    const coords = getPostcodeCoordinates(site.metadata.postcode);
+                    return {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: coords
+                        },
+                        properties: {
+                            ...site.metadata,
+                            score: site.score,
+                            description: site.description
+                        }
+                    };
+                }).filter(site => site.geometry.coordinates[0] !== 0);
+
+                currentData = urgentSites;
+                addDataToMap(currentData);
+                updateStats(currentData);
+                updateStatus(`Loaded ${urgentSites.length} urgent sites`);
+                
+            } catch (error) {
+                updateStatus('Failed to load urgent sites');
+            }
+        }
+
+        // Reset to initial view
+        function resetView() {
+            loadInitialData();
+            map.flyTo({
+                center: [-3.5, 54.5],
+                zoom: 5.5
+            });
+        }
+
+        // Update statistics
+        function updateStats(data) {
+            const windSites = data.filter(d => d.properties.technology === 'Wind').length;
+            const hydroSites = data.filter(d => d.properties.technology === 'Hydro').length;
+            const urgentSites = data.filter(d => d.properties.remaining_fit_years < 2).length;
+            const totalCapacity = data.reduce((sum, d) => sum + (d.properties.capacity_mw || 0), 0);
+
+            document.getElementById('sitesShown').textContent = data.length.toLocaleString();
+            document.getElementById('totalCapacity').textContent = totalCapacity.toFixed(2) + ' MW';
+            document.getElementById('windSites').textContent = windSites.toLocaleString();
+            document.getElementById('hydroSites').textContent = hydroSites.toLocaleString();
+            document.getElementById('urgentSitesCount').textContent = urgentSites.toLocaleString();
+            document.getElementById('totalSites').textContent = `${windSites + hydroSites}`;
+        }
+
+        // Update status
+        function updateStatus(message) {
+            document.getElementById('statusText').textContent = message;
+        }
+
+        // Handle search key press
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
+    </script>
+</body>
+</html>
